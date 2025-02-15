@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Place Your Order - Jimmy's Pizza</title>
+  <style>
+    /* Overall Page Styles */
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #fff;
+      color: #333;
+    }
+    h1 {
+      color: #0073CF; /* Royal Blue */
+      border-bottom: 3px solid #0073CF;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    /* Order Form Styles */
+    #order-form {
+      max-width: 500px;
+      padding: 20px;
+      border: 1px solid #F58426;
+      background-color: #FEEBD3;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    #order-form input,
+    #order-form select {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    #order-form button {
+      background-color: #F58426;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    #order-form button:hover {
+      background-color: #d76a1e;
+    }
+    /* Menu Display */
+    #menu-container {
+      margin-bottom: 20px;
+    }
+    #menu-container h2 {
+      color: #0073CF;
+    }
+    .menu-item {
+      padding: 5px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      #order-form, #menu-container { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Place Your Order - Jimmy's Pizza</h1>
+
+  <!-- Menu Display -->
+  <div id="menu-container">
+    <h2>Menu</h2>
+    <div id="menu">
+      <!-- Menu items will be loaded here by order.js -->
+    </div>
+  </div>
+
+  <!-- Order Form -->
+  <form id="order-form">
+    <h2>Your Details</h2>
+    <!-- Customer Name -->
+    <input type="text" id="customerName" placeholder="Your Name" required />
+    <!-- Customer Address -->
+    <input type="text" id="address" placeholder="Your Address" required />
+    <!-- Customer Email -->
+    <input type="email" id="customerEmail" placeholder="Your Email" required />
+    <!-- Customer Phone Number (optional) -->
+    <input type="tel" id="phoneNumber" placeholder="Your Phone Number (optional)" />
+    
+    <label for="items">Select Items (hold Ctrl/Cmd for multiple):</label>
+    <select id="items" multiple required></select>
+    <button type="submit">Place Order</button>
+  </form>
+
+  <!-- Include our custom order page JavaScript -->
+  <script src="order.js"></script>
+</body>
+</html>
+

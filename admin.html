@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Jimmy's Pizza</title>
+  <style>
+    /* Overall Page Styles */
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #fff;
+      color: #333;
+    }
+    h1 {
+      color: #0073CF; /* Royal Blue */
+      border-bottom: 3px solid #0073CF;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    /* Orders Table Styles */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #F58426; /* Vibrant Orange */
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      table, thead, tbody, th, td, tr { display: block; }
+      th { position: sticky; top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard - Jimmy's Pizza</h1>
+
+  <!-- Orders Table -->
+  <table id="orders-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Address</th>
+        <th>Items</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Orders will be populated here by admin.js -->
+    </tbody>
+  </table>
+
+  <!-- Include our custom admin dashboard JavaScript -->
+  <script src="admin.js"></script>
+</body>
+</html>
+

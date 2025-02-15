@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Order History - Jimmy's Pizza</title>
+  <style>
+    /* Overall Page Styles */
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #fff;
+      color: #333;
+    }
+    h1 {
+      color: #0073CF;
+      border-bottom: 3px solid #0073CF;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    /* Authentication UI */
+    #auth-container {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #FEEBD3;
+      border: 1px solid #F58426;
+      border-radius: 5px;
+      max-width: 400px;
+    }
+    #auth-container input {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    #auth-container button {
+      background-color: #F58426;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    #auth-container button:hover {
+      background-color: #d76a1e;
+    }
+    .hidden { display: none; }
+    /* Orders Table Styles */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #F58426;
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>My Order History - Jimmy's Pizza</h1>
+
+  <!-- Authentication UI -->
+  <div id="auth-container">
+    <!-- Login Form -->
+    <div id="login-form">
+      <h3>Customer Login</h3>
+      <input type="email" id="login-email" placeholder="Email" required />
+      <input type="password" id="login-password" placeholder="Password" required />
+      <button id="login-btn">Login</button>
+      <p>Don't have an account? <button id="show-signup-btn" style="background: none; color: #0073CF; border: none; cursor: pointer;">Sign Up</button></p>
+    </div>
+
+    <!-- Sign-Up Form -->
+    <div id="signup-form" class="hidden">
+      <h3>Create an Account</h3>
+      <input type="email" id="signup-email" placeholder="Email" required />
+      <input type="password" id="signup-password" placeholder="Password" required />
+      <button id="signup-btn">Sign Up</button>
+      <p>Already have an account? <button id="show-login-btn" style="background: none; color: #0073CF; border: none; cursor: pointer;">Login</button></p>
+    </div>
+
+    <!-- Logout Section -->
+    <div id="logout-section" class="hidden">
+      <p id="auth-status"></p>
+      <button id="logout-btn">Logout</button>
+    </div>
+  </div>
+
+  <!-- Order History Table -->
+  <table id="orders-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer Name</th>
+        <th>Address</th>
+        <th>Items</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Order history will be rendered here by customer.js -->
+    </tbody>
+  </table>
+
+  <!-- Firebase Libraries -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script>
+    // Replace these placeholder values with your actual Firebase configuration.
+    const firebaseConfig = {
+apiKey: "AIzaSyDcNH3J0i7TsXP6XgEG862EQA72Lmrzcro",
+  authDomain: "jimmysdelivery-9261d.firebaseapp.com",
+  projectId: "jimmysdelivery-9261d",
+  storageBucket: "jimmysdelivery-9261d.firebasestorage.app",
+  messagingSenderId: "52478759963",
+  appId: "1:52478759963:web:11fd5ab98b7bfd841bd4be",
+  measurementId: "G-CW1LMVX7QN"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Show signup form when clicking "Sign Up"
+    document.getElementById('show-signup-btn').addEventListener('click', () => {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('signup-form').classList.remove('hidden');
+    });
+
+    // Show login form when clicking "Login" from signup
+    document.getElementById('show-login-btn').addEventListener('click', () => {
+      document.getElementById('signup-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+    });
+
+    // Login event
+    document.getElementById('login-btn').addEventListener('click', () => {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      auth.signInWithEmailAndPassword(email, password)
+          .catch(error => console.error("Login Error:", error));
+    });
+
+    // Sign-Up event
+    document.getElementById('signup-btn').addEventListener('click', () => {
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      auth.createUserWithEmailAndPassword(email, password)
+          .then(userCredential => {
+            console.log("Sign-Up Successful:", userCredential.user);
+            // After successful sign-up, automatically log the user in.
+          })
+          .catch(error => console.error("Sign-Up Error:", error));
+    });
+
+    // Logout event
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      auth.signOut().catch(error => console.error("Logout Error:", error));
+    });
+
+    // Listen for authentication state changes
+    auth.onAuthStateChanged(user => {
+      const loginForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
+      const logoutSection = document.getElementById('logout-section');
+      const authStatusEl = document.getElementById('auth-status');
+      if (user) {
+        loginForm.classList.add('hidden');
+        signupForm.classList.add('hidden');
+        logoutSection.classList.remove('hidden');
+        authStatusEl.textContent = "Logged in as: " + user.email;
+        // Fetch orders for this customer
+        fetchCustomerOrders(user.email);
+      } else {
+        loginForm.classList.remove('hidden');
+        logoutSection.classList.add('hidden');
+        authStatusEl.textContent = "Not logged in.";
+      }
+    });
+  </script>
+
+  <!-- Include our custom customer dashboard JavaScript -->
+  <script src="customer.js"></script>
+</body>
+</html>
+

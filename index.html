@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jimmy's Delivery Tracker</title>
+</head>
+<body>
+  <h1>Jimmy's Delivery Tracker</h1>
+  <p id="status">Waiting for order updates...</p>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js" integrity="sha384-9LFVZf+eIYI3O/T8O5ldvYFT5cYqhHepYGtCf/4q3HLbwl9hLSmqVtQhr6WIlIE+" crossorigin="anonymous"></script>
+  <script>
+    // Connect to the Socket.io server running on localhost:3000
+    const socket = io('http://localhost:3000');
+
+    // Listen for orderUpdate events
+    socket.on('orderUpdate', (order) => {
+      console.log('Received order update:', order);
+      document.getElementById('status').innerText = 
+        `Order #${order.id}: ${order.status}. Location: lat ${order.location.lat.toFixed(4)}, lng ${order.location.lng.toFixed(4)}`;
+    });
+
+    // Optional: Handle connection errors
+    socket.on('connect_error', (error) => {
+      console.error('Connection Error:', error);
+    });
+  </script>
+</body>
+</html>
+
