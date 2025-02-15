@@ -66,6 +66,11 @@ const menu = [
 
 // 8. Endpoints
 
+// ADD A ROOT ROUTE TO PREVENT "Cannot GET /"
+app.get('/', (req, res) => {
+  res.send("Welcome to Jimmy's Delivery!");
+});
+
 // GET /menu - Return static menu data
 app.get('/menu', (req, res) => {
   res.json({ menu });
@@ -235,4 +240,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Kitchen is open on port ${PORT}`);
 });
-
