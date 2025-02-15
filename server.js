@@ -57,6 +57,9 @@ const io = socketIo(server, { cors: { origin: "*" } });
 app.use(express.json());
 app.use(cors());
 
+// **NEW**: Serve all files in 'public' as static
+app.use(express.static('public'));
+
 // 7. Static Data for Menu (Example)
 const menu = [
   { id: 1, name: 'Burger', price: 5.99 },
@@ -66,10 +69,7 @@ const menu = [
 
 // 8. Endpoints
 
-// ADD A ROOT ROUTE TO PREVENT "Cannot GET /"
-app.get('/', (req, res) => {
-  res.send("Welcome to Jimmy's Delivery!");
-});
+// ~~ Removed the manual '/' route so 'public/index.html' can serve it ~~
 
 // GET /menu - Return static menu data
 app.get('/menu', (req, res) => {
