@@ -9,6 +9,7 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const sgMail = require('@sendgrid/mail');
 const fs = require('fs');
+const path = require('path');
 
 // Debugging
 console.log("DEBUG: Does .env exist?", fs.existsSync('./.env'));
@@ -54,23 +55,12 @@ const io = socketIo(server, { cors: { origin: "*" } });
 // 6. Middleware
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
+app.use(express.static('public')); // Serve frontend files
 
-// 7. Test SendGrid API Key Before Sending Orders
-async function testSendGrid() {
-  try {
-    await sgMail.send({
-      to: "akmdra3@gmail.com",
-      from: "ashleysajous@elitebarbershopny.com", // Ensure this is verified in SendGrid
-      subject: "Test Email",
-      text: "This is a test email from Jimmy's Pizza.",
-    });
-    console.log("✅ SendGrid test email sent successfully.");
-  } catch (error) {
-    console.error("❌ SendGrid is not working:", error.response ? error.response.body : error);
-  }
-}
-testSendGrid();
+// 7. Serve Index Page (Fix Render CANNOT GET Issue)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // 8. Order Placement Endpoint
 app.post('/order', async (req, res) => {
@@ -105,16 +95,11 @@ app.post('/order', async (req, res) => {
 
     // Send order notification email
     const msg = {
-      to: "akmdra3@gmail.com", // Replace with admin email
-      from: "ashleysajous@elitebarbershopny.com", // Ensure this is a verified sender
+      to: "orders@jimmysmenu.com", // Replace with your admin email
+      from: "no-reply@jimmyspizza.com", // Ensure this email is verified
       subject: "New Order Received",
       text: `New order from ${customerName} (${customerEmail}). Address: ${address}. Items: ${items.map(item => item.name).join(', ')}`,
     };
-    sgMail.send(msg)
-  .then(() => console.log("✅ Notification email sent"))
-  .catch((error) => {
-    console.error("❌ SendGrid is not working:", error.response ? error.response.body : error);
-  });
 
     await sgMail.send(msg);
     console.log("✅ Order notification email sent successfully");
@@ -126,7 +111,77 @@ app.post('/order', async (req, res) => {
   }
 });
 
-// 9. Start the Server
+// 9. Retrieve All Orders for Admin
+app.get('/orders', async (req, res) => {
+  try {
+    const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
+    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json({ orders });
+  } catch (error) {
+    console.error("❌ Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders." });
+  }
+});
+
+// 10. Retrieve Customer Orders
+app.get('/orders/customer', async (req, res) => {
+  const email = req.query.email;
+  if (!email) {
+    return res.status(400).json({ error: "Email query parameter is required." });
+  }
+  try {
+    const snapshot = await db.collection('customers').doc(email).collection('orderHistory').orderBy('createdAt', 'desc').get();
+    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json({ orders });
+  } catch (error) {
+    console.error("❌ Error fetching customer orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders." });
+  }
+});
+
+// 11. Update Order Status
+app.patch('/order/:id/status', async (req, res) => {
+  const orderId = req.params.id;
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: 'Status is required.' });
+
+  try {
+    const orderRef = db.collection('orders').doc(orderId);
+    const orderSnap = await orderRef.get();
+    if (!orderSnap.exists) return res.status(404).json({ error: 'Order not found.' });
+
+    const orderData = orderSnap.data();
+    await orderRef.update({ status });
+
+    // Update customer order history
+    await db.collection('customers').doc(orderData.customerEmail)
+      .collection('orderHistory').doc(orderId).update({ status });
+
+    // Send Email Notification to Customer
+    const msg = {
+      to: orderData.customerEmail,
+      from: "no-reply@jimmyspizza.com",
+      subject: "Your Order Status Has Changed!",
+      text: `Your order is now: ${status}`,
+    };
+
+    await sgMail.send(msg);
+    console.log(`✅ Email sent to ${orderData.customerEmail} about status update.`);
+
+    res.json({ orderId, status });
+  } catch (error) {
+    console.error("❌ Error updating order status:", error);
+    res.status(500).json({ error: "Failed to update order status." });
+  }
+});
+
+// 12. Socket.io Setup for Real-Time Order Updates
+io.on('connection', (socket) => {
+  console.log(`✅ Client connected: ${socket.id}`);
+  socket.on('disconnect', () => console.log(`❌ Client disconnected: ${socket.id}`));
+});
+
+// 13. Start the Server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🔥 Server running on port ${PORT}`);
