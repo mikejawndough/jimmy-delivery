@@ -57,8 +57,10 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('public')); // Serve frontend files
 
-// 7. Serve Index Page (Fix Render CANNOT GET Issue)
-app.get('/', (req, res) => {
+// 7. Serve Static Files Properly (Fix CANNOT GET Error)
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
