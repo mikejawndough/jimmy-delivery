@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jimmy's Pizza - Home</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
+
+        body {
+            font-family: 'DynaPuff', cursive;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #1D428A; /* Knicks Blue */
+            text-align: center;
+        }
+
+        /* Header */
+        header {
+            background-color: #F58426; /* Knicks Orange */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+
+        /* Logo */
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: #1D428A;
+            color: white;
+            padding: 80px 20px;
+            margin-top: 20px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 22px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1D428A;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav {
+                flex-direction: column;
+                align-items: center;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <img src="logo.png" alt="Jimmy's Pizza Logo">
+    </div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="order.html">Order Now</a>
+        <a href="customer.html">Customer Dashboard</a>
+        <a href="checkout.html">Checkout</a>
+
+    </nav>
+</header>
+
+<section class="hero">
+    <h1>Welcome to Jimmy's Pizza!</h1>
+    <p>Detroit-Style Pizza with a NY Attitude. Fresh, Hot, and Always Delicious.</p>
+</section>
+
+<footer>
+    <p>&copy; 2025 Jimmy's Pizza. All Rights Reserved.</p>
+</footer>
+
+</body>
+</html>

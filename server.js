@@ -1,49 +1,47 @@
 // server.js
 
 // 1. Load Environment Variables and Required Modules
-require('dotenv').config(); // Loads variables from .env into process.env
-const fs = require('fs');
-console.log("DEBUG: Does .env exist?", fs.existsSync('./.env'));
-console.log("DEBUG: FIREBASE_SERVICE_ACCOUNT (raw):", process.env.FIREBASE_SERVICE_ACCOUNT);
-
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const sgMail = require('@sendgrid/mail');
+const fs = require('fs');
+
+// Debugging
+console.log("DEBUG: Does .env exist?", fs.existsSync('./.env'));
+console.log("DEBUG: SENDGRID_API_KEY Loaded:", process.env.SENDGRID_API_KEY ? "Yes" : "No");
+console.log("DEBUG: FIREBASE_SERVICE_ACCOUNT Loaded:", process.env.FIREBASE_SERVICE_ACCOUNT ? "Yes" : "No");
 
 // 2. Load Firebase Service Account from Environment Variable
 let firebaseAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
 if (!firebaseAccountRaw) {
-  console.error("FIREBASE_SERVICE_ACCOUNT environment variable not set.");
+  console.error("❌ FIREBASE_SERVICE_ACCOUNT is missing!");
   process.exit(1);
 }
 
 let serviceAccount;
 try {
-  // Parse the raw JSON from the environment variable
   serviceAccount = JSON.parse(firebaseAccountRaw);
-
-  // Manually convert every '\\n' in the private key to actual newlines
-  if (serviceAccount.private_key) {
+  if (serviceAccount.private_key.includes("\\n")) {
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
   }
-} catch (err) {
-  console.error("Error parsing FIREBASE_SERVICE_ACCOUNT:", err);
+} catch (error) {
+  console.error("❌ Error parsing FIREBASE_SERVICE_ACCOUNT:", error);
   process.exit(1);
 }
 
-// 3. Initialize Firebase Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+// 3. Initialize Firebase
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
+console.log("✅ Firebase Initialized Successfully!");
 
-// 4. Set SendGrid API Key from Environment Variables
+// 4. Initialize SendGrid
 const sendGridApiKey = process.env.SENDGRID_API_KEY;
 if (!sendGridApiKey) {
-  console.error("SENDGRID_API_KEY environment variable not set.");
+  console.error("❌ SENDGRID_API_KEY is missing!");
   process.exit(1);
 }
 sgMail.setApiKey(sendGridApiKey);
@@ -53,190 +51,83 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
-// 6. Apply Middleware
+// 6. Middleware
 app.use(express.json());
 app.use(cors());
-
-// **NEW**: Serve all files in 'public' as static
 app.use(express.static('public'));
 
-// 7. Static Data for Menu (Example)
-const menu = [
-  { id: 1, name: 'Burger', price: 5.99 },
-  { id: 2, name: 'Pizza', price: 8.99 },
-  { id: 3, name: 'Fries', price: 2.99 },
-];
+// 7. Test SendGrid API Key Before Sending Orders
+async function testSendGrid() {
+  try {
+    await sgMail.send({
+      to: "akmdra3@gmail.com",
+      from: "ashleysajous@elitebarbershopny.com", // Ensure this is verified in SendGrid
+      subject: "Test Email",
+      text: "This is a test email from Jimmy's Pizza.",
+    });
+    console.log("✅ SendGrid test email sent successfully.");
+  } catch (error) {
+    console.error("❌ SendGrid is not working:", error.response ? error.response.body : error);
+  }
+}
+testSendGrid();
 
-// 8. Endpoints
-
-// ~~ Removed the manual '/' route so 'public/index.html' can serve it ~~
-
-// GET /menu - Return static menu data
-app.get('/menu', (req, res) => {
-  res.json({ menu });
-});
-
-// POST /order - Create a new order and send a notification email
+// 8. Order Placement Endpoint
 app.post('/order', async (req, res) => {
-  const { items, customerName, address, customerEmail, phoneNumber } = req.body;
-  if (!items || !customerName || !address || !customerEmail) {
+  const { items, customerName, customerEmail, phoneNumber, address } = req.body;
+  
+  // Validate Input
+  if (!items || !customerName || !customerEmail || !phoneNumber || !address) {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
-  // Use a default location (e.g., restaurant location)
-  const defaultLocation = { lat: 40.7128, lng: -74.0060 };
-
   const newOrder = {
-    items,
     customerName,
-    address,
     customerEmail,
-    phoneNumber, // Optional
+    phoneNumber,
+    address,
+    items,
+    total: items.reduce((sum, item) => sum + item.price, 5.99),
     status: 'Order Received',
-    location: defaultLocation,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
   try {
+    // Save order to Firebase
     const orderRef = await db.collection('orders').add(newOrder);
-    console.log(`Order placed with ID: ${orderRef.id}`);
 
+    // Save order in customer's order history
+    const userOrdersRef = db.collection('customers').doc(customerEmail);
+    await userOrdersRef.set({ email: customerEmail }, { merge: true });
+    await userOrdersRef.collection('orderHistory').doc(orderRef.id).set(newOrder);
+
+    console.log(`✅ Order placed with ID: ${orderRef.id}`);
+
+    // Send order notification email
     const msg = {
-      to: "orders@jimmysmenu.com", // Replace with your email
-      from: "no-reply@jimmyspizza.com", // Must be a verified sender in SendGrid
-      subject: "New Order Received at Jimmy's Pizza",
-      text: `A new order has been placed by ${customerName} (${customerEmail}).\n\nAddress: ${address}\nItems: ${items.join(', ')}\n\nPlease check the admin dashboard for more details.`,
-      html: `<p>A new order has been placed by <strong>${customerName}</strong> (${customerEmail}).</p>
-             <p><strong>Address:</strong> ${address}</p>
-             <p><strong>Items:</strong> ${items.join(', ')}</p>
-             <p>Please check the admin dashboard for more details.</p>`,
+      to: "akmdra3@gmail.com", // Replace with admin email
+      from: "ashleysajous@elitebarbershopny.com", // Ensure this is a verified sender
+      subject: "New Order Received",
+      text: `New order from ${customerName} (${customerEmail}). Address: ${address}. Items: ${items.map(item => item.name).join(', ')}`,
     };
+    sgMail.send(msg)
+  .then(() => console.log("✅ Notification email sent"))
+  .catch((error) => {
+    console.error("❌ SendGrid is not working:", error.response ? error.response.body : error);
+  });
 
-    sgMail
-      .send(msg)
-      .then(() => console.log("Notification email sent"))
-      .catch((error) => console.error("Error sending notification email:", error));
+    await sgMail.send(msg);
+    console.log("✅ Order notification email sent successfully");
 
     res.json({ orderId: orderRef.id, status: newOrder.status });
   } catch (error) {
-    console.error("Error placing order:", error);
-    res.status(500).json({ error: "Could not place order." });
+    console.error("❌ Error placing order:", error.response ? error.response.body : error);
+    res.status(500).json({ error: "Failed to place order." });
   }
 });
 
-// GET /order/:id - Retrieve a single order by its ID
-app.get('/order/:id', async (req, res) => {
-  const orderId = req.params.id;
-  try {
-    const doc = await db.collection('orders').doc(orderId).get();
-    if (!doc.exists) {
-      return res.status(404).json({ error: 'Order not found.' });
-    }
-    res.json({ id: doc.id, ...doc.data() });
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    res.status(500).json({ error: "Could not fetch order." });
-  }
-});
-
-// GET /orders - Retrieve all orders (for admin dashboard)
-app.get('/orders', async (req, res) => {
-  try {
-    const snapshot = await db.collection('orders').get();
-    const orders = [];
-    snapshot.forEach((doc) => {
-      orders.push({ id: doc.id, ...doc.data() });
-    });
-    console.log(`Fetched ${orders.length} orders`);
-    res.json({ orders });
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    res.status(500).json({ error: "Failed to fetch orders." });
-  }
-});
-
-// GET /orders/customer - Retrieve orders for a specific customer by email
-app.get('/orders/customer', async (req, res) => {
-  const email = req.query.email;
-  if (!email) {
-    return res.status(400).json({ error: "Email query parameter is required." });
-  }
-  try {
-    const snapshot = await db.collection('orders').where('customerEmail', '==', email).get();
-    const orders = [];
-    snapshot.forEach((doc) => {
-      orders.push({ id: doc.id, ...doc.data() });
-    });
-    res.json({ orders });
-  } catch (error) {
-    console.error("Error fetching customer orders:", error);
-    res.status(500).json({ error: "Failed to fetch orders." });
-  }
-});
-
-// PATCH /order/:id/status - Update the status of an order
-app.patch('/order/:id/status', async (req, res) => {
-  const orderId = req.params.id;
-  const { status } = req.body;
-  if (!status) {
-    return res.status(400).json({ error: 'Status is required.' });
-  }
-  try {
-    const orderRef = db.collection('orders').doc(orderId);
-    const doc = await orderRef.get();
-    if (!doc.exists) {
-      return res.status(404).json({ error: 'Order not found.' });
-    }
-    await orderRef.update({ status });
-    res.json({ orderId, status });
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ error: "Failed to update order status." });
-  }
-});
-
-// Socket.io Setup for Real-Time Updates (Optional)
-io.on('connection', (socket) => {
-  console.log('A client connected:', socket.id);
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
-
-// Optional Global Update Loop for Simulated Updates
-setInterval(async () => {
-  try {
-    const snapshot = await db.collection('orders').get();
-    snapshot.forEach(async (doc) => {
-      const order = doc.data();
-      if (!order.location || order.location.lat === undefined || order.location.lng === undefined) {
-        console.warn(`Order ${doc.id} is missing a valid location. Skipping update.`);
-        return;
-      }
-      const newLocation = {
-        lat: order.location.lat + (Math.random() - 0.5) * 0.001,
-        lng: order.location.lng + (Math.random() - 0.5) * 0.001
-      };
-      const updatedOrder = {
-        ...order,
-        status: 'Order Out For Delivery',
-        location: newLocation
-      };
-      try {
-        await db.collection('orders').doc(doc.id).update(updatedOrder);
-        io.emit('orderUpdate', { id: doc.id, ...updatedOrder });
-        console.log(`Updated order ${doc.id}: ${updatedOrder.status}`);
-      } catch (updateError) {
-        console.error(`Error updating order ${doc.id}:`, updateError);
-      }
-    });
-  } catch (error) {
-    console.error("Error updating orders:", error);
-  }
-}, 5000);
-
-// Start the Server
+// 9. Start the Server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Kitchen is open on port ${PORT}`);
+  console.log(`🔥 Server running on port ${PORT}`);
 });

@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Jimmy's Pizza</title>
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet">
-  
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
+
     /* Overall Page Styles */
     body {
       font-family: 'DynaPuff', cursive;
@@ -51,8 +49,8 @@
     }
 
     h1 {
-      color: #1D428A;
-      border-bottom: 3px solid #F58426;
+      color: #1D428A; /* Knicks Blue */
+      border-bottom: 3px solid #F58426; /* Knicks Orange */
       padding-bottom: 10px;
       margin-bottom: 20px;
     }
@@ -76,7 +74,7 @@
     }
 
     th {
-      background-color: #F58426;
+      background-color: #F58426; /* Knicks Orange */
       color: white;
       font-size: 18px;
     }
@@ -132,51 +130,39 @@
 
 <header>
     <div class="logo">
-        <img src="logo.png" alt="Jimmy's Pizza Logo">
+        <img src="logo copy.png" alt="Jimmy's Pizza Logo">
     </div>
     <nav>
-        <a href="index.html">Home</a>
         <a href="admin.html">Admin Dashboard</a>
     </nav>
 </header>
 
-<h1>Admin Dashboard - Jimmy's Pizza</h1>
+  <h1>Admin Dashboard - Jimmy's Pizza</h1>
 
-<!-- Orders Table -->
-<table id="orders-table">
-  <thead>
-    <tr>
-      <th>Order ID</th>
-      <th>Customer</th>
-      <th>Address</th>
-      <th>Items</th>
-      <th>Created At</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- Orders will be populated here by admin.js -->
-  </tbody>
-</table>
+  <!-- Orders Table -->
+  <table id="orders-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Address</th>
+        <th>Items</th>
+        <th>Created At</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Orders will be populated here by admin.js -->
+    </tbody>
+  </table>
 
-<footer>
-  <p>&copy; 2025 Jimmy's Pizza. All Rights Reserved.</p>
-</footer>
+  <footer>
+    <p>&copy; 2025 Jimmy's Pizza. All Rights Reserved.</p>
+  </footer>
 
-<!-- Include our custom admin dashboard JavaScript -->
-<script src="admin.js"></script>
-
-<!-- Auto-refresh orders every 30 seconds -->
-<script>
-  window.onload = function () {
-    fetchOrders();
-    setInterval(() => {
-      console.log("🔄 Refreshing orders...");
-      fetchOrders();
-    }, 30000); // Refresh every 30 seconds
-  };
-</script>
+  <!-- Include our custom admin dashboard JavaScript -->
+  <script src="admin.js"></script>
 
 </body>
 </html>

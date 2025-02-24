@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order - Jimmy's Pizza</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
+
+        body {
+            font-family: 'DynaPuff', cursive;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #1D428A;
+            text-align: center;
+        }
+
+        /* Header */
+        header {
+            background-color: #F58426;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Menu Section */
+        .menu {
+            padding: 20px;
+        }
+
+        .menu-category {
+            font-size: 28px;
+            margin-top: 30px;
+            color: #1D428A;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 3px solid #F58426;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-content: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .menu-item {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .menu-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+            margin: 5px auto;
+        }
+
+        .price {
+            font-size: 20px;
+            color: #F58426;
+            font-weight: bold;
+        }
+
+        .add-to-cart {
+            background-color: #F58426;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .add-to-cart:hover {
+            background-color: #D46A1F;
+        }
+
+        /* Cart Section */
+        .cart-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #F58426;
+            color: white;
+            text-align: center;
+        }
+
+        /* Order Tracking Section */
+        .order-tracking {
+            margin: 20px auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #order-id {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            width: 250px;
+        }
+
+        #track-order-btn {
+            background-color: #1D428A;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1D428A;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            width: 100%;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <img src="logo.png" alt="Jimmy's Pizza Logo">
+    </div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="order.html">Order Now</a>
+        <a href="customer.html">Customer Dashboard</a>
+        <a href="checkout.html">Checkout</a>
+
+    </nav>
+</header>
+
+<section class="menu">
+  <h1>Order Your Pizza</h1>
+
+ <!-- Pizza Category -->
+ <div class="menu-category">Pizza</div>
+ <div class="menu-grid pizza-grid">
+     <div class="menu-item">
+         <h3>Tony Pepperoni</h3>
+         <img src="Untitled-15.png" alt="Tony Pepperoni" class="menu-image">
+         <p>Detroit-style crust with Mike’s Hot Honey.</p>
+         <span class="price">$19.99</span>
+         <button class="add-to-cart" data-name="Tony Pepperoni" data-price="19.99">Add to Cart</button>
+     </div>
+
+     <div class="menu-item">
+         <h3>O.G. Jimmy</h3>
+         <img src="images/pepperoni-pizza.jpg" alt="O.G. Jimmy" class="menu-image">
+         <p>Golden crust layered with rich cheeses.</p>
+         <span class="price">$18.99</span>
+         <button class="add-to-cart" data-name="O.G. Jimmy" data-price="18.99">Add to Cart</button>
+        </div>
+
+     <div class="menu-item">
+         <h3>Supreme Paulie</h3>
+         <img src="Untitled-16.png" alt="Supreme Paulie" class="menu-image">
+         <p>Pepperoni, roasted red peppers, onions, olives, bell peppers.</p>
+         <span class="price">$23.99</span>
+         <button class="add-to-cart" data-name="Supreme Paulie" data-price="23.99">Add to Cart</button>
+        </div>
+
+     <div class="menu-item">
+         <h3>Spicy Tommy</h3>
+         <img src="s167539139756367011_p33_i2_w1024.webp" alt="Spicy Tommy" class="menu-image">
+         <p>Spicy Italian sausage, red peppers, onions, basil, hot honey.</p>
+         <span class="price">$22.99</span>
+         <button class="add-to-cart" data-name="Spicy Tommy" data-price="22.99">Add to Cart</button>
+        </div>
+
+     <div class="menu-item">
+         <h3>Karen Hill</h3>
+         <img src="Untitled-14.png" alt="Karen Hill" class="menu-image">
+         <p>Buffalo chicken, cheese blend, ranch drizzle.</p>
+         <span class="price">$21.99</span>
+         <button class="add-to-cart" data-name="Karen Hill" data-price="21.99">Add to Cart</button>     </div>
+ </div>
+
+ <!-- Drinks Category -->
+ <div class="menu-category">Drinks</div>
+ <div class="menu-grid">
+     <div class="menu-item">
+         <h3>Homemade Lemonade</h3>
+         <img src="images/lemonade.jpg" alt="Homemade Lemonade" class="menu-image">
+         <span class="price">$3.00</span>
+         <button class="add-to-cart" data-name="Homemade Lemonade" data-price="3.00">Add to Cart</button>     </div>
+
+     <div class="menu-item">
+         <h3>Water Bottle</h3>
+         <img src="water.jpeg.webp" alt="Water Bottle" class="menu-image">
+         <span class="price">$1.50</span>
+         <button class="add-to-cart" data-name="Water Bottle" data-price="1.50">Add to Cart</button>     </div>
+ </div>
+
+ <!-- Desserts Category -->
+ <div class="menu-category">Desserts</div>
+ <div class="menu-grid">
+     <div class="menu-item">
+         <h3>Cannoli</h3>
+         <img src="cannoli.jpeg.webp" alt="Cannoli" class="menu-image">
+         <span class="price">$10.99</span>
+         <button class="add-to-cart" data-name="Cannoli" data-price="10.99">Add to Cart</button>     </div>
+
+     <div class="menu-item">
+       <h3>Zeppolis</h3>
+       <img src="zep.webp" alt="Zeppolis" class="menu-image">
+       <span class="price">$7.99</span>
+       <button class="add-to-cart" data-name="Zeppolis" data-price="7.99">Add to Cart</button>   </div>
+
+   <div class="menu-item">
+     <h3>Chocolate Chip Cookies</h3>
+     <img src="chocchip.jpeg" alt="Chocolate Chip Cookies" class="menu-image">
+     <span class="price">$6.99</span>
+     <button class="add-to-cart" data-name="Chocolate Chip Cookies" data-price="6.99">Add to Cart</button> </div>
+
+ </div>
+
+</section>
+
+<!-- Cart Section -->
+<section class="cart-section">
+  <h2>Your Cart</h2>
+  <ul id="cart-items"></ul>
+  <p class="total">Total: $<span id="cart-total">0.00</span></p>
+  <button onclick="goToCheckout()">Proceed to Checkout</button>
+</section>
+
+<footer>
+  <p>&copy; 2025 Jimmy's Pizza. All Rights Reserved.</p>
+</footer>
+
+<script>
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const DELIVERY_FEE = 5.99;
+
+  function updateCartDisplay() {
+      const cartList = document.getElementById("cart-items");
+      const totalElement = document.getElementById("cart-total");
+
+      cartList.innerHTML = "";
+      let total = cart.reduce((sum, item) => sum + item.price, 0) + DELIVERY_FEE;
+
+      cart.forEach((item, index) => {
+          let li = document.createElement("li");
+          li.innerHTML = `${item.name} - $${item.price.toFixed(2)} 
+              <button onclick="removeFromCart(${index})">❌</button>`;
+          cartList.appendChild(li);
+      });
+
+      let deliveryLi = document.createElement("li");
+      deliveryLi.innerHTML = `<strong>Delivery Fee:</strong> $${DELIVERY_FEE.toFixed(2)}`;
+      cartList.appendChild(deliveryLi);
+
+      totalElement.textContent = total.toFixed(2);
+  }
+
+  function addToCart(event) {
+      let button = event.target;
+      let itemName = button.getAttribute("data-name");
+      let itemPrice = parseFloat(button.getAttribute("data-price"));
+
+      if (!itemName || isNaN(itemPrice)) {
+          console.error("Invalid item details.");
+          return;
+      }
+
+      cart.push({ name: itemName, price: itemPrice });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCartDisplay();
+  }
+
+  function removeFromCart(index) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCartDisplay();
+  }
+
+  function goToCheckout() {
+      if (cart.length === 0) {
+          alert("Your cart is empty!");
+          return;
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      window.location.href = "checkout.html";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".add-to-cart").forEach(button => {
+          button.addEventListener("click", addToCart);
+      });
+      updateCartDisplay();
+  });
+</script>
+
+</body>
+</html>
