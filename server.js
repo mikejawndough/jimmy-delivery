@@ -61,11 +61,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 8. Handle unknown routes by serving index.html (Fixes CANNOT GET error)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'), function(err) {
-    if (err) {
-      res.status(500).send(err);
-    }
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), (err) => {
+    if (err) res.status(500).send(err);
   });
 });
 
