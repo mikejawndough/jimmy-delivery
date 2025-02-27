@@ -55,21 +55,31 @@ const io = socketIo(server, { cors: { origin: "*" } });
 // 6. Middleware
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public')); // Serve frontend files
-
-// 7. Serve Static Files Properly (Fix CANNOT GET Error)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 7. Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 8. Handle unknown routes by serving index.html (Fixes CANNOT GET error)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
 });
 
-// 8. Order Placement Endpoint
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🔥 Server running on port ${PORT}`);
+});
+
+// 9. Order Placement Endpoint
 app.post('/order', async (req, res) => {
   const { items, customerName, customerEmail, phoneNumber, address } = req.body;
   
-  // Validate Input
   if (!items || !customerName || !customerEmail || !phoneNumber || !address) {
+    console.error("❌ Error: Missing required fields.");
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
@@ -85,26 +95,26 @@ app.post('/order', async (req, res) => {
   };
 
   try {
-    // Save order to Firebase
     const orderRef = await db.collection('orders').add(newOrder);
-
-    // Save order in customer's order history
     const userOrdersRef = db.collection('customers').doc(customerEmail);
     await userOrdersRef.set({ email: customerEmail }, { merge: true });
     await userOrdersRef.collection('orderHistory').doc(orderRef.id).set(newOrder);
 
     console.log(`✅ Order placed with ID: ${orderRef.id}`);
 
-    // Send order notification email
     const msg = {
-      to: "orders@jimmysmenu.com", // Replace with your admin email
-      from: "no-reply@jimmyspizza.com", // Ensure this email is verified
+      to: "ashleysajous@elitebarbershopny.com",
+      from: "no-reply@jimmyspizza.com",
       subject: "New Order Received",
       text: `New order from ${customerName} (${customerEmail}). Address: ${address}. Items: ${items.map(item => item.name).join(', ')}`,
     };
 
-    await sgMail.send(msg);
-    console.log("✅ Order notification email sent successfully");
+    try {
+      await sgMail.send(msg);
+      console.log("✅ Order notification email sent successfully");
+    } catch (emailError) {
+      console.error("❌ SendGrid Error:", emailError.response ? emailError.response.body : emailError);
+    }
 
     res.json({ orderId: orderRef.id, status: newOrder.status });
   } catch (error) {
@@ -113,7 +123,7 @@ app.post('/order', async (req, res) => {
   }
 });
 
-// 9. Retrieve All Orders for Admin
+// 10. Retrieve All Orders for Admin
 app.get('/orders', async (req, res) => {
   try {
     const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
@@ -125,7 +135,7 @@ app.get('/orders', async (req, res) => {
   }
 });
 
-// 10. Retrieve Customer Orders
+// 11. Retrieve Customer Orders
 app.get('/orders/customer', async (req, res) => {
   const email = req.query.email;
   if (!email) {
@@ -141,7 +151,7 @@ app.get('/orders/customer', async (req, res) => {
   }
 });
 
-// 11. Update Order Status
+// 12. Update Order Status
 app.patch('/order/:id/status', async (req, res) => {
   const orderId = req.params.id;
   const { status } = req.body;
@@ -155,11 +165,9 @@ app.patch('/order/:id/status', async (req, res) => {
     const orderData = orderSnap.data();
     await orderRef.update({ status });
 
-    // Update customer order history
     await db.collection('customers').doc(orderData.customerEmail)
       .collection('orderHistory').doc(orderId).update({ status });
 
-    // Send Email Notification to Customer
     const msg = {
       to: orderData.customerEmail,
       from: "no-reply@jimmyspizza.com",
@@ -167,8 +175,12 @@ app.patch('/order/:id/status', async (req, res) => {
       text: `Your order is now: ${status}`,
     };
 
-    await sgMail.send(msg);
-    console.log(`✅ Email sent to ${orderData.customerEmail} about status update.`);
+    try {
+      await sgMail.send(msg);
+      console.log(`✅ Email sent to ${orderData.customerEmail} about status update.`);
+    } catch (emailError) {
+      console.error("❌ SendGrid Error:", emailError.response ? emailError.response.body : emailError);
+    }
 
     res.json({ orderId, status });
   } catch (error) {
@@ -177,14 +189,13 @@ app.patch('/order/:id/status', async (req, res) => {
   }
 });
 
-// 12. Socket.io Setup for Real-Time Order Updates
+// 13. Socket.io Setup for Real-Time Order Updates
 io.on('connection', (socket) => {
   console.log(`✅ Client connected: ${socket.id}`);
   socket.on('disconnect', () => console.log(`❌ Client disconnected: ${socket.id}`));
 });
 
-// 13. Start the Server
-const PORT = process.env.PORT || 3000;
+// 14. Start the Server
 server.listen(PORT, () => {
   console.log(`🔥 Server running on port ${PORT}`);
 });
