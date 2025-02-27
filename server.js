@@ -69,11 +69,6 @@ app.get('*', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🔥 Server running on port ${PORT}`);
-});
-
 // 9. Order Placement Endpoint
 app.post('/order', async (req, res) => {
   const { items, customerName, customerEmail, phoneNumber, address } = req.body;
