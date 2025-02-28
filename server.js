@@ -1,5 +1,3 @@
-// server.js
-
 // 1. Load Environment Variables and Required Modules
 require('dotenv').config();
 const express = require('express');
@@ -11,24 +9,15 @@ const sgMail = require('@sendgrid/mail');
 const fs = require('fs');
 const path = require('path');
 
+// Initialize Express App Before Middleware
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, { cors: { origin: "*" } });
+
 // Debugging
 console.log("DEBUG: Does .env exist?", fs.existsSync('./.env'));
 console.log("DEBUG: SENDGRID_API_KEY Loaded:", process.env.SENDGRID_API_KEY ? "Yes" : "No");
 console.log("DEBUG: FIREBASE_SERVICE_ACCOUNT Loaded:", process.env.FIREBASE_SERVICE_ACCOUNT ? "Yes" : "No");
-
-// Ensure public directory is served correctly
-const publicPath = path.join(__dirname, 'public');
-console.log("Public directory path:", publicPath);
-app.use(express.static(publicPath));
-
-// Serve index.html for all unknown routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(publicPath, 'index.html'), function(err) {
-    if (err) {
-      res.status(500).send(err);
-    }
-  });
-});
 
 // 2. Load Firebase Service Account from Environment Variable
 let firebaseAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -61,27 +50,29 @@ if (!sendGridApiKey) {
 }
 sgMail.setApiKey(sendGridApiKey);
 
-// 5. Create Express App, HTTP Server, and Initialize Socket.io
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: "*" } });
-
-// 6. Middleware
+// 5. Middleware
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
 
-// 7. Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// 6. Serve Static Files from the 'public' Directory
+const publicPath = path.join(__dirname, 'public');
+if (!fs.existsSync(publicPath)) {
+  console.error("❌ ERROR: Public directory not found:", publicPath);
+  process.exit(1);
+}
+console.log("✅ Serving static files from:", publicPath);
+app.use(express.static(publicPath));
 
-// 8. Handle unknown routes by serving index.html (Fixes CANNOT GET error)
+// 7. Serve index.html for Root Requests
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'), (err) => {
-    if (err) res.status(500).send(err);
+  res.sendFile(path.join(publicPath, 'index.html'), (err) => {
+    if (err) {
+      res.status(500).send(err);
+    }
   });
 });
 
-// 9. Order Placement Endpoint
+// 8. Order Placement Endpoint
 app.post('/order', async (req, res) => {
   const { items, customerName, customerEmail, phoneNumber, address } = req.body;
   
@@ -130,7 +121,7 @@ app.post('/order', async (req, res) => {
   }
 });
 
-// 10. Retrieve All Orders for Admin
+// 9. Retrieve All Orders for Admin
 app.get('/orders', async (req, res) => {
   try {
     const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
@@ -142,7 +133,7 @@ app.get('/orders', async (req, res) => {
   }
 });
 
-// 11. Retrieve Customer Orders
+// 10. Retrieve Customer Orders
 app.get('/orders/customer', async (req, res) => {
   const email = req.query.email;
   if (!email) {
@@ -158,7 +149,7 @@ app.get('/orders/customer', async (req, res) => {
   }
 });
 
-// 12. Update Order Status
+// 11. Update Order Status
 app.patch('/order/:id/status', async (req, res) => {
   const orderId = req.params.id;
   const { status } = req.body;
@@ -196,15 +187,14 @@ app.patch('/order/:id/status', async (req, res) => {
   }
 });
 
-// 13. Socket.io Setup for Real-Time Order Updates
+// 12. Socket.io Setup for Real-Time Order Updates
 io.on('connection', (socket) => {
   console.log(`✅ Client connected: ${socket.id}`);
   socket.on('disconnect', () => console.log(`❌ Client disconnected: ${socket.id}`));
 });
 
-// 14. Start the Server
+// 13. Start the Server
 const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, '0.0.0.0.', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🔥 Server running on port ${PORT}`);
 });
