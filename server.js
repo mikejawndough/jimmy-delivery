@@ -16,6 +16,20 @@ console.log("DEBUG: Does .env exist?", fs.existsSync('./.env'));
 console.log("DEBUG: SENDGRID_API_KEY Loaded:", process.env.SENDGRID_API_KEY ? "Yes" : "No");
 console.log("DEBUG: FIREBASE_SERVICE_ACCOUNT Loaded:", process.env.FIREBASE_SERVICE_ACCOUNT ? "Yes" : "No");
 
+// Ensure public directory is served correctly
+const publicPath = path.join(__dirname, 'public');
+console.log("Public directory path:", publicPath);
+app.use(express.static(publicPath));
+
+// Serve index.html for all unknown routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(publicPath, 'index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
+});
+
 // 2. Load Firebase Service Account from Environment Variable
 let firebaseAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
 if (!firebaseAccountRaw) {
