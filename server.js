@@ -65,11 +65,7 @@ app.use(express.static(publicPath));
 
 // 7. Serve index.html for Root Requests
 app.get('/', (req, res) => {
-  res.sendFile(path.join(publicPath, 'index.html'), (err) => {
-    if (err) {
-      res.status(500).send(err);
-    }
-  });
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // 8. Order Placement Endpoint
