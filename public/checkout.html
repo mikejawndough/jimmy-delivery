@@ -199,5 +199,33 @@
         document.addEventListener("DOMContentLoaded", displayCart);
     </script>
 
+<script src="https://www.paypal.com/sdk/js?client-id=AQTK7ic7iXlajV2RlxFAg5WcEnzk7JusjLpWhwskhPVmaDWzDft_oLOnpq9ywGb7rPn9jlDuJ0TSVLg5"></script>
+
+<div id="paypal-button-container"></div>
+
+<script>
+    paypal.Buttons({
+      // Create the order on button click
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: '10.00' }  // Set the payment amount here
+          }]
+        });
+      },
+      // Finalize the transaction after approval
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert('Transaction completed by ' + details.payer.name.given_name);
+          // Here you can also redirect or update your UI as needed
+        });
+      },
+      // Handle any errors during the transaction
+      onError: function(err) {
+        console.error('PayPal Checkout error:', err);
+      }
+    }).render('#paypal-button-container');  // Render the button into the container
+  </script>
+
 </body>
 </html>
