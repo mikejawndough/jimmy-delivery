@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Tracking - Jimmy's Pizza</title>
+  <!-- Google Fonts: DynaPuff -->
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Global Styles */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DynaPuff', cursive;
+      background-color: #ffffff;
+      color: #1D428A;
+      padding: 20px;
+      text-align: center;
+    }
+    /* Header & Footer placeholders (loaded via fetch) */
+    #header-placeholder, #footer-placeholder {
+      margin-bottom: 20px;
+    }
+    /* Order Tracking Container */
+    .tracking-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .tracking-container h1 {
+      margin-bottom: 20px;
+      color: #F58426;
+    }
+    /* Progress Bar Styles */
+    .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 30px 0;
+    }
+    .progress-step {
+      position: relative;
+      flex: 1;
+      text-align: center;
+      z-index: 1;
+    }
+    .progress-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 0;
+      width: 100%;
+      height: 4px;
+      background-color: #ccc;
+      z-index: -1;
+      transform: translateX(50%);
+    }
+    .progress-step .step-circle {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      background-color: #ccc;
+      line-height: 40px;
+      color: #fff;
+      font-weight: bold;
+    }
+    .progress-step.active .step-circle {
+      background-color: #F58426;
+    }
+    .progress-step.active ~ .progress-step::after {
+      background-color: #F58426;
+    }
+    .progress-step span {
+      font-size: 14px;
+      display: block;
+    }
+    /* Order Details */
+    .order-details {
+      margin-top: 20px;
+    }
+    .order-details p {
+      font-size: 18px;
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Placeholder -->
+  <div id="header-placeholder"></div>
+  <script>
+    // Load header.html into header-placeholder
+    fetch('header.html')
+      .then(response => response.text())
+      .then(data => { document.getElementById('header-placeholder').innerHTML = data; })
+      .catch(error => console.error('Error loading header:', error));
+  </script>
+  
+  <div class="tracking-container">
+    <h1>Order Tracking</h1>
+    <div class="order-details">
+      <p>Order ID: <span id="order-id">Loading...</span></p>
+      <p>Status: <span id="order-status">Loading...</span></p>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-step" id="step-1">
+        <div class="step-circle">1</div>
+        <span>Order Received</span>
+      </div>
+      <div class="progress-step" id="step-2">
+        <div class="step-circle">2</div>
+        <span>In The Oven</span>
+      </div>
+      <div class="progress-step" id="step-3">
+        <div class="step-circle">3</div>
+        <span>Out for Delivery</span>
+      </div>
+      <div class="progress-step" id="step-4">
+        <div class="step-circle">4</div>
+        <span>Delivered</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+  <script>
+    // Load footer.html into footer-placeholder
+    fetch('footer.html')
+      .then(response => response.text())
+      .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
+      .catch(error => console.error('Error loading footer:', error));
+  </script>
+  
+  <!-- Socket.IO Client Library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // For demonstration, assume the orderId and current status are passed via URL query parameters.
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderId') || 'Unknown';
+    const initialStatus = urlParams.get('status') || 'Order Received'; // default initial status
+    document.getElementById('order-id').textContent = orderId;
+    document.getElementById('order-status').textContent = initialStatus;
+    
+    // Function to update progress bar based on status
+    function updateProgress(status) {
+      const statusOrder = ["Order Received", "In The Oven", "Out for Delivery", "Delivered"];
+      // Determine current step index (0-based)
+      const currentIndex = statusOrder.indexOf(status);
+      // Mark steps as active up to the current index
+      statusOrder.forEach((step, index) => {
+        const stepElem = document.getElementById(`step-${index+1}`);
+        if (index <= currentIndex) {
+          stepElem.classList.add("active");
+        } else {
+          stepElem.classList.remove("active");
+        }
+      });
+    }
+    
+    // Set initial progress based on initialStatus
+    updateProgress(initialStatus);
+    
+    // Connect to Socket.IO server
+    const socket = io();
+    
+    // Listen for order status updates
+    socket.on('orderStatusUpdated', (data) => {
+      console.log("Received update:", data);
+      // Check if the update is for this order
+      if(data.orderId === orderId) {
+        document.getElementById('order-status').textContent = data.status;
+        updateProgress(data.status);
+      }
+    });
+    
+    // Optionally, fetch the latest order status on page load
+    // function fetchOrderStatus() { ... }
+    // fetchOrderStatus();
+  </script>
+</body>
+</html>

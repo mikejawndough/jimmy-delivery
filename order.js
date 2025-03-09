@@ -61,4 +61,3 @@ document.getElementById('order-form').addEventListener('submit', (e) => {
 window.addEventListener('load', () => {
   loadMenu();
 });
-

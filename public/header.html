@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Header - Jimmy's Pizza</title>
+  <!-- Google Fonts: DynaPuff -->
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
+    header {
+      background-color: #F58426;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      position: relative;
+    }
+    .logo img {
+      height: 60px;
+      width: auto;
+    }
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    /* Mini Cart Icon */
+    .cart-icon {
+      position: relative;
+      cursor: pointer;
+      background-color: #fff;
+      border-radius: 50%;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #1D428A;
+    }
+    #cart-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+      color: white;
+    }
+    /* Mini Cart Dropdown */
+    .mini-cart {
+      position: absolute;
+      right: 20px;
+      top: 70px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 300px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 1000;
+      text-align: left;
+    }
+    .mini-cart h3 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #1D428A;
+    }
+    .mini-cart ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .mini-cart li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .mini-cart li:last-child {
+      border-bottom: none;
+    }
+    .item-text {
+      flex: 1;
+      margin: 0;
+      padding-right: 5px;
+      font-size: 14px;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #ff4d4d;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+    }
+    .remove-btn:hover {
+      color: #ff1a1a;
+    }
+    .mini-cart p.total {
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="logo.png" alt="Jimmy's Pizza" />
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="order.html">Order</a>
+      <a href="customer.html">Customer Dashboard</a>
+      <a href="checkout.html">Checkout</a>
+    </nav>
+    <!-- Cart Icon -->
+    <div class="cart-icon" id="cartIcon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7.58,16.57c0.47,0,0.85,0.39,0.85,0.85s-0.38,0.85-0.85,0.85S6.73,17.89,6.73,17.42S7.11,16.57,7.58,16.57z
+          M17.42,16.57c0.47,0,0.85,0.39,0.85,0.85s-0.38,0.85-0.85,0.85s-0.85-0.39-0.85-0.85S16.95,16.57,17.42,16.57z
+          M6.99,5.35l1.1,4.95h8.19l1.8-6.54H5.35L6.99,5.35z M4.16,2H19.39c0.3,0,0.55,0.13,0.72,0.34c0.17,0.21,0.22,0.46,0.15,0.72
+          l-2.14,7.35c-0.13,0.45-0.57,0.78-1.05,0.78H8l-0.21,1h9.63c0.4,0,0.72,0.32,0.72,0.72s-0.32,0.72-0.72,0.72H7.58
+          c-0.4,0-0.72-0.32-0.72-0.72c0-0.06,0.01-0.11,0.02-0.17l0.11-0.49L5.16,4.87C5.1,4.61,5.04,4.49,5.04,4.49C4.91,4.1,5.11,3.67,5.52,3.57
+          C5.73,3.52,5.96,3.54,6.16,3.63L6.16,3.63L4.16,2z"></path>
+      </svg>
+      <span id="cart-count">0</span>
+    </div>
+    <!-- Mini Cart Dropdown -->
+    <div class="mini-cart" id="miniCart">
+      <h3>Your Cart</h3>
+      <ul id="mini-cart-items"></ul>
+      <p class="total">Total: $<span id="mini-cart-total">0.00</span></p>
+    </div>
+  </header>
+
+  <!-- (The rest of your page content will go here) -->
+  
+  <!-- Include header.js for mini-cart functions -->
+  <script src="header.js"></script>
+</body>
+</html>

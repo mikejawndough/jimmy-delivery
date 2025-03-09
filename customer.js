@@ -56,4 +56,3 @@ function fetchCustomerOrders(email) {
     })
     .catch(err => console.error("Error fetching customer orders:", err));
 }
-

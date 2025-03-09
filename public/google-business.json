@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "jimmy-reviews",
+  "private_key_id": "beba02d83dd28a150566185f157b535f852354aa",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCrDZlYZBSERg+i\nHuNKpDjJTDSefIOj0d3JI34LFLj9s7m+MW3pv2zgGJTInuWeXq5CD4BaiPtmPzpb\n4M2VsgKee2u09EoFtCZCJsbfHluMd2QefNUWZFeV1unu2lQsgtJLbNqCTTqNw6Ei\nqeH2tdOo0DdWs/r3uRXBoN+pKCK0VTcxcHF7/XnUmdi2n+Rj7EQPiu+1MewJU0R6\ngpAQJ5TbcznlwbNHJiPPTYa9faHas8Irp1cf1jwFIP9nQCEhEqLVTvppciJIV/pK\ncU9tMQJ8pvv9/5FeY96CX+5g9R9cwzvHCkbbk9MsOVo1OcXLLLITmPG9b6uyE4sQ\nHKqcRDKhAgMBAAECgf89L5gdWMSeAWcGLtZO6ioF7LnFwfRfXRVges7+AmOfHJ2M\naFH7aFChuH6VZNaYrSAthoNQien4y7/XAwrcSS32qAoBqICcmbGLEs6AcR4o7ha6\nG8fSmAIHGeEut0T0xwxCPqXK26UzoI67FNmR+RMah6BukI1tSfTRAPgATNhdI1Hd\nORKl8IPoUdIv28oaqk4Pj4xTTCG4K9MkQLlb7fV87qKsEUIr5jnMM665a7wE7PWg\ngiXQkGnf1pvtr70O+JgOUXZzr8DTdt+EgarmZMoGW1UzoeZoFG3wQ3xQlVaW2S9+\nKJO6OhUAAJ9po0GmOMt2QMPVdUXY1JQnz3G3ocECgYEA7+GaKb092yS2+l0vAWFS\nreU7Rbyt5oPRgK4LX3vbylMGBjEwmrT0RlLts5sst+X1oTn/BVesX6tvm3lMvwrX\n2lzCRlsvyEIlPB8eI3eKQoF99EPQ4sCGbkULGFs89F6n3cDn1vJ10wVvl67PlOI7\nLuX/W3Tq3y4wARtb4c470mECgYEAtowGy/a9/4EVvoCLBAVRec97EdAtthdtqh0H\nibmi4CrJoqeflpQGacNIFqrdgeaM25O3c4+3xLOcwslzmceZqz7fwv8i0qpL7cYW\nouNHlDUcNRRZjfrYc4mGUgDANtt0q2AsyJTlG3Gnfb8Vafhor11XQaYZvodizNPW\nJG24yEECgYAOE8k+RdLJd4AddTZ6+EEn31n5H7d83aN/z7bvJY+icfjaiCx4B8KG\nFfvJHIQlTqN5kLO8loaRHrhwAVBVrcc5E1R7WIKXV/pjatgT8MH2YS8JFKm/hNje\nw8KA7WnIVX24b8erP5NWjO0dk66u6A/dErZHobbe3hEHH5nmyHmOQQKBgDwBhY5w\nen5NyX8ItCnLMcAv4s21OAF+bA8aYcr1GcREbGmqXjxaRk1n4v+IhS3ZQn4/bXNw\nT8E6JZKmM/jd8vamwVlREvpa/oCXuAMtYO8oEjCkkteoGJTKJTw5gPXHZ++Zur7o\nqvM9hghA0uI1xPu4XCF5X0cRK/oWvHLXGoHBAoGBAO34PEAKGfVccKFF7MM57JLu\nem5Q7Q2Ue+w6/8r/9oRl9DTrFlk3RRygq+Hu0CbRPEe7hGLe/lJ/e2pjRgRXXS3/\nFxBh8V8GVOrM4g+XcovTyVGcN3jkO54K1PlpWTxrTfWxQJsdWL3Vm2t3qrLnJ2Ri\nIxkMwPT8AJSEoRNnTB7e\n-----END PRIVATE KEY-----\n",
+  "client_email": "jimmy-reviews@jimmy-reviews.iam.gserviceaccount.com",
+  "client_id": "104002437298952525186",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/jimmy-reviews%40jimmy-reviews.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

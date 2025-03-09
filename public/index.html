@@ -1,120 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jimmy's Pizza - Home</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
-
-        body {
-            font-family: 'DynaPuff', cursive;
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff;
-            color: #1D428A; /* Knicks Blue */
-            text-align: center;
-        }
-
-        /* Header */
-        header {
-            background-color: #F58426; /* Knicks Orange */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-        }
-
-        /* Logo */
-        .logo img {
-            height: 60px;
-            width: auto;
-        }
-
-        /* Navigation */
-        nav {
-            display: flex;
-            gap: 20px;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            padding: 10px;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        /* Hero Section */
-        .hero {
-            background-color: #1D428A;
-            color: white;
-            padding: 80px 20px;
-            margin-top: 20px;
-        }
-
-        .hero h1 {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            font-size: 22px;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #1D428A;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            position: absolute;
-            width: 100%;
-            bottom: 0;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            nav {
-                flex-direction: column;
-                align-items: center;
-                margin-top: 10px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jimmy's Pizza - Home</title>
+  
+  <!-- Google Fonts: DynaPuff -->
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
+    body {
+      font-family: 'DynaPuff', cursive;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #1D428A;
+      text-align: center;
+    }
+    /* Hero Section */
+    .hero {
+      background-color: #1D428A;
+      color: white;
+      padding: 80px 20px;
+      margin-top: 20px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 22px;
+    }
+    /* Custom Text Section */
+    #custom-text {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      font-size: 16px;
+      color: #1D428A;
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 100px;
+    }
+    /* Footer */
+    footer {
+      background-color: #1D428A;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      position: relative;
+      width: 100%;
+    }
+    /* Age Verification Modal Styles */
+    .age-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    .age-modal {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .age-modal h2 {
+      margin-top: 0;
+      color: #F58426;
+    }
+    .age-modal input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    .age-modal button {
+      background-color: #1D428A;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .age-modal button:hover {
+      background-color: #163769;
+    }
+    .age-modal p.error {
+      color: red;
+      display: none;
+      margin-top: 10px;
+    }
+  </style>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Check if age is already verified
+      if (!localStorage.getItem("ageVerified")) {
+        // Prevent page scrolling until verified
+        document.body.style.overflow = "hidden";
+        
+        // Create the modal overlay
+        const modalOverlay = document.createElement("div");
+        modalOverlay.className = "age-modal-overlay";
+        modalOverlay.innerHTML = `
+          <div class="age-modal">
+            <h2>Age Verification</h2>
+            <p>Please enter your date of birth. You must be 21 or older to access this site.</p>
+            <input type="date" id="dob" max="${new Date().toISOString().split("T")[0]}" />
+            <button id="verify-btn">Verify</button>
+            <p class="error" id="error-msg">Sorry, you must be 21 or older to access this site.</p>
+          </div>
+        `;
+        document.body.appendChild(modalOverlay);
+        
+        document.getElementById("verify-btn").addEventListener("click", function() {
+          const dobValue = document.getElementById("dob").value;
+          if (!dobValue) {
+            alert("Please enter your date of birth.");
+            return;
+          }
+          const dob = new Date(dobValue);
+          const today = new Date();
+          let age = today.getFullYear() - dob.getFullYear();
+          const m = today.getMonth() - dob.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+          }
+          if (age >= 21) {
+            localStorage.setItem("ageVerified", "true");
+            modalOverlay.remove();
+            document.body.style.overflow = "";
+          } else {
+            document.getElementById("error-msg").style.display = "block";
+          }
+        });
+      }
+    });
+  </script>
+  
 </head>
 <body>
 
-<header>
-    <div class="logo">
-        <img src="logo.png" alt="Jimmy's Pizza Logo">
-    </div>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="order.html">Order Now</a>
-        <a href="customer.html">Customer Dashboard</a>
-        <a href="checkout.html">Checkout</a>
+  <!-- Header Placeholder -->
+  <div id="header-placeholder"></div>
+  <script>
+    // Fetch and insert header.html into the placeholder
+    fetch('header.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('header-placeholder').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading header:', error));
+  </script>
 
-    </nav>
-</header>
-
-<section class="hero">
+  <!-- Hero Section -->
+  <section class="hero">
     <h1>Welcome to Jimmy's Pizza!</h1>
     <p>Detroit-Style Pizza with a NY Attitude. Fresh, Hot, and Always Delicious.</p>
-</section>
+  </section>
 
-<footer>
-    <p>&copy; 2025 Jimmy's Pizza. All Rights Reserved.</p>
-</footer>
+  <!-- Custom Text Section -->
+  <div id="custom-text">
+    <p>
+      Welcome to Jimmy's Pizza -<br>
+      Where the spirit of Detroit-style pizza meets the charm of Westchester, NY! Founded by Jimmy, our pizzeria is a culinary haven that celebrates the art of crafting unforgettable pies.
+    </p>
+    <p>
+      Legend had it that Tony, the talking tomato whispered the secrets of the perfect crust as Jimmy was strolling by, and thus, Jimmy's destiny as a pizza maestro was sealed. Our commitment to quality ingredients, expert craftsmanship, and a dash of humor in every slice sets us apart.
+    </p>
+    <p>
+      Though Jimmy may be a fictional character, the legacy of Jimmy's Pizza lives on in the hearts and taste buds of Westchester locals. So, if you ever find yourself in the area and hear the faint sound of the crunch of a crust, follow your senses – for you may just stumble upon the legendary Jimmy's Pizza.
+    </p>
+  </div>
+
+  <!-- Elfsight Instagram Feed Widget -->
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
+  <div class="elfsight-app-88a1e5fe-48f9-43b3-9e69-566bbfc43783" data-elfsight-app-lazy></div>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+  <script>
+    // Fetch and insert footer.html into the placeholder
+    fetch('footer.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('footer-placeholder').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading footer:', error));
+  </script>
 
 </body>
 </html>
