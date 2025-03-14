@@ -33,6 +33,24 @@
     nav a:hover {
       text-decoration: underline;
     }
+    /* Global Auth Controls */
+    #auth-controls {
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #auth-controls button {
+      background-color: #1D428A;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #auth-controls button:hover {
+      background-color: #163769;
+    }
     /* Mini Cart Icon */
     .cart-icon {
       position: relative;
@@ -108,8 +126,13 @@
       color: #ff4d4d;
       font-size: 16px;
       cursor: pointer;
-      padding: 0;
+      padding: 2px;
       margin: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .remove-btn:hover {
       color: #ff1a1a;
@@ -132,6 +155,11 @@
       <a href="customer.html">Customer Dashboard</a>
       <a href="checkout.html">Checkout</a>
     </nav>
+    <!-- Global Auth Controls -->
+    <div id="auth-controls">
+      <!-- This section is updated based on Firebase auth state -->
+      <button id="login-btn">Log In</button>
+    </div>
     <!-- Cart Icon -->
     <div class="cart-icon" id="cartIcon">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -152,9 +180,30 @@
     </div>
   </header>
 
-  <!-- (The rest of your page content will go here) -->
+  <!-- Global Auth Listener Script -->
+  <script>
+    // Ensure Firebase is loaded before this script runs
+    if (typeof firebase !== "undefined") {
+      firebase.auth().onAuthStateChanged(function(user) {
+        const authControls = document.getElementById("auth-controls");
+        if (user) {
+          authControls.innerHTML = `<span>Welcome, ${user.email}</span>
+            <button id="logout-btn">Log Out</button>`;
+          document.getElementById("logout-btn").addEventListener("click", function() {
+            firebase.auth().signOut();
+          });
+        } else {
+          authControls.innerHTML = `<button id="login-btn">Log In</button>`;
+          document.getElementById("login-btn").addEventListener("click", function() {
+            // Redirect to customer page or open a login modal
+            window.location.href = "customer.html";
+          });
+        }
+      });
+    }
+  </script>
   
-  <!-- Include header.js for mini-cart functions -->
-  <script src="header.js"></script>
+  <!-- Include header.js for additional mini-cart functions -->
+  <script src="/js/header.js"></script>
 </body>
 </html>

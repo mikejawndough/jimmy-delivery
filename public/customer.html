@@ -2,12 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Customer Dashboard - Jimmy's Pizza</title>
-  
-  <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet">
-  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
     body {
@@ -32,35 +29,23 @@
       border: 1px solid #ccc;
       border-radius: 8px;
     }
-    .hidden {
-      display: none;
-    }
-    .section {
-      margin: 20px auto;
+    .hidden { display: none; }
+    #favorites-section {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       max-width: 600px;
-      text-align: left;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .section h2 {
-      color: #F58426;
-    }
-    .order, .favorite {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .action-btn {
-      background-color: #F58426;
-      color: white;
-      border: none;
-      padding: 5px 10px;
+    #favorites-section h2 { margin-bottom: 10px; }
+    #favorites-list { list-style: none; padding: 0; }
+    #favorites-list li {
+      background: #f5f5f5;
+      margin: 5px 0;
+      padding: 8px;
       border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .action-btn:hover {
-      background-color: #D46A1F;
     }
     footer {
       background-color: #1D428A;
@@ -68,27 +53,42 @@
       text-align: center;
       padding: 15px;
       width: 100%;
-      position: relative;
       margin-top: 30px;
     }
+    button {
+      cursor: pointer;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background-color: #1D428A;
+      color: white;
+      margin-top: 10px;
+    }
+    button:hover { background-color: #163769; }
   </style>
 </head>
 <body>
-  <!-- Header Placeholder -->
+  <!-- Header Placeholder (loaded via header.js) -->
   <div id="header-placeholder"></div>
   <script>
-    // Load header.html into the header placeholder
     fetch('header.html')
       .then(response => response.text())
       .then(data => {
         document.getElementById('header-placeholder').innerHTML = data;
+        // Optionally load header.js for any header-specific functions (e.g., mini-cart) if needed:
+        const script = document.createElement('script');
+        script.src = 'js/header.js';
+        document.body.appendChild(script);
       })
       .catch(error => console.error('Error loading header:', error));
   </script>
   
   <section class="customer-dashboard">
-    <h1>Your Dashboard</h1>
-    <!-- Login/Signup UI -->
+    <h1>Welcome to Jimmy's Pizza</h1>
+    <p>Sign up or log in to track your orders and manage your favorites.</p>
+    
+    <!-- Sign Up Section -->
     <div class="container" id="signup-section">
       <h2>Sign Up</h2>
       <input type="text" id="name" placeholder="Full Name" required>
@@ -98,7 +98,8 @@
       <button onclick="signup(event)">Create Account</button>
       <p>Already have an account? <a href="#" onclick="showLogin()">Log in</a></p>
     </div>
-
+    
+    <!-- Log In Section -->
     <div class="container hidden" id="login-section">
       <h2>Log In</h2>
       <input type="email" id="login-email" placeholder="Email Address" required>
@@ -106,199 +107,40 @@
       <button onclick="login(event)">Log In</button>
       <p>Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
     </div>
-
-    <!-- Dashboard UI (shown after login) -->
+    
+    <!-- Dashboard Section -->
     <div class="container hidden" id="dashboard-section">
       <h2>Your Dashboard</h2>
       <p id="user-info"></p>
+      <h3>Order History</h3>
+      <ul id="order-list"></ul>
+      
+      <!-- Favorites Section -->
+      <div id="favorites-section">
+        <h2>Your Favorites</h2>
+        <ul id="favorites-list"></ul>
+      </div>
+      
+      <button onclick="logout()">Log Out</button>
     </div>
-
-    <!-- Favorites Section -->
-    <div class="section hidden" id="favorites-section">
-      <h2>Favorites</h2>
-      <ul id="favorites-list"></ul>
-    </div>
-
-    <!-- Order History Section -->
-    <div class="section hidden" id="order-history-section">
-      <h2>Order History</h2>
-      <ul id="order-history-list"></ul>
-    </div>
-
-    <button class="action-btn" onclick="logout()">Log Out</button>
   </section>
   
-  <!-- Footer Placeholder -->
+  <!-- Footer Placeholder (loaded via footer.html) -->
   <div id="footer-placeholder"></div>
   <script>
-    // Load footer.html into the footer placeholder
     fetch('footer.html')
       .then(response => response.text())
-      .then(data => {
-        document.getElementById('footer-placeholder').innerHTML = data;
-      })
+      .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
       .catch(error => console.error('Error loading footer:', error));
   </script>
-
+  
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
-  <!-- Firebase Initialization and Dashboard Logic -->
-  <script>
-    fetch('/firebase-config')
-      .then(response => response.json())
-      .then(config => {
-        firebase.initializeApp(config);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        let currentUserEmail = null;
-
-        function showLogin() {
-          document.getElementById("signup-section").classList.add("hidden");
-          document.getElementById("login-section").classList.remove("hidden");
-        }
-
-        function showSignup() {
-          document.getElementById("login-section").classList.add("hidden");
-          document.getElementById("signup-section").classList.remove("hidden");
-        }
-
-        function signup(event) {
-          event.preventDefault();
-          const name = document.getElementById("name").value;
-          const email = document.getElementById("signup-email").value;
-          const phone = document.getElementById("phone").value;
-          const password = document.getElementById("signup-password").value;
-
-          auth.createUserWithEmailAndPassword(email, password)
-            .then(userCredential => {
-              return db.collection("customers").doc(userCredential.user.email).set({
-                name,
-                email,
-                phone,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-              });
-            })
-            .then(() => {
-              alert("Account created! You can now log in.");
-              showLogin();
-            })
-            .catch(error => alert("Error: " + error.message));
-        }
-
-        function login(event) {
-          event.preventDefault();
-          const email = document.getElementById("login-email").value;
-          const password = document.getElementById("login-password").value;
-
-          auth.signInWithEmailAndPassword(email, password)
-            .then(userCredential => {
-              alert("Login successful!");
-              loadDashboard(userCredential.user);
-            })
-            .catch(error => alert("Error: " + error.message));
-        }
-
-        function loadDashboard(user) {
-          currentUserEmail = user.email;
-          document.getElementById("user-info").textContent = `Logged in as ${user.email}`;
-          // Hide login/signup and show dashboard sections
-          document.getElementById("signup-section").classList.add("hidden");
-          document.getElementById("login-section").classList.add("hidden");
-          document.getElementById("dashboard-section").classList.remove("hidden");
-          document.getElementById("favorites-section").classList.remove("hidden");
-          document.getElementById("order-history-section").classList.remove("hidden");
-
-          // Listen for changes in order history
-          db.collection("customers").doc(user.email).collection("orderHistory")
-            .orderBy('createdAt', 'desc')
-            .onSnapshot(snapshot => {
-              const orderList = document.getElementById("order-history-list");
-              orderList.innerHTML = "";
-              snapshot.forEach(doc => {
-                const order = doc.data();
-                const li = document.createElement("li");
-                li.className = "order";
-                li.innerHTML = `
-                  Order #${doc.id}: ${order.items.map(i => i.name).join(', ')} - ${order.status}
-                  <button class="action-btn" onclick="reorder('${doc.id}')">Reorder</button>
-                `;
-                orderList.appendChild(li);
-              });
-            }, error => {
-              console.error("Error listening for order history updates:", error);
-            });
-
-          // Load favorites from server
-          fetch(`/customer/favorites?email=${encodeURIComponent(user.email)}`)
-            .then(res => res.json())
-            .then(data => {
-              const favList = document.getElementById("favorites-list");
-              favList.innerHTML = "";
-              data.favorites.forEach((fav, index) => {
-                const li = document.createElement("li");
-                li.className = "favorite";
-                li.innerHTML = `
-                  ${fav.name} - $${fav.price.toFixed(2)}
-                  <button class="action-btn" onclick="reorderFavorite(${index})">Order Favorite</button>
-                `;
-                favList.appendChild(li);
-              });
-            })
-            .catch(error => console.error("Error fetching favorites:", error));
-        }
-
-        // Reorder a past order
-        window.reorder = function(orderId) {
-          fetch(`/orders/customer?email=${encodeURIComponent(currentUserEmail)}`)
-            .then(res => res.json())
-            .then(data => {
-              const order = data.orders.find(o => o.id === orderId);
-              if (order) {
-                localStorage.setItem("reorder", JSON.stringify(order));
-                window.location.href = "order.html";
-              } else {
-                alert("Order not found.");
-              }
-            })
-            .catch(error => console.error("Error reordering:", error));
-        };
-
-        // Reorder a favorite
-        window.reorderFavorite = function(favIndex) {
-          fetch(`/customer/favorites?email=${encodeURIComponent(currentUserEmail)}`)
-            .then(res => res.json())
-            .then(data => {
-              const fav = data.favorites[favIndex];
-              if (fav) {
-                // Here we assume your order form can prefill an order with one item (the favorite)
-                localStorage.setItem("reorder", JSON.stringify({ items: [fav] }));
-                window.location.href = "order.html";
-              } else {
-                alert("Favorite not found.");
-              }
-            })
-            .catch(error => console.error("Error reordering favorite:", error));
-        };
-
-        function logout() {
-          auth.signOut().then(() => {
-            window.location.reload();
-          });
-        }
-
-        auth.onAuthStateChanged(user => {
-          if (user) {
-            loadDashboard(user);
-          } else {
-            // Show login/signup UI (you can implement showLogin here if needed)
-          }
-        });
-      })
-      .catch(error => console.error("Error loading Firebase config:", error));
-  </script>
   
+  <!-- Customer Dashboard Functions -->
+  <script src="js/customer.js"></script>
+
 </body>
 </html>

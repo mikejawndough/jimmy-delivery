@@ -274,89 +274,21 @@
     </div>
   </section>
 
-  <!-- Footer Placeholder -->
-  <div id="footer-placeholder"></div>
-  <script>
-    // Load footer.html into the footer placeholder
-    fetch('footer.html')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('footer-placeholder').innerHTML = data;
-      })
-      .catch(error => console.error('Error loading footer:', error));
-  </script>
+   <!-- Footer Placeholder (using absolute paths for fetch) -->
+   <div id="footer-placeholder"></div>
+   <script>
+     fetch('/footer.html')
+       .then(response => response.text())
+       .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
+       .catch(error => console.error('Error loading footer:', error));
+   </script>
+   
+   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+ 
+   <!-- Load Common Functions from app.js -->
+   <script src="/js/app.js"></script>
 
-  <!-- Client-Side Scripts: Cart & Favorites Functions -->
-  <script>
-    // Function to add an item to the cart
-    function addToCart(button) {
-      const name = button.getAttribute("data-name");
-      const basePrice = parseFloat(button.getAttribute("data-price"));
-      let price = basePrice;
-      let isInfused = false;
-      
-      // Check if there's an infused toggle within the same menu-item
-      const menuItem = button.closest('.menu-item');
-      const infusedToggle = menuItem.querySelector('.infused-toggle');
-      if (infusedToggle && infusedToggle.checked) {
-        isInfused = true;
-        price += 20;
-      }
-      
-      const item = { name, price, infused: isInfused };
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      cart.push(item);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert(`${name}${isInfused ? " (Infused)" : ""} added to cart!`);
-    }
-    
-    // Function to add an item to favorites
-    function addFavorite(item) {
-      // Assume user email is stored in localStorage after login
-      const email = localStorage.getItem("userEmail");
-      if (!email) {
-        alert("You must be logged in to add favorites.");
-        return;
-      }
-      fetch('/customer/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, favorite: item })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.message) {
-          alert(data.message);
-        } else {
-          alert("Added to favorites!");
-        }
-      })
-      .catch(err => {
-        console.error("Error adding favorite:", err);
-        alert("Failed to add favorite. Please try again later.");
-      });
-    }
-  </script>
-
-  <!-- Firebase Initialization and Authentication -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <script>
-    fetch('/firebase-config')
-      .then(response => response.json())
-      .then(config => {
-        firebase.initializeApp(config);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        
-        // For testing purposes, if no user is logged in, set a dummy email.
-        if (!localStorage.getItem("userEmail")) {
-          localStorage.setItem("userEmail", "customer@example.com");
-        }
-      })
-      .catch(error => console.error("Error loading Firebase config:", error));
-  </script>
-  
 </body>
 </html>
