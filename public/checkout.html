@@ -2,72 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Checkout - Jimmy's Pizza</title>
+  
+  <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
-  <!-- PayPal SDK (standard button) -->
+  
+  <!-- PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
+  
   <style>
-    /* Global Styles */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'DynaPuff', cursive;
-      background-color: #ffffff;
-      color: #1D428A;
-      padding-bottom: 50px;
-    }
-    h1 { text-align: center; font-size: 36px; margin: 20px 0; color: #F58426; }
-    .checkout-container {
-      width: 90%;
-      max-width: 600px;
-      margin: 0 auto 30px;
-      padding: 20px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      text-align: left;
-    }
-    .checkout-container h2 { color: #F58426; margin-bottom: 10px; }
-    .form-section { margin-bottom: 20px; }
-    .form-section h3 { color: #F58426; margin-bottom: 10px; font-size: 20px; }
-    .form-section label { display: block; margin: 6px 0 4px; font-weight: bold; color: #1D428A; }
+    body { font-family:'DynaPuff', cursive; background:#fff; color:#1D428A; padding-bottom:50px; }
+    h1 { text-align:center; font-size:36px; margin:20px 0; color:#F58426; }
+    .checkout-container { width:90%; max-width:600px; margin:0 auto 30px; padding:20px; background:#f5f5f5; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.15); text-align:left; }
+    .checkout-container h2 { color:#F58426; margin-bottom:10px; }
+    .form-section { margin-bottom:20px; }
+    .form-section h3 { color:#F58426; margin-bottom:10px; font-size:20px; }
+    .form-section label { display:block; margin:6px 0 4px; font-weight:bold; color:#1D428A; }
     .form-section input[type="text"],
     .form-section input[type="email"],
     .form-section input[type="tel"],
     .form-section select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+      border-radius:5px;
+      border:1px solid #ccc;
+      font-size:16px;
     }
-    .datetime-dropdowns { display: flex; flex-wrap: wrap; gap: 8px; }
-    .datetime-dropdowns select { flex: 1; min-width: 70px; }
-    .radio-group { margin-top: 8px; }
-    .radio-group label { display: block; margin-bottom: 8px; cursor: pointer; }
-    #schedule-delivery { display: none; margin-top: 10px; }
-    #recurring-options { display: none; margin-top: 10px; padding: 10px; background: #ffffff; border-radius: 5px; border: 1px solid #ccc; }
-    #paypal-button-container { margin-top: 20px; display: none; }
-    #place-order {
-      width: 100%;
-      padding: 12px;
-      border-radius: 5px;
-      border: none;
-      background-color: #1D428A;
-      color: #fff;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      margin-top: 20px;
+    .datetime-dropdowns { display:flex; flex-wrap:wrap; gap:8px; }
+    .datetime-dropdowns select { flex:1; min-width:70px; }
+    .radio-group { margin-top:8px; }
+    .radio-group label { display:block; margin-bottom:8px; cursor:pointer; }
+    #schedule-delivery { display:none; margin-top:10px; }
+    #recurring-options {
+      display:none;
+      margin-top:10px;
+      padding:10px;
+      background:#fff;
+      border-radius:5px;
+      border:1px solid #ccc;
     }
-    #place-order:hover { background-color: #163769; }
-    #place-order:disabled { background-color: #888; cursor: not-allowed; }
-    #cart-items { list-style: none; padding: 0; margin-bottom: 10px; }
-    #cart-items li { margin: 5px 0; }
-    .total { font-weight: bold; text-align: right; margin-bottom: 20px; }
-    footer { text-align: center; margin-top: 30px; padding: 20px; background-color: #1D428A; color: white; }
+    #paypal-button-container { margin-top:20px; display:none; }
+    #place-order { width:100%; padding:12px; border-radius:5px; border:none; background-color:#1D428A; color:#fff; font-size:18px; font-weight:bold; cursor:pointer; transition:background-color 0.2s ease; margin-top:20px; }
+    #place-order:hover { background-color:#163769; }
+    #place-order:disabled { background-color:#888; cursor:not-allowed; }
+    #cart-items { list-style:none; padding:0; margin-bottom:10px; }
+    #cart-items li { margin:5px 0; }
+    .total { font-weight:bold; text-align:right; margin-bottom:20px; }
+    footer { text-align:center; margin-top:30px; padding:20px; background-color:#1D428A; color:white; }
   </style>
 </head>
 <body>
@@ -76,17 +60,24 @@
   <script>
     fetch('header.html')
       .then(response => response.text())
-      .then(data => { document.getElementById('header-placeholder').innerHTML = data; })
-      .catch(error => console.error('Error loading header:', error));
+      .then(function(data) {
+        document.getElementById('header-placeholder').innerHTML = data;
+      })
+      .catch(function(error) {
+        console.error('Error loading header:', error);
+      });
   </script>
-
+  
   <h1>Checkout</h1>
+  
+  <!-- Checkout Form -->
   <form id="order-form">
     <div class="checkout-container">
       <h2>Your Order</h2>
       <ul id="cart-items"></ul>
       <p class="total">Total: $<span id="cart-total">0.00</span></p>
       
+      <!-- Delivery Information Section -->
       <div class="form-section">
         <h3>Delivery Information</h3>
         <label for="customer-name">Name</label>
@@ -99,17 +90,12 @@
         <input type="text" id="address" placeholder="Enter your delivery address" required>
       </div>
       
+      <!-- Delivery Time Section -->
       <div class="form-section">
         <h3>Delivery Time</h3>
         <div class="radio-group" id="delivery-options">
-          <label>
-            <input type="radio" name="delivery-option" value="asap" checked>
-            ASAP (Deliver now)
-          </label>
-          <label>
-            <input type="radio" name="delivery-option" value="scheduled">
-            Schedule for Later
-          </label>
+          <label><input type="radio" name="delivery-option" value="asap" checked> ASAP (Deliver now)</label>
+          <label><input type="radio" name="delivery-option" value="scheduled"> Schedule for Later</label>
         </div>
         <div id="schedule-delivery">
           <label>Select Delivery Date &amp; Time</label>
@@ -132,36 +118,36 @@
             <select id="delivery-day">
               <option value="">Day</option>
               <script>
-                for (let i = 1; i <= 31; i++) {
-                  let day = i.toString().padStart(2, '0');
-                  document.write(`<option value="${day}">${day}</option>`);
+                for (var i = 1; i <= 31; i++) {
+                  var day = i.toString().padStart(2, '0');
+                  document.write('<option value="' + day + '">' + day + '</option>');
                 }
               </script>
             </select>
             <select id="delivery-year">
               <option value="">Year</option>
               <script>
-                const currentYear = new Date().getFullYear();
-                for (let i = 0; i < 2; i++) {
-                  let year = currentYear + i;
-                  document.write(`<option value="${year}">${year}</option>`);
+                var currentYear = new Date().getFullYear();
+                for (var i = 0; i < 2; i++) {
+                  var year = currentYear + i;
+                  document.write('<option value="' + year + '">' + year + '</option>');
                 }
               </script>
             </select>
             <select id="delivery-hour">
               <option value="">Hour</option>
               <script>
-                for (let i = 1; i <= 12; i++) {
-                  document.write(`<option value="${i.toString().padStart(2,'0')}">${i}</option>`);
+                for (var i = 1; i <= 12; i++) {
+                  document.write('<option value="' + i.toString().padStart(2, '0') + '">' + i + '</option>');
                 }
               </script>
             </select>
             <select id="delivery-minute">
               <option value="">Minute</option>
               <script>
-                for (let i = 0; i < 60; i += 5) {
-                  let minute = i.toString().padStart(2, '0');
-                  document.write(`<option value="${minute}">${minute}</option>`);
+                for (var i = 0; i < 60; i += 5) {
+                  var minute = i.toString().padStart(2, '0');
+                  document.write('<option value="' + minute + '">' + minute + '</option>');
                 }
               </script>
             </select>
@@ -174,17 +160,12 @@
         </div>
       </div>
       
+      <!-- Recurring Order Section -->
       <div class="form-section">
         <h3>Recurring Order?</h3>
         <div class="radio-group">
-          <label>
-            <input type="radio" name="recurring" value="no" checked>
-            One-Time Order
-          </label>
-          <label>
-            <input type="radio" name="recurring" value="yes">
-            Recurring Order
-          </label>
+          <label><input type="radio" name="recurring" value="no" checked> One-Time Order</label>
+          <label><input type="radio" name="recurring" value="yes"> Recurring Order</label>
         </div>
         <div id="recurring-options">
           <label for="frequency">Frequency</label>
@@ -200,19 +181,13 @@
         </div>
       </div>
       
+      <!-- Payment Section -->
       <div class="form-section">
         <h3>Select Payment Method</h3>
         <div class="radio-group">
-          <label>
-            <input type="radio" name="payment-method" value="cash" required>
-            Cash
-          </label>
-          <label>
-            <input type="radio" name="payment-method" value="paypal" required>
-            PayPal
-          </label>
+          <label><input type="radio" name="payment-method" value="cash" required> Cash</label>
+          <label><input type="radio" name="payment-method" value="paypal" required> PayPal</label>
         </div>
-        <!-- Payment Button Container for PayPal -->
         <div id="paypal-button-container"></div>
       </div>
       
@@ -225,179 +200,25 @@
   <script>
     fetch('footer.html')
       .then(response => response.text())
-      .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
-      .catch(error => console.error('Error loading footer:', error));
+      .then(function(data) { document.getElementById('footer-placeholder').innerHTML = data; })
+      .catch(function(error) { console.error('Error loading footer:', error); });
   </script>
   
-  <!-- JavaScript for Checkout Functionality -->
-  <script>
-    // Toggle scheduled delivery input display
-    document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
-      radio.addEventListener('change', function() {
-        const scheduleDiv = document.getElementById('schedule-delivery');
-        scheduleDiv.style.display = (this.value === 'scheduled') ? 'block' : 'none';
-      });
-    });
-    
-    // Toggle recurring order options display
-    document.querySelectorAll('input[name="recurring"]').forEach(radio => {
-      radio.addEventListener('change', function() {
-        const recurringOptions = document.getElementById('recurring-options');
-        recurringOptions.style.display = (this.value === 'yes') ? 'block' : 'none';
-      });
-    });
-    
-    // Payment method toggle: Show PayPal button if "paypal" is selected
-    let paypalPaymentCompleted = false;
-    document.querySelectorAll('input[name="payment-method"]').forEach(elem => {
-      elem.addEventListener("change", function(event) {
-        if (event.target.value === "paypal") {
-          document.getElementById("paypal-button-container").style.display = "block";
-          document.getElementById("place-order").disabled = true;
-        } else {
-          document.getElementById("paypal-button-container").style.display = "none";
-          document.getElementById("place-order").disabled = false;
-        }
-      });
-    });
-    
-    // Render PayPal button
-    paypal.Buttons({
-      createOrder: function(data, actions) {
-        return actions.order.create({
-          purchase_units: [{
-            amount: { value: '10.00' }
-          }]
-        });
-      },
-      onApprove: function(data, actions) {
-        return actions.order.capture().then(function(details) {
-          alert('PayPal Transaction completed by ' + details.payer.name.given_name);
-          paypalPaymentCompleted = true;
-          document.getElementById("place-order").disabled = false;
-        });
-      },
-      onError: function(err) {
-        console.error('PayPal Checkout error:', err);
-      }
-    }).render('#paypal-button-container');
-    
-    // Display cart items from localStorage
-    function displayCart() {
-      const cartList = document.getElementById("cart-items");
-      const totalElement = document.getElementById("cart-total");
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      cartList.innerHTML = "";
-      let total = 0;
-      cart.forEach(item => {
-        total += item.price;
-        const li = document.createElement("li");
-        li.textContent = `${item.name}${item.infused ? " (Infused)" : ""} - $${item.price.toFixed(2)}`;
-        cartList.appendChild(li);
-      });
-      total += 5.99; // Delivery fee
-      totalElement.textContent = total.toFixed(2);
-    }
-    
-    // Order form submission logic
-    document.getElementById("order-form").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const customerName = document.getElementById("customer-name").value.trim();
-      const phoneNumber = document.getElementById("phone-number").value.trim();
-      const customerEmail = document.getElementById("customer-email").value.trim();
-      const address = document.getElementById("address").value.trim();
-      
-      // Build delivery datetime
-      let deliveryDatetime = "";
-      const deliveryOption = document.querySelector('input[name="delivery-option"]:checked').value;
-      if (deliveryOption === 'asap') {
-        deliveryDatetime = new Date().toISOString();
-      } else {
-        const month = document.getElementById("delivery-month").value;
-        const day = document.getElementById("delivery-day").value;
-        const year = document.getElementById("delivery-year").value;
-        const hourRaw = document.getElementById("delivery-hour").value;
-        const minute = document.getElementById("delivery-minute").value;
-        const ampm = document.getElementById("delivery-ampm").value;
-        if (!month || !day || !year || !hourRaw || !minute || !ampm) {
-          alert("Please select a complete delivery date and time.");
-          return;
-        }
-        let hour = parseInt(hourRaw);
-        if (ampm === "PM" && hour < 12) { hour += 12; }
-        if (ampm === "AM" && hour === 12) { hour = 0; }
-        const hourStr = hour.toString().padStart(2, '0');
-        const dateTimeString = `${year}-${month}-${day}T${hourStr}:${minute}:00`;
-        deliveryDatetime = new Date(dateTimeString).toISOString();
-      }
-      
-      if (!customerName || !phoneNumber || !customerEmail || !address) {
-        alert("⚠️ Please fill out all required fields.");
-        return;
-      }
-      
-      const selectedPayment = document.querySelector('input[name="payment-method"]:checked').value;
-      if (selectedPayment === "paypal" && !paypalPaymentCompleted) {
-        alert("Please complete the PayPal payment before placing your order.");
-        return;
-      }
-      
-      // Recurring order fields
-      const recurring = document.querySelector('input[name="recurring"]:checked').value;
-      let frequency = null, recurringStart = null, recurringEnd = null;
-      if (recurring === "yes") {
-        frequency = document.getElementById("frequency").value;
-        recurringStart = document.getElementById("recurring-start").value;
-        recurringEnd = document.getElementById("recurring-end").value;
-      }
-      
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      const DELIVERY_FEE = 5.99;
-      const total = cart.reduce((sum, item) => sum + item.price, 0) + DELIVERY_FEE;
-      
-      const newOrder = {
-        customerName,
-        phoneNumber,
-        customerEmail,
-        address,
-        items: cart,
-        total: total,
-        paymentMethod: selectedPayment,
-        status: "Order Received",
-        createdAt: new Date().toISOString(),
-        deliveryDatetime: deliveryDatetime,
-        recurring,
-        frequency,
-        recurringStart,
-        recurringEnd
-      };
-      
-      try {
-        let response = await fetch('http://localhost:3000/order', {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newOrder)
-        });
-        let data = await response.json();
-        if (response.ok) {
-          alert(`✅ Order placed successfully!\nOrder ID: ${data.orderId}`);
-          localStorage.removeItem("cart");
-          window.location.href = "tracker.html?orderId=" + data.orderId;
-        } else {
-          throw new Error(data.error || "Failed to place order");
-        }
-      } catch (error) {
-        console.error("❌ Error submitting order:", error);
-        alert("⚠️ Failed to place order. Try again.");
-      }
-    });
-    
-    document.addEventListener("DOMContentLoaded", displayCart);
-  </script>
-  
-  <!-- Footer Placeholder already loaded above -->
+  <!-- Firebase Libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
+<!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
+<script src="/js/firebase-config.js"></script>
+
+<!-- Common Functions (app.js) -->
 <script src="/js/app.js"></script>
-  
+
+<script src="/js/checkout.js"></script>
+
+<!-- Header Functionality (header.js) -->
+<script src="/js/header.js"></script>  
+
 </body>
 </html>

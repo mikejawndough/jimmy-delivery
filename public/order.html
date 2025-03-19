@@ -3,86 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Customer Dashboard - Jimmy's Pizza</title>
-  
-  <!-- Google Fonts: DynaPuff -->
+  <title>Order - Jimmy's Pizza</title>
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet">
-  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
-    body {
-      font-family: 'DynaPuff', cursive;
-      margin: 0;
-      padding: 0;
-      background-color: #ffffff;
-      color: #1D428A;
-      text-align: center;
-    }
-    /* Header and Footer will be loaded from separate files */
-    /* Menu Section */
-    .menu {
-      padding: 20px;
-    }
-    .menu-category {
-      font-size: 28px;
-      margin-top: 30px;
-      color: #1D428A;
-      font-weight: bold;
-      text-transform: uppercase;
-      border-bottom: 3px solid #F58426;
-      padding-bottom: 5px;
-      display: inline-block;
-    }
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      justify-content: center;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .menu-item {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .menu-item h3 {
-      margin-top: 0;
-    }
-    .menu-image {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 10px;
-      display: block;
-      margin: 5px auto;
-    }
-    .price {
-      font-size: 20px;
-      color: #F58426;
-      font-weight: bold;
-    }
-    .infused-option {
-      margin: 10px 0;
-    }
-    .add-to-cart,
-    .action-btn {
-      background-color: #F58426;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-    .add-to-cart:hover,
-    .action-btn:hover {
-      background-color: #D46A1F;
-    }
+    body { font-family:'DynaPuff', cursive; margin:0; padding:0; background:#fff; color:#1D428A; text-align:center; }
+    .menu { padding:20px; }
+    .menu-category { font-size:28px; margin-top:30px; color:#1D428A; font-weight:bold; text-transform:uppercase; border-bottom:3px solid #F58426; padding-bottom:5px; display:inline-block; }
+    .menu-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; justify-content:center; max-width:800px; margin:0 auto; padding:20px; }
+    .menu-item { background:#fff; padding:20px; border-radius:8px; box-shadow:2px 2px 10px rgba(0,0,0,0.1); text-align:center; }
+    .menu-item h3 { margin-top:0; }
+    .menu-image { width:150px; height:150px; object-fit:cover; border-radius:10px; display:block; margin:5px auto; }
+    .price { font-size:20px; color:#F58426; font-weight:bold; }
+    .infused-option { margin:10px 0; }
+    .add-to-cart, .action-btn { background-color:#F58426; color:white; border:none; padding:10px 15px; font-size:16px; cursor:pointer; border-radius:5px; margin-top:10px; }
+    .add-to-cart:hover, .action-btn:hover { background-color:#D46A1F; }
   </style>
 </head>
 <body>
@@ -91,10 +26,12 @@
   <script>
     fetch('header.html')
       .then(response => response.text())
-      .then(data => {
+      .then(function(data) {
         document.getElementById('header-placeholder').innerHTML = data;
       })
-      .catch(error => console.error('Error loading header:', error));
+      .catch(function(error) {
+        console.error('Error loading header:', error);
+      });
   </script>
 
   <!-- Menu Section -->
@@ -103,110 +40,61 @@
     <!-- Pizza Category -->
     <div class="menu-category">Pizza</div>
     <div class="menu-grid pizza-grid">
+      <!-- All your pizza items remain as before -->
       <div class="menu-item">
         <h3>Tony Pepperoni</h3>
         <img src="Untitled-15.png" alt="Tony Pepperoni" class="menu-image">
         <p>Detroit-style crust with Mike’s Hot Honey.</p>
         <span class="price">$19.99</span>
-        <!-- Infused option toggle -->
         <div class="infused-option">
-          <label>
-            <input type="checkbox" class="infused-toggle" id="infused-tony">
-            Infused (+$20)
-          </label>
+          <label><input type="checkbox" class="infused-toggle" id="infused-tony"> Infused (+$20)</label>
         </div>
-        <!-- Add to Favorites button -->
-        <button onclick="addFavorite({ name: 'Tony Pepperoni', price: 19.99, infused: false })">
-          Add to Favorites
-        </button>
-        <!-- Existing Add to Cart button -->
-        <button class="add-to-cart" data-name="Tony Pepperoni" data-price="19.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Tony Pepperoni', price: 19.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Tony Pepperoni" data-price="19.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
       <div class="menu-item">
         <h3>O.G. Jimmy</h3>
         <img src="original.png" alt="O.G. Jimmy" class="menu-image">
         <p>Golden crust layered with rich cheeses.</p>
         <span class="price">$18.99</span>
-        <!-- Infused option toggle -->
         <div class="infused-option">
-          <label>
-            <input type="checkbox" class="infused-toggle" id="infused-jimmy">
-            Infused (+$20)
-          </label>
+          <label><input type="checkbox" class="infused-toggle" id="infused-jimmy"> Infused (+$20)</label>
         </div>
-        <!-- Add to Favorites button -->
-        <button onclick="addFavorite({ name: 'O.G. Jimmy', price: 18.99, infused: false })">
-          Add to Favorites
-        </button>
-        <!-- Existing Add to Cart button -->
-        <button class="add-to-cart" data-name="O.G. Jimmy" data-price="18.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'O.G. Jimmy', price: 18.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="O.G. Jimmy" data-price="18.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
       <div class="menu-item">
         <h3>Supreme Paulie</h3>
         <img src="Untitled-16.png" alt="Supreme Paulie" class="menu-image">
         <p>Pepperoni, roasted red peppers, onions, olives, bell peppers.</p>
         <span class="price">$23.99</span>
-        <!-- Infused option toggle -->
         <div class="infused-option">
-          <label>
-            <input type="checkbox" class="infused-toggle" id="infused-paulie">
-            Infused (+$20)
-          </label>
+          <label><input type="checkbox" class="infused-toggle" id="infused-paulie"> Infused (+$20)</label>
         </div>
-        <!-- Add to Favorites button -->
-        <button onclick="addFavorite({ name: 'Supreme Paulie', price: 23.99, infused: false })">
-          Add to Favorites
-        </button>
-        <!-- Existing Add to Cart button -->
-        <button class="add-to-cart" data-name="Supreme Paulie" data-price="23.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Supreme Paulie', price: 23.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Supreme Paulie" data-price="23.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
       <div class="menu-item">
         <h3>Spicy Tommy</h3>
         <img src="s167539139756367011_p33_i2_w1024.webp" alt="Spicy Tommy" class="menu-image">
         <p>Spicy Italian sausage, red peppers, onions, basil, hot honey.</p>
         <span class="price">$22.99</span>
-        <!-- Infused option toggle -->
         <div class="infused-option">
-          <label>
-            <input type="checkbox" class="infused-toggle" id="infused-tommy">
-            Infused (+$20)
-          </label>
+          <label><input type="checkbox" class="infused-toggle" id="infused-tommy"> Infused (+$20)</label>
         </div>
-        <!-- Add to Favorites button -->
-        <button onclick="addFavorite({ name: 'Spicy Tommy', price: 22.99, infused: false })">
-          Add to Favorites
-        </button>
-        <!-- Existing Add to Cart button -->
-        <button class="add-to-cart" data-name="Spicy Tommy" data-price="22.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Spicy Tommy', price: 22.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Spicy Tommy" data-price="22.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
       <div class="menu-item">
         <h3>Karen Hill</h3>
         <img src="Untitled-14.png" alt="Karen Hill" class="menu-image">
         <p>Buffalo chicken, cheese blend, ranch drizzle.</p>
         <span class="price">$21.99</span>
-        <!-- Infused option toggle -->
         <div class="infused-option">
-          <label>
-            <input type="checkbox" class="infused-toggle" id="infused-karen">
-            Infused (+$20)
-          </label>
+          <label><input type="checkbox" class="infused-toggle" id="infused-karen"> Infused (+$20)</label>
         </div>
-        <!-- Add to Favorites button -->
-        <button onclick="addFavorite({ name: 'Karen Hill', price: 21.99, infused: false })">
-          Add to Favorites
-        </button>
-        <!-- Existing Add to Cart button -->
-        <button class="add-to-cart" data-name="Karen Hill" data-price="21.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Karen Hill', price: 21.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Karen Hill" data-price="21.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
     </div>
     <!-- Drinks Category -->
@@ -216,23 +104,15 @@
         <h3>Homemade Lemonade</h3>
         <img src="IMG_0849.jpg" alt="Homemade Lemonade" class="menu-image">
         <span class="price">$3.00</span>
-        <button onclick="addFavorite({ name: 'Homemade Lemonade', price: 3.00, infused: false })">
-          Add to Favorites
-        </button>
-        <button class="add-to-cart" data-name="Homemade Lemonade" data-price="3.00" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Homemade Lemonade', price: 3.00, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Homemade Lemonade" data-price="3.00" onclick="addToCart(this)">Add to Cart</button>
       </div>
       <div class="menu-item">
         <h3>Water Bottle</h3>
         <img src="water.jpeg.webp" alt="Water Bottle" class="menu-image">
         <span class="price">$1.50</span>
-        <button onclick="addFavorite({ name: 'Water Bottle', price: 1.50, infused: false })">
-          Add to Favorites
-        </button>
-        <button class="add-to-cart" data-name="Water Bottle" data-price="1.50" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Water Bottle', price: 1.50, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Water Bottle" data-price="1.50" onclick="addToCart(this)">Add to Cart</button>
       </div>
     </div>
     <!-- Desserts Category -->
@@ -242,53 +122,51 @@
         <h3>Cannoli</h3>
         <img src="cannoli.jpeg.webp" alt="Cannoli" class="menu-image">
         <span class="price">$10.99</span>
-        <button onclick="addFavorite({ name: 'Cannoli', price: 10.99, infused: false })">
-          Add to Favorites
-        </button>
-        <button class="add-to-cart" data-name="Cannoli" data-price="10.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Cannoli', price: 10.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Cannoli" data-price="10.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
       <div class="menu-item">
         <h3>Zeppolis</h3>
         <img src="zep.webp" alt="Zeppolis" class="menu-image">
         <span class="price">$7.99</span>
-        <button onclick="addFavorite({ name: 'Zeppolis', price: 7.99, infused: false })">
-          Add to Favorites
-        </button>
-        <button class="add-to-cart" data-name="Zeppolis" data-price="7.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Zeppolis', price: 7.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Zeppolis" data-price="7.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
       <div class="menu-item">
         <h3>Chocolate Chip Cookies</h3>
         <img src="chocchip.jpeg" alt="Chocolate Chip Cookies" class="menu-image">
         <span class="price">$6.99</span>
-        <button onclick="addFavorite({ name: 'Chocolate Chip Cookies', price: 6.99, infused: false })">
-          Add to Favorites
-        </button>
-        <button class="add-to-cart" data-name="Chocolate Chip Cookies" data-price="6.99" onclick="addToCart(this)">
-          Add to Cart
-        </button>
+        <button onclick="addFavorite({ name: 'Chocolate Chip Cookies', price: 6.99, infused: false })">Add to Favorites</button>
+        <button class="add-to-cart" data-name="Chocolate Chip Cookies" data-price="6.99" onclick="addToCart(this)">Add to Cart</button>
       </div>
     </div>
   </section>
 
-   <!-- Footer Placeholder (using absolute paths for fetch) -->
-   <div id="footer-placeholder"></div>
-   <script>
-     fetch('/footer.html')
-       .then(response => response.text())
-       .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
-       .catch(error => console.error('Error loading footer:', error));
-   </script>
-   
-   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
- 
-   <!-- Load Common Functions from app.js -->
-   <script src="/js/app.js"></script>
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+  <script>
+    fetch('/footer.html')
+      .then(response => response.text())
+      .then(function(data) { document.getElementById('footer-placeholder').innerHTML = data; })
+      .catch(function(error) { console.error('Error loading footer:', error); });
+  </script>
+  
+  <!-- Firebase Libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
+<script src="/js/firebase-config.js"></script>
+
+<!-- Common Functions (app.js) -->
+<script src="/js/app.js"></script>
+
+<script src="/js/order.js"></script>
+
+<!-- Header Functionality (header.js) -->
+<script src="/js/header.js"></script>
+
 
 </body>
 </html>

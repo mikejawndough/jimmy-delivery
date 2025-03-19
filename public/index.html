@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jimmy's Pizza - Home</title>
-  
-  <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
-  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
     body {
@@ -18,7 +15,6 @@
       color: #1D428A;
       text-align: center;
     }
-    /* Hero Section */
     .hero {
       background-color: #1D428A;
       color: white;
@@ -32,7 +28,6 @@
     .hero p {
       font-size: 22px;
     }
-    /* Custom Text Section */
     #custom-text {
       max-width: 600px;
       margin: 20px auto;
@@ -43,7 +38,6 @@
       line-height: 1.5;
       margin-bottom: 100px;
     }
-    /* Footer */
     footer {
       background-color: #1D428A;
       color: white;
@@ -104,13 +98,9 @@
   
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Check if age is already verified
       if (!localStorage.getItem("ageVerified")) {
-        // Prevent page scrolling until verified
         document.body.style.overflow = "hidden";
-        
-        // Create the modal overlay
-        const modalOverlay = document.createElement("div");
+        var modalOverlay = document.createElement("div");
         modalOverlay.className = "age-modal-overlay";
         modalOverlay.innerHTML = `
           <div class="age-modal">
@@ -122,20 +112,17 @@
           </div>
         `;
         document.body.appendChild(modalOverlay);
-        
         document.getElementById("verify-btn").addEventListener("click", function() {
-          const dobValue = document.getElementById("dob").value;
+          var dobValue = document.getElementById("dob").value;
           if (!dobValue) {
             alert("Please enter your date of birth.");
             return;
           }
-          const dob = new Date(dobValue);
-          const today = new Date();
-          let age = today.getFullYear() - dob.getFullYear();
-          const m = today.getMonth() - dob.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-            age--;
-          }
+          var dob = new Date(dobValue);
+          var today = new Date();
+          var age = today.getFullYear() - dob.getFullYear();
+          var m = today.getMonth() - dob.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) { age--; }
           if (age >= 21) {
             localStorage.setItem("ageVerified", "true");
             modalOverlay.remove();
@@ -154,13 +141,14 @@
   <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
   <script>
-    // Fetch and insert header.html into the placeholder
     fetch('header.html')
       .then(response => response.text())
-      .then(data => {
+      .then(function(data) {
         document.getElementById('header-placeholder').innerHTML = data;
       })
-      .catch(error => console.error('Error loading header:', error));
+      .catch(function(error) {
+        console.error('Error loading header:', error);
+      });
   </script>
 
   <!-- Hero Section -->
@@ -168,7 +156,7 @@
     <h1>Welcome to Jimmy's Pizza!</h1>
     <p>Detroit-Style Pizza with a NY Attitude. Fresh, Hot, and Always Delicious.</p>
   </section>
-
+  
   <!-- Custom Text Section -->
   <div id="custom-text">
     <p>
@@ -182,22 +170,37 @@
       Though Jimmy may be a fictional character, the legacy of Jimmy's Pizza lives on in the hearts and taste buds of Westchester locals. So, if you ever find yourself in the area and hear the faint sound of the crunch of a crust, follow your senses – for you may just stumble upon the legendary Jimmy's Pizza.
     </p>
   </div>
-
+  
   <!-- Elfsight Instagram Feed Widget -->
   <script src="https://static.elfsight.com/platform/platform.js" async></script>
   <div class="elfsight-app-88a1e5fe-48f9-43b3-9e69-566bbfc43783" data-elfsight-app-lazy></div>
-
+  
   <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
   <script>
-    // Fetch and insert footer.html into the placeholder
     fetch('footer.html')
       .then(response => response.text())
-      .then(data => {
+      .then(function(data) {
         document.getElementById('footer-placeholder').innerHTML = data;
       })
-      .catch(error => console.error('Error loading footer:', error));
+      .catch(function(error) {
+        console.error('Error loading footer:', error);
+      });
   </script>
+  
+<!-- Firebase Libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
+<!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
+<script src="/js/firebase-config.js"></script>
+
+<!-- Common Functions (app.js) -->
+<script src="/js/app.js"></script>
+
+<!-- Header Functionality (header.js) -->
+<script src="/js/header.js"></script>
+  
 </body>
 </html>

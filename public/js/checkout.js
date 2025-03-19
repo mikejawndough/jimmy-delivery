@@ -1,7 +1,6 @@
 // public/js/checkout.js
 
 document.addEventListener("DOMContentLoaded", function() {
-  // Display cart items on checkout page
   function displayCart() {
     const cartList = document.getElementById("cart-items");
     const totalElement = document.getElementById("cart-total");
@@ -9,52 +8,54 @@ document.addEventListener("DOMContentLoaded", function() {
     cartList.innerHTML = "";
     let total = 0;
     cart.forEach(item => {
-      total += item.price;
+      const qty = item.quantity || 1;
+      total += item.price * qty;
       const li = document.createElement("li");
-      li.textContent = `${item.name}${item.infused ? " (Infused)" : ""} - $${item.price.toFixed(2)}`;
+      li.textContent = `${item.name}${item.infused ? " (Infused)" : ""} x${qty} - $${(item.price * qty).toFixed(2)}`;
       cartList.appendChild(li);
     });
-    total += 5.99; // Add delivery fee
+    total += 5.99; // Delivery fee
     totalElement.textContent = total.toFixed(2);
   }
-  
+
   displayCart();
-  
-  // Toggle scheduled delivery dropdown display
+
   document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
     radio.addEventListener("change", function() {
       const scheduleDiv = document.getElementById("schedule-delivery");
-      scheduleDiv.style.display = (this.value === "scheduled") ? "block" : "none";
-    });
-  });
-  
-  // Toggle recurring order options display
-  document.querySelectorAll('input[name="recurring"]').forEach(radio => {
-    radio.addEventListener("change", function() {
-      const recurringOptions = document.getElementById("recurring-options");
-      recurringOptions.style.display = (this.value === "yes") ? "block" : "none";
-    });
-  });
-  
-  let paypalPaymentCompleted = false;
-  
-  // Payment method toggle: show PayPal button if "paypal" is selected
-  document.querySelectorAll('input[name="payment-method"]').forEach(elem => {
-    elem.addEventListener("change", function(event) {
-      if (event.target.value === "paypal") {
-        document.getElementById("paypal-button-container").style.display = "block";
-        document.getElementById("place-order").disabled = true;
-      } else {
-        document.getElementById("paypal-button-container").style.display = "none";
-        document.getElementById("place-order").disabled = false;
+      if (scheduleDiv) {
+        scheduleDiv.style.display = (this.value === "scheduled") ? "block" : "none";
       }
     });
   });
-  
-  // Render PayPal button
+
+  document.querySelectorAll('input[name="recurring"]').forEach(radio => {
+    radio.addEventListener("change", function() {
+      const recurringOptions = document.getElementById("recurring-options");
+      if (recurringOptions) {
+        recurringOptions.style.display = (this.value === "yes") ? "block" : "none";
+      }
+    });
+  });
+
+  let paypalPaymentCompleted = false;
+
+  document.querySelectorAll('input[name="payment-method"]').forEach(elem => {
+    elem.addEventListener("change", function(event) {
+      const paypalContainer = document.getElementById("paypal-button-container");
+      const placeOrderBtn = document.getElementById("place-order");
+      if (event.target.value === "paypal") {
+        if (paypalContainer) paypalContainer.style.display = "block";
+        if (placeOrderBtn) placeOrderBtn.disabled = true;
+      } else {
+        if (paypalContainer) paypalContainer.style.display = "none";
+        if (placeOrderBtn) placeOrderBtn.disabled = false;
+      }
+    });
+  });
+
   paypal.Buttons({
     createOrder: function(data, actions) {
-      // Here, you could calculate the total dynamically if needed.
       return actions.order.create({
         purchase_units: [{
           amount: { value: "10.00" }
@@ -65,21 +66,22 @@ document.addEventListener("DOMContentLoaded", function() {
       return actions.order.capture().then(function(details) {
         alert("PayPal Transaction completed by " + details.payer.name.given_name);
         paypalPaymentCompleted = true;
-        document.getElementById("place-order").disabled = false;
+        const placeOrderBtn = document.getElementById("place-order");
+        if (placeOrderBtn) placeOrderBtn.disabled = false;
       });
     },
     onError: function(err) {
       console.error("PayPal Checkout error:", err);
     }
   }).render("#paypal-button-container");
-  
-  // Order form submission logic
+
   document.getElementById("order-form").addEventListener("submit", async function(e) {
     e.preventDefault();
     const customerName = document.getElementById("customer-name").value.trim();
     const phoneNumber = document.getElementById("phone-number").value.trim();
     const customerEmail = document.getElementById("customer-email").value.trim();
     const address = document.getElementById("address").value.trim();
+    
     let deliveryDatetime = "";
     const deliveryOption = document.querySelector('input[name="delivery-option"]:checked').value;
     if (deliveryOption === "asap") {
@@ -114,7 +116,6 @@ document.addEventListener("DOMContentLoaded", function() {
       return;
     }
     
-    // Recurring order fields
     const recurring = document.querySelector('input[name="recurring"]:checked').value;
     let frequency = null, recurringStart = null, recurringEnd = null;
     if (recurring === "yes") {
@@ -125,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const DELIVERY_FEE = 5.99;
-    const total = cart.reduce((sum, item) => sum + item.price, 0) + DELIVERY_FEE;
+    const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) + DELIVERY_FEE;
     
     const newOrder = {
       customerName,

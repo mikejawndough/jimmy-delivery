@@ -4,10 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard - Jimmy's Pizza</title>
-  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
-    /* Overall Page Styles */
     body {
       font-family: 'DynaPuff', cursive;
       margin: 0;
@@ -16,7 +14,6 @@
       color: #1D428A;
       text-align: center;
     }
-    /* Orders Table Styles */
     table {
       border-collapse: collapse;
       width: 100%;
@@ -40,7 +37,6 @@
     tr:nth-child(even) {
       background-color: #f9f9f9;
     }
-    /* Toggle Switch Section */
     .toggle-container {
       margin: 20px 0;
     }
@@ -48,7 +44,6 @@
       font-size: 18px;
       font-weight: bold;
     }
-    /* Responsive Design */
     @media (max-width: 768px) {
       body { padding: 10px; }
       table, thead, tbody, th, td, tr { display: block; }
@@ -60,11 +55,13 @@
   <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
   <script>
-    // Load header.html into the header placeholder
     fetch('header.html')
       .then(response => response.text())
       .then(data => {
         document.getElementById('header-placeholder').innerHTML = data;
+        const headerScript = document.createElement('script');
+        headerScript.src = '/js/header.js';
+        document.body.appendChild(headerScript);
       })
       .catch(error => console.error('Error loading header:', error));
   </script>
@@ -93,45 +90,72 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Orders will be populated here by admin.js -->
+      <!-- Orders will be populated by admin.js -->
     </tbody>
   </table>
   
   <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
   <script>
-    // Load footer.html into the footer placeholder
     fetch('footer.html')
       .then(response => response.text())
-      .then(data => {
-        document.getElementById('footer-placeholder').innerHTML = data;
-      })
+      .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
       .catch(error => console.error('Error loading footer:', error));
   </script>
   
+  <!-- Firebase Libraries & Config -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/app.js"></script>
+  
   <!-- Admin Toggle Script -->
   <script>
-    const toggleCheckbox = document.getElementById('order-toggle');
-    toggleCheckbox.addEventListener('change', function() {
-      const enabled = toggleCheckbox.checked;
-      fetch('/admin/toggle-ordering', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled })
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert(data.message);
-      })
-      .catch(err => {
-        console.error('Error toggling ordering:', err);
-      });
+    document.addEventListener("DOMContentLoaded", function() {
+      // Wait a moment to ensure Firebase and common scripts are loaded
+      setTimeout(function() {
+        fetch('/admin/order-status')
+          .then(response => response.json())
+          .then(data => {
+            console.log("Fetched order status:", data);
+            var toggleCheckbox = document.getElementById('order-toggle');
+            if (toggleCheckbox) {
+              toggleCheckbox.checked = data.enabled;
+            }
+          })
+          .catch(error => console.error('Error fetching order status:', error));
+  
+        var toggleCheckbox = document.getElementById('order-toggle');
+        if (toggleCheckbox) {
+          toggleCheckbox.addEventListener('change', function() {
+            var enabled = toggleCheckbox.checked;
+            fetch('/admin/toggle-ordering', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ enabled: enabled })
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log("Toggle update response:", data);
+              alert(data.message);
+            })
+            .catch(err => { console.error('Error toggling ordering:', err); });
+          });
+        }
+      }, 300);
     });
   </script>
   
-  
-  <!-- Include our custom admin.js -->
-  <script src="admin.js"></script>
+  <!-- Include custom admin.js -->
+  <script src="/js/admin.js"></script>
+
+<!-- Firebase Config -->
+<script src="/js/firebase-config.js"></script>
+<!-- Common Functions -->
+<script src="/js/app.js"></script>
+<!-- Header Functionality -->
+<script src="/js/header.js"></script>
   
 </body>
 </html>

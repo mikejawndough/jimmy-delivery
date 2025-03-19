@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'DynaPuff', cursive;
+      font-family:'DynaPuff', cursive;
       background-color: #ffffff;
       color: #1D428A;
       text-align: center;
@@ -48,6 +48,19 @@
   </style>
 </head>
 <body>
+  <!-- Header Placeholder -->
+  <div id="header-placeholder"></div>
+  <script>
+    fetch('header.html')
+      .then(response => response.text())
+      .then(function(data) {
+        document.getElementById('header-placeholder').innerHTML = data;
+      })
+      .catch(function(error) {
+        console.error('Error loading header:', error);
+      });
+  </script>
+  
   <h1>Order Tracker</h1>
   <div class="tracker-container">
     <p>Your order is currently: <span id="order-status">Loading...</span></p>
@@ -57,42 +70,55 @@
     </div>
   </div>
   
-  <!-- Firebase Scripts -->
+  <!-- Firebase Libraries -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  
+  <!-- Load Firebase Config -->
+  <script src="/js/firebase-config.js"></script>
+  
   <script>
-    fetch('/firebase-config')
-      .then(response => response.json())
-      .then(config => {
-        firebase.initializeApp(config);
-        const db = firebase.firestore();
-        const params = new URLSearchParams(window.location.search);
-        const orderId = params.get("orderId");
-        if (!orderId) {
-          document.getElementById("order-status").textContent = "No order ID provided.";
-          return;
+    var params = new URLSearchParams(window.location.search);
+    var orderId = params.get("orderId");
+    if (!orderId) {
+      document.getElementById("order-status").textContent = "No order ID provided.";
+    } else {
+      var db = firebase.firestore();
+      db.collection("orders").doc(orderId).onSnapshot(function(doc) {
+        if (doc.exists) {
+          var order = doc.data();
+          document.getElementById("order-status").textContent = order.status;
+          var progress = 0;
+          if (order.status === "Order Received") progress = 25;
+          else if (order.status === "Preparing") progress = 50;
+          else if (order.status === "Out for Delivery") progress = 75;
+          else if (order.status === "Completed") progress = 100;
+          document.getElementById("status-fill").style.width = progress + "%";
+          document.getElementById("status-text").textContent = progress + "%";
+        } else {
+          document.getElementById("order-status").textContent = "Order not found.";
         }
-        db.collection("orders").doc(orderId).onSnapshot(doc => {
-          if (doc.exists) {
-            const order = doc.data();
-            document.getElementById("order-status").textContent = order.status;
-            let progress = 0;
-            if (order.status === "Order Received") progress = 25;
-            else if (order.status === "Preparing") progress = 50;
-            else if (order.status === "Out for Delivery") progress = 75;
-            else if (order.status === "Completed") progress = 100;
-            document.getElementById("status-fill").style.width = progress + "%";
-            document.getElementById("status-text").textContent = progress + "%";
-          } else {
-            document.getElementById("order-status").textContent = "Order not found.";
-          }
-        }, error => {
-          console.error("Error listening to order updates:", error);
-          document.getElementById("order-status").textContent = "Error loading order status.";
-        });
-      })
-      .catch(error => console.error("Error loading Firebase config:", error));
+      }, function(error) {
+        console.error("Error listening to order updates:", error);
+        document.getElementById("order-status").textContent = "Error loading order status.";
+      });
+    }
   </script>
+
+  <!-- Firebase Libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
+<script src="/js/firebase-config.js"></script>
+
+<!-- Common Functions (app.js) -->
+<script src="/js/app.js"></script>
+
+<!-- Header Functionality (header.js) -->
+<script src="/js/header.js"></script>
+  
 </body>
 </html>
