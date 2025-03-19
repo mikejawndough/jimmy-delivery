@@ -1,8 +1,14 @@
 // public/js/admin.js
+'use strict';
 
 function renderOrders(orders) {
   const tbody = document.querySelector('#orders-table tbody');
+  if (!tbody) {
+    console.error('Could not find the orders table body.');
+    return;
+  }
   tbody.innerHTML = '';
+  
   orders.forEach(order => {
     const tr = document.createElement('tr');
 
@@ -23,7 +29,11 @@ function renderOrders(orders) {
 
     // Items
     const itemsCell = document.createElement('td');
-    itemsCell.textContent = order.items ? order.items.map(item => item.name).join(', ') : 'N/A';
+    if (order.items && Array.isArray(order.items)) {
+      itemsCell.textContent = order.items.map(item => item.name).join(', ');
+    } else {
+      itemsCell.textContent = 'N/A';
+    }
     tr.appendChild(itemsCell);
 
     // Created At

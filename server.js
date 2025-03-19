@@ -9,7 +9,7 @@ const sgMail = require('@sendgrid/mail');
 const fs = require('fs');
 const path = require('path');
 
-// 2. Define publicPath early so it's available everywhere
+// 2. Define publicPath so it's available everywhere
 const publicPath = path.join(__dirname, 'public');
 
 // 3. Initialize Express App and HTTP Server
@@ -54,7 +54,7 @@ if (!sendGridApiKey) {
 sgMail.setApiKey(sendGridApiKey);
 
 // 7. Global Ordering Toggle with Firestore Persistence
-// We'll store the ordering status in Firestore under collection "adminSettings", document "ordering".
+// We store the ordering status in Firestore under collection "adminSettings", document "ordering".
 let isOrderingEnabled = true; // default value
 async function loadOrderingStatus() {
   try {
@@ -77,7 +77,7 @@ loadOrderingStatus();
 app.use(express.json());
 app.use(cors());
 
-// 9. API Routes (Define these BEFORE serving static files)
+// 9. API Routes (Define these BEFORE static file serving)
 
 // GET endpoint to fetch current ordering status
 app.get('/admin/order-status', async (req, res) => {
@@ -85,8 +85,14 @@ app.get('/admin/order-status', async (req, res) => {
     const docRef = db.collection('adminSettings').doc('ordering');
     const doc = await docRef.get();
     if (doc.exists) {
-      res.json({ enabled: doc.data().isOrderingEnabled });
+      if (typeof doc.data().isOrderingEnabled === 'undefined') {
+        console.warn("isOrderingEnabled field missing in document; using in-memory value.");
+        res.json({ enabled: isOrderingEnabled });
+      } else {
+        res.json({ enabled: doc.data().isOrderingEnabled });
+      }
     } else {
+      console.warn("Ordering document does not exist; using in-memory value.");
       res.json({ enabled: isOrderingEnabled });
     }
   } catch (error) {
@@ -101,6 +107,7 @@ app.post('/admin/toggle-ordering', async (req, res) => {
   isOrderingEnabled = enabled;
   try {
     await db.collection('adminSettings').doc('ordering').set({ isOrderingEnabled: enabled });
+    console.log("Ordering status updated to:", enabled);
     res.json({ message: `Ordering is now ${enabled ? 'ENABLED' : 'DISABLED'}.` });
   } catch (error) {
     console.error("Error updating ordering status in Firestore:", error);
@@ -165,7 +172,13 @@ app.post('/order', async (req, res) => {
 // GET endpoint to retrieve all orders for admin
 app.get('/orders', async (req, res) => {
   try {
-    const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
+    let snapshot;
+    try {
+      snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
+    } catch (err) {
+      console.error("Error ordering by createdAt, falling back:", err);
+      snapshot = await db.collection('orders').get();
+    }
     const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.json({ orders });
   } catch (error) {
