@@ -9,7 +9,10 @@ const sgMail = require('@sendgrid/mail');
 const fs = require('fs');
 const path = require('path');
 
-// 2. Initialize Express App and HTTP Server
+// 2. Define publicPath early so it's available everywhere
+const publicPath = path.join(__dirname, 'public');
+
+// 3. Initialize Express App and HTTP Server
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
@@ -19,7 +22,7 @@ console.log('FIREBASE_SERVICE_ACCOUNT:', process.env.FIREBASE_SERVICE_ACCOUNT);
 console.log("DEBUG: Does .env exist?", fs.existsSync('./.env'));
 console.log("DEBUG: SENDGRID_API_KEY Loaded:", process.env.SENDGRID_API_KEY ? "Yes" : "No");
 
-// 3. Load Firebase Service Account from Environment Variable
+// 4. Load Firebase Service Account from Environment Variable
 let firebaseAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
 if (!firebaseAccountRaw) {
   console.error("❌ FIREBASE_SERVICE_ACCOUNT is missing!");
@@ -37,12 +40,12 @@ try {
   process.exit(1);
 }
 
-// 4. Initialize Firebase Admin
+// 5. Initialize Firebase Admin
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 console.log("✅ Firebase Admin Initialized Successfully!");
 
-// 5. Initialize SendGrid
+// 6. Initialize SendGrid
 const sendGridApiKey = process.env.SENDGRID_API_KEY;
 if (!sendGridApiKey) {
   console.error("❌ SENDGRID_API_KEY is missing!");
@@ -50,8 +53,8 @@ if (!sendGridApiKey) {
 }
 sgMail.setApiKey(sendGridApiKey);
 
-// 6. Global Ordering Toggle with Firestore Persistence
-// This value is stored in Firestore under collection "adminSettings", document "ordering".
+// 7. Global Ordering Toggle with Firestore Persistence
+// We'll store the ordering status in Firestore under collection "adminSettings", document "ordering".
 let isOrderingEnabled = true; // default value
 async function loadOrderingStatus() {
   try {
@@ -70,11 +73,11 @@ async function loadOrderingStatus() {
 }
 loadOrderingStatus();
 
-// 7. Middleware
+// 8. Middleware
 app.use(express.json());
 app.use(cors());
 
-// 8. API Routes (define these BEFORE static file serving)
+// 9. API Routes (Define these BEFORE serving static files)
 
 // GET endpoint to fetch current ordering status
 app.get('/admin/order-status', async (req, res) => {

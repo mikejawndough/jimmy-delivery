@@ -103,59 +103,54 @@
       .catch(error => console.error('Error loading footer:', error));
   </script>
   
-  <!-- Firebase Libraries & Config -->
+  <!-- Script Order -->
+  <!-- Firebase Libraries -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <!-- Firebase Config -->
   <script src="/js/firebase-config.js"></script>
+  <!-- Common Functions -->
   <script src="/js/app.js"></script>
   
   <!-- Admin Toggle Script -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Wait a moment to ensure Firebase and common scripts are loaded
-      setTimeout(function() {
-        fetch('/admin/order-status')
+      // Fetch the current ordering status from the server
+      fetch('/admin/order-status')
+        .then(response => response.json())
+        .then(data => {
+          console.log("Fetched order status:", data);
+          var toggleCheckbox = document.getElementById('order-toggle');
+          if (toggleCheckbox) {
+            toggleCheckbox.checked = data.enabled;
+          }
+        })
+        .catch(error => console.error('Error fetching order status:', error));
+      
+      // Attach event listener to the toggle checkbox
+      var toggleCheckbox = document.getElementById('order-toggle');
+      if (toggleCheckbox) {
+        toggleCheckbox.addEventListener('change', function() {
+          var enabled = toggleCheckbox.checked;
+          fetch('/admin/toggle-ordering', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled: enabled })
+          })
           .then(response => response.json())
           .then(data => {
-            console.log("Fetched order status:", data);
-            var toggleCheckbox = document.getElementById('order-toggle');
-            if (toggleCheckbox) {
-              toggleCheckbox.checked = data.enabled;
-            }
+            console.log("Toggle update response:", data);
+            alert(data.message);
           })
-          .catch(error => console.error('Error fetching order status:', error));
-  
-        var toggleCheckbox = document.getElementById('order-toggle');
-        if (toggleCheckbox) {
-          toggleCheckbox.addEventListener('change', function() {
-            var enabled = toggleCheckbox.checked;
-            fetch('/admin/toggle-ordering', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ enabled: enabled })
-            })
-            .then(response => response.json())
-            .then(data => {
-              console.log("Toggle update response:", data);
-              alert(data.message);
-            })
-            .catch(err => { console.error('Error toggling ordering:', err); });
-          });
-        }
-      }, 300);
+          .catch(err => { console.error('Error toggling ordering:', err); });
+        });
+      }
     });
   </script>
   
   <!-- Include custom admin.js -->
   <script src="/js/admin.js"></script>
-
-<!-- Firebase Config -->
-<script src="/js/firebase-config.js"></script>
-<!-- Common Functions -->
-<script src="/js/app.js"></script>
-<!-- Header Functionality -->
-<script src="/js/header.js"></script>
   
 </body>
 </html>
