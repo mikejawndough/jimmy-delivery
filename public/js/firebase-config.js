@@ -6,6 +6,8 @@ var firebaseConfig = {
   storageBucket: "jimmysdelivery-9261d.firebasestorage.app",
   messagingSenderId: "52478759963",
   appId: "1:52478759963:web:11fd5ab98b7bfd841bd4be",
+  measurementId: "G-CW1LMVX7QN"
+  ,
 };
 // Initialize Firebase if not already initialized
 if (!firebase.apps.length) {
