@@ -1,3 +1,5 @@
+// server.js
+
 // 1. Load Environment Variables and Required Modules
 require('dotenv').config();
 const express = require('express');
@@ -17,12 +19,12 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
-// Debug Environment Variables
-console.log('FIREBASE_SERVICE_ACCOUNT:', process.env.FIREBASE_SERVICE_ACCOUNT);
+// 4. Debug Environment Variables
+console.log('FIREBASE_SERVICE_ACCOUNT:', process.env.FIREBASE_SERVICE_ACCOUNT ? "Loaded" : "Not set");
 console.log("DEBUG: Does .env exist?", fs.existsSync('./.env'));
 console.log("DEBUG: SENDGRID_API_KEY Loaded:", process.env.SENDGRID_API_KEY ? "Yes" : "No");
 
-// 4. Load Firebase Service Account from Environment Variable
+// 5. Load Firebase Service Account from Environment Variable
 let firebaseAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
 if (!firebaseAccountRaw) {
   console.error("❌ FIREBASE_SERVICE_ACCOUNT is missing!");
@@ -31,21 +33,22 @@ if (!firebaseAccountRaw) {
 let serviceAccount;
 try {
   serviceAccount = JSON.parse(firebaseAccountRaw);
-  // Replace escaped newline characters with actual newlines if needed
   if (serviceAccount.private_key.includes("\\n")) {
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
   }
+  // Optionally log part of the key (avoid printing full key in production)
+  console.log("Service Account parsed successfully for project:", serviceAccount.project_id);
 } catch (error) {
   console.error("❌ Error parsing FIREBASE_SERVICE_ACCOUNT:", error);
   process.exit(1);
 }
 
-// 5. Initialize Firebase Admin
+// 6. Initialize Firebase Admin SDK
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 console.log("✅ Firebase Admin Initialized Successfully!");
 
-// 6. Initialize SendGrid
+// 7. Initialize SendGrid
 const sendGridApiKey = process.env.SENDGRID_API_KEY;
 if (!sendGridApiKey) {
   console.error("❌ SENDGRID_API_KEY is missing!");
@@ -53,8 +56,7 @@ if (!sendGridApiKey) {
 }
 sgMail.setApiKey(sendGridApiKey);
 
-// 7. Global Ordering Toggle with Firestore Persistence
-// We store the ordering status in Firestore under collection "adminSettings", document "ordering".
+// 8. Global Ordering Toggle with Firestore Persistence
 let isOrderingEnabled = true; // default value
 async function loadOrderingStatus() {
   try {
@@ -73,26 +75,24 @@ async function loadOrderingStatus() {
 }
 loadOrderingStatus();
 
-// 8. Middleware
+// 9. Middleware
 app.use(express.json());
 app.use(cors());
 
-// 9. API Routes (Define these BEFORE static file serving)
+// 10. API Routes (Defined BEFORE static file serving)
 
-// GET endpoint to fetch current ordering status
+// GET endpoint: fetch current ordering status
 app.get('/admin/order-status', async (req, res) => {
   try {
     const docRef = db.collection('adminSettings').doc('ordering');
     const doc = await docRef.get();
     if (doc.exists) {
-      if (typeof doc.data().isOrderingEnabled === 'undefined') {
-        console.warn("isOrderingEnabled field missing in document; using in-memory value.");
-        res.json({ enabled: isOrderingEnabled });
-      } else {
-        res.json({ enabled: doc.data().isOrderingEnabled });
-      }
+      let enabled = doc.data().isOrderingEnabled;
+      enabled = Boolean(enabled);
+      console.log("GET /admin/order-status: Returning", enabled);
+      res.json({ enabled });
     } else {
-      console.warn("Ordering document does not exist; using in-memory value.");
+      console.warn("Ordering document does not exist; returning in-memory value.");
       res.json({ enabled: isOrderingEnabled });
     }
   } catch (error) {
@@ -101,13 +101,13 @@ app.get('/admin/order-status', async (req, res) => {
   }
 });
 
-// POST endpoint to update ordering status
+// POST endpoint: update ordering status
 app.post('/admin/toggle-ordering', async (req, res) => {
-  const { enabled } = req.body; // expects a boolean
+  const { enabled } = req.body; // expects boolean
   isOrderingEnabled = enabled;
   try {
     await db.collection('adminSettings').doc('ordering').set({ isOrderingEnabled: enabled });
-    console.log("Ordering status updated to:", enabled);
+    console.log("POST /admin/toggle-ordering: Updated status to", enabled);
     res.json({ message: `Ordering is now ${enabled ? 'ENABLED' : 'DISABLED'}.` });
   } catch (error) {
     console.error("Error updating ordering status in Firestore:", error);
@@ -115,30 +115,16 @@ app.post('/admin/toggle-ordering', async (req, res) => {
   }
 });
 
-// Order Placement Endpoint – Manual Admin Toggle Only
+// Order Placement Endpoint – only allow if ordering is enabled
 app.post('/order', async (req, res) => {
   if (!isOrderingEnabled) {
     return res.status(403).json({ error: 'Ordering is currently disabled by admin.' });
   }
-
-  const {
-    items,
-    customerName,
-    customerEmail,
-    phoneNumber,
-    address,
-    deliveryDatetime,
-    recurring,
-    frequency,
-    recurringStart,
-    recurringEnd
-  } = req.body;
-
+  const { items, customerName, customerEmail, phoneNumber, address, deliveryDatetime, recurring, frequency, recurringStart, recurringEnd } = req.body;
   if (!items || !customerName || !customerEmail || !phoneNumber || !address) {
     console.error("❌ Error: Missing required fields.");
     return res.status(400).json({ error: 'Missing required fields.' });
   }
-
   const newOrder = {
     customerName,
     customerEmail,
@@ -154,22 +140,20 @@ app.post('/order', async (req, res) => {
     recurringStart: recurringStart || null,
     recurringEnd: recurringEnd || null
   };
-
   try {
     const orderRef = await db.collection('orders').add(newOrder);
     const userOrdersRef = db.collection('customers').doc(customerEmail);
     await userOrdersRef.set({ email: customerEmail }, { merge: true });
     await userOrdersRef.collection('orderHistory').doc(orderRef.id).set(newOrder);
-
     console.log(`✅ Order placed with ID: ${orderRef.id}`);
     res.json({ orderId: orderRef.id, status: newOrder.status });
   } catch (error) {
-    console.error("❌ Error placing order:", error.response ? error.response.body : error);
+    console.error("Error placing order:", error.response ? error.response.body : error);
     res.status(500).json({ error: "Failed to place order." });
   }
 });
 
-// GET endpoint to retrieve all orders for admin
+// GET endpoint: retrieve all orders for admin
 app.get('/orders', async (req, res) => {
   try {
     let snapshot;
@@ -180,14 +164,15 @@ app.get('/orders', async (req, res) => {
       snapshot = await db.collection('orders').get();
     }
     const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log("GET /orders: Fetched", orders.length, "orders");
     res.json({ orders });
   } catch (error) {
-    console.error("❌ Error fetching orders:", error);
+    console.error("Error fetching orders:", error);
     res.status(500).json({ error: "Failed to fetch orders." });
   }
 });
 
-// GET endpoint to retrieve customer orders by email
+// GET endpoint: retrieve customer orders by email
 app.get('/orders/customer', async (req, res) => {
   const email = req.query.email;
   if (!email) {
@@ -200,12 +185,12 @@ app.get('/orders/customer', async (req, res) => {
     const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.json({ orders });
   } catch (error) {
-    console.error("❌ Error fetching customer orders:", error);
+    console.error("Error fetching customer orders:", error);
     res.status(500).json({ error: "Failed to fetch orders." });
   }
 });
 
-// PATCH endpoint to update order status
+// PATCH endpoint: update order status
 app.patch('/order/:id/status', async (req, res) => {
   const orderId = req.params.id;
   const { status } = req.body;
@@ -218,7 +203,6 @@ app.patch('/order/:id/status', async (req, res) => {
     await orderRef.update({ status });
     await db.collection('customers').doc(orderData.customerEmail)
       .collection('orderHistory').doc(orderId).update({ status });
-
     const msg = {
       to: orderData.customerEmail,
       from: "no-reply@jimmyspizza.com",
@@ -229,11 +213,11 @@ app.patch('/order/:id/status', async (req, res) => {
       await sgMail.send(msg);
       console.log(`✅ Email sent to ${orderData.customerEmail} about status update.`);
     } catch (emailError) {
-      console.error("❌ SendGrid Error:", emailError.response ? emailError.response.body : emailError);
+      console.error("SendGrid Error:", emailError.response ? emailError.response.body : emailError);
     }
     res.json({ orderId, status });
   } catch (error) {
-    console.error("❌ Error updating order status:", error);
+    console.error("Error updating order status:", error);
     res.status(500).json({ error: "Failed to update order status." });
   }
 });
@@ -244,7 +228,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => console.log(`❌ Client disconnected: ${socket.id}`));
 });
 
-// 16. Serve Static Files from the 'public' Directory
+// 11. Serve Static Files from the 'public' Directory (after API routes)
 console.log("✅ Serving static files from:", publicPath);
 app.use(express.static(publicPath, {
   setHeaders: function (res, filePath) {
@@ -254,7 +238,7 @@ app.use(express.static(publicPath, {
   }
 }));
 
-// 17. Start the Server
+// 12. Start the Server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🔥 Server running on port ${PORT}`);

@@ -59,9 +59,7 @@
       .then(response => response.text())
       .then(data => {
         document.getElementById('header-placeholder').innerHTML = data;
-        const headerScript = document.createElement('script');
-        headerScript.src = '/js/header.js';
-        document.body.appendChild(headerScript);
+        // Optionally load header.js if not already loaded in your static files
       })
       .catch(error => console.error('Error loading header:', error));
   </script>
@@ -103,20 +101,16 @@
       .catch(error => console.error('Error loading footer:', error));
   </script>
   
-  <!-- Script Order -->
-  <!-- Firebase Libraries -->
+  <!-- Script Order: Load Firebase libraries, config, app.js, then admin.js -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <!-- Firebase Config -->
   <script src="/js/firebase-config.js"></script>
-  <!-- Common Functions -->
   <script src="/js/app.js"></script>
   
   <!-- Admin Toggle Script -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Fetch the current ordering status from the server
       fetch('/admin/order-status')
         .then(response => response.json())
         .then(data => {
@@ -128,7 +122,6 @@
         })
         .catch(error => console.error('Error fetching order status:', error));
       
-      // Attach event listener to the toggle checkbox
       var toggleCheckbox = document.getElementById('order-toggle');
       if (toggleCheckbox) {
         toggleCheckbox.addEventListener('change', function() {
