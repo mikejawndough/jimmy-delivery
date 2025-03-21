@@ -10,11 +10,12 @@
 
   <!-- Load Google Maps JavaScript API with Places library asynchronously -->
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbagmRumEATqUQ7co9ygTtEZDxAOHqzWk&libraries=places"></script>
-  
-  <!-- Load PayPal SDK before checkout.js -->
+
+  <!-- Load PayPal SDK asynchronously -->
   <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
   
   <style>
+    /* Your CSS styles (unchanged for brevity) */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'DynaPuff', cursive;
@@ -115,7 +116,7 @@
   </style>
 </head>
 <body>
-  <!-- Header Placeholder -->
+  <!-- Header Placeholder (assuming you already have header.html loaded) -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')

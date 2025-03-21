@@ -6,11 +6,10 @@ document.addEventListener("DOMContentLoaded", function() {
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
 
-  // Haversine formula helpers
+  // Haversine helpers
   function toRadians(deg) {
     return deg * (Math.PI / 180);
   }
-
   function haversineDistance(lat1, lng1, lat2, lng2) {
     const R = 3958.8; // Earth's radius in miles
     const dLat = toRadians(lat2 - lat1);
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
   var addressInput = document.getElementById("address");
   if (addressInput && window.google && google.maps && google.maps.places) {
     var autocomplete = new google.maps.places.Autocomplete(addressInput, {
-      // Optionally restrict to the United States:
+      // Optional: Restrict search to United States
       // componentRestrictions: { country: "us" },
     });
     autocomplete.addListener("place_changed", function() {
@@ -46,13 +45,13 @@ document.addEventListener("DOMContentLoaded", function() {
       console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
       if (distance > DELIVERY_RADIUS_MILES) {
         alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
-        addressInput.value = ""; // Clear address field if too far
+        addressInput.value = ""; // Clear the address field if too far
       }
     });
   } else {
-    console.warn("Google Places API is not loaded; check your script tag in HTML.");
+    console.warn("Google Places API is not loaded; please check your script tag in the HTML.");
   }
-
+  
   // --- Existing Functions ---
   function displayCart() {
     const cartList = document.getElementById("cart-items");
@@ -70,7 +69,6 @@ document.addEventListener("DOMContentLoaded", function() {
     total += 5.99; // Delivery fee
     totalElement.textContent = total.toFixed(2);
   }
-
   displayCart();
 
   document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
