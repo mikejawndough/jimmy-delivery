@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", function() {
   // --- New: Delivery Radius Check via Autocomplete ---
-  // Define New Rochelle center and delivery radius
+  // Define New Rochelle center and delivery radius (in miles)
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
 
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
   var addressInput = document.getElementById("address");
   if (addressInput && window.google && google.maps && google.maps.places) {
     var autocomplete = new google.maps.places.Autocomplete(addressInput, {
-      // Optional: Restrict search to United States
+      // Optional: Restrict search to United States:
       // componentRestrictions: { country: "us" },
     });
     autocomplete.addListener("place_changed", function() {
@@ -91,6 +91,38 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let paypalPaymentCompleted = false;
 
+  // --- New: Initialize PayPal Buttons When SDK is Available ---
+  function initializePaypalButtons() {
+    if (typeof paypal === "undefined") {
+      // If paypal is not yet loaded, wait 100ms and try again.
+      setTimeout(initializePaypalButtons, 100);
+      return;
+    }
+    // Once paypal is available, render the buttons.
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: "10.00" }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert("PayPal Transaction completed by " + details.payer.name.given_name);
+          paypalPaymentCompleted = true;
+          const placeOrderBtn = document.getElementById("place-order");
+          if (placeOrderBtn) placeOrderBtn.disabled = false;
+        });
+      },
+      onError: function(err) {
+        console.error("PayPal Checkout error:", err);
+      }
+    }).render("#paypal-button-container");
+  }
+  initializePaypalButtons();
+
+  // Listen for changes on the payment method
   document.querySelectorAll('input[name="payment-method"]').forEach(elem => {
     elem.addEventListener("change", function(event) {
       const paypalContainer = document.getElementById("paypal-button-container");
@@ -105,27 +137,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  paypal.Buttons({
-    createOrder: function(data, actions) {
-      return actions.order.create({
-        purchase_units: [{
-          amount: { value: "10.00" }
-        }]
-      });
-    },
-    onApprove: function(data, actions) {
-      return actions.order.capture().then(function(details) {
-        alert("PayPal Transaction completed by " + details.payer.name.given_name);
-        paypalPaymentCompleted = true;
-        const placeOrderBtn = document.getElementById("place-order");
-        if (placeOrderBtn) placeOrderBtn.disabled = false;
-      });
-    },
-    onError: function(err) {
-      console.error("PayPal Checkout error:", err);
-    }
-  }).render("#paypal-button-container");
-
+  // Order form submission
   document.getElementById("order-form").addEventListener("submit", async function(e) {
     e.preventDefault();
     const customerName = document.getElementById("customer-name").value.trim();
