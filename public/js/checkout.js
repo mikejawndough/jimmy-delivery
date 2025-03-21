@@ -1,12 +1,12 @@
 // public/js/checkout.js
 
 document.addEventListener("DOMContentLoaded", function() {
-  // --- New: Delivery Radius Check via Autocomplete ---
+  // --- New: Delivery Radius Check via LocationIQ Autocomplete ---
   // Define New Rochelle center and delivery radius (in miles)
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
-
-  // Haversine helpers
+  
+  // Haversine helper functions
   function toRadians(deg) {
     return deg * (Math.PI / 180);
   }
@@ -20,39 +20,59 @@ document.addEventListener("DOMContentLoaded", function() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
-
-  // Initialize Google Places Autocomplete on the address input field
-  var addressInput = document.getElementById("address");
-  if (addressInput && window.google && google.maps && google.maps.places) {
-    var autocomplete = new google.maps.places.Autocomplete(addressInput, {
-      // Optional: Restrict search to United States:
-      // componentRestrictions: { country: "us" },
-    });
-    autocomplete.addListener("place_changed", function() {
-      var place = autocomplete.getPlace();
-      if (!place.geometry) {
-        alert("No details available for the selected address.");
-        return;
-      }
-      var location = place.geometry.location;
-      var locObj = { lat: location.lat(), lng: location.lng() };
-      var distance = haversineDistance(
-        NEW_ROCHELLE_COORDS.lat,
-        NEW_ROCHELLE_COORDS.lng,
-        locObj.lat,
-        locObj.lng
-      );
-      console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
-      if (distance > DELIVERY_RADIUS_MILES) {
-        alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
-        addressInput.value = ""; // Clear the address field if too far
-      }
-    });
-  } else {
-    console.warn("Google Places API is not loaded; please check your script tag in the HTML.");
+  
+  // Elements for autocomplete
+  const addressInput = document.getElementById("address");
+  const suggestionsList = document.getElementById("suggestions");
+  
+  // Function to fetch suggestions from LocationIQ
+  async function fetchSuggestions(query) {
+    try {
+      const response = await fetch(`https://us1.locationiq.com/v1/autocomplete.php?key=pk.3d4ab6e4e696de166191300baf9fbb19&q=${encodeURIComponent(query)}&limit=5&format=json`);
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      return [];
+    }
   }
   
-  // --- Existing Functions ---
+  // Render suggestions in the dropdown
+  function renderSuggestions(suggestions) {
+    suggestionsList.innerHTML = "";
+    suggestions.forEach(suggestion => {
+      const li = document.createElement("li");
+      li.textContent = suggestion.display_name;
+      li.addEventListener("click", function() {
+        // Set the address input value
+        addressInput.value = suggestion.display_name;
+        suggestionsList.innerHTML = "";
+        // Calculate distance from New Rochelle using suggestion coordinates
+        const locObj = { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) };
+        const distance = haversineDistance(NEW_ROCHELLE_COORDS.lat, NEW_ROCHELLE_COORDS.lng, locObj.lat, locObj.lng);
+        console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
+        if (distance > DELIVERY_RADIUS_MILES) {
+          alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
+          addressInput.value = "";
+        }
+      });
+      suggestionsList.appendChild(li);
+    });
+  }
+  
+  // Listen for keyup on the address input to fetch suggestions
+  if (addressInput) {
+    addressInput.addEventListener("keyup", async function() {
+      const query = addressInput.value;
+      if (query.length < 3) {
+        suggestionsList.innerHTML = "";
+        return;
+      }
+      const suggestions = await fetchSuggestions(query);
+      renderSuggestions(suggestions);
+    });
+  }
+  
+  // --- Existing Functions (unchanged) ---
   function displayCart() {
     const cartList = document.getElementById("cart-items");
     const totalElement = document.getElementById("cart-total");
@@ -70,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function() {
     totalElement.textContent = total.toFixed(2);
   }
   displayCart();
-
+  
   document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
     radio.addEventListener("change", function() {
       const scheduleDiv = document.getElementById("schedule-delivery");
@@ -79,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   });
-
+  
   document.querySelectorAll('input[name="recurring"]').forEach(radio => {
     radio.addEventListener("change", function() {
       const recurringOptions = document.getElementById("recurring-options");
@@ -88,17 +108,29 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   });
-
+  
   let paypalPaymentCompleted = false;
-
-  // --- New: Initialize PayPal Buttons When SDK is Available ---
+  
+  document.querySelectorAll('input[name="payment-method"]').forEach(elem => {
+    elem.addEventListener("change", function(event) {
+      const paypalContainer = document.getElementById("paypal-button-container");
+      const placeOrderBtn = document.getElementById("place-order");
+      if (event.target.value === "paypal") {
+        if (paypalContainer) paypalContainer.style.display = "block";
+        if (placeOrderBtn) placeOrderBtn.disabled = true;
+      } else {
+        if (paypalContainer) paypalContainer.style.display = "none";
+        if (placeOrderBtn) placeOrderBtn.disabled = false;
+      }
+    });
+  });
+  
+  // Initialize PayPal buttons when the SDK is loaded
   function initializePaypalButtons() {
     if (typeof paypal === "undefined") {
-      // If paypal is not yet loaded, wait 100ms and try again.
       setTimeout(initializePaypalButtons, 100);
       return;
     }
-    // Once paypal is available, render the buttons.
     paypal.Buttons({
       createOrder: function(data, actions) {
         return actions.order.create({
@@ -121,23 +153,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }).render("#paypal-button-container");
   }
   initializePaypalButtons();
-
-  // Listen for changes on the payment method
-  document.querySelectorAll('input[name="payment-method"]').forEach(elem => {
-    elem.addEventListener("change", function(event) {
-      const paypalContainer = document.getElementById("paypal-button-container");
-      const placeOrderBtn = document.getElementById("place-order");
-      if (event.target.value === "paypal") {
-        if (paypalContainer) paypalContainer.style.display = "block";
-        if (placeOrderBtn) placeOrderBtn.disabled = true;
-      } else {
-        if (paypalContainer) paypalContainer.style.display = "none";
-        if (placeOrderBtn) placeOrderBtn.disabled = false;
-      }
-    });
-  });
-
-  // Order form submission
+  
   document.getElementById("order-form").addEventListener("submit", async function(e) {
     e.preventDefault();
     const customerName = document.getElementById("customer-name").value.trim();

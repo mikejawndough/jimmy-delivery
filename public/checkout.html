@@ -8,14 +8,11 @@
   <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
 
-  <!-- Load Google Maps JavaScript API with Places library asynchronously -->
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbagmRumEATqUQ7co9ygTtEZDxAOHqzWk&libraries=places"></script>
-
-  <!-- Load PayPal SDK asynchronously -->
-  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
+  <!-- Load PayPal SDK asynchronously (replace YOUR_PAYPAL_CLIENT_ID with your client ID) -->
+  <script async defer src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons"></script>
   
   <style>
-    /* Your CSS styles (unchanged for brevity) */
+    /* Basic CSS styles */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'DynaPuff', cursive;
@@ -36,7 +33,7 @@
       padding: 20px;
       background: #f5f5f5;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       text-align: left;
     }
     .checkout-container h2 { color: #F58426; margin-bottom: 10px; }
@@ -58,6 +55,26 @@
       border-radius: 5px;
       border: 1px solid #ccc;
       font-size: 16px;
+    }
+    /* Container for autocomplete suggestions */
+    #suggestions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      position: absolute;
+      width: calc(100% - 22px);
+      background: #fff;
+      z-index: 100;
+    }
+    #suggestions li {
+      padding: 8px;
+      cursor: pointer;
+    }
+    #suggestions li:hover {
+      background-color: #f0f0f0;
     }
     .datetime-dropdowns {
       display: flex;
@@ -116,7 +133,7 @@
   </style>
 </head>
 <body>
-  <!-- Header Placeholder (assuming you already have header.html loaded) -->
+  <!-- Header Placeholder (assume header.html is loaded here) -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
@@ -135,7 +152,7 @@
       <p class="total">Total: $<span id="cart-total">0.00</span></p>
       
       <!-- Delivery Information Section -->
-      <div class="form-section">
+      <div class="form-section" style="position: relative;">
         <h3>Delivery Information</h3>
         <label for="customer-name">Name</label>
         <input type="text" id="customer-name" placeholder="Enter your name" required>
@@ -145,6 +162,8 @@
         <input type="email" id="customer-email" placeholder="Enter your email address" required>
         <label for="address">Delivery Address</label>
         <input type="text" id="address" name="address" placeholder="Enter your address" required>
+        <!-- Container for autocomplete suggestions -->
+        <ul id="suggestions"></ul>
       </div>
       
       <!-- Delivery Time Section -->
