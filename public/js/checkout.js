@@ -1,20 +1,18 @@
 // public/js/checkout.js
 
 document.addEventListener("DOMContentLoaded", function() {
-  // --- New: Geocoding & Delivery Radius Check ---
-
-  // Define New Rochelle center coordinates and delivery radius in miles.
+  // --- New: Delivery Radius Check via Autocomplete ---
+  // Define New Rochelle center and delivery radius
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
 
-  // Helper: Convert degrees to radians.
+  // Haversine formula helpers
   function toRadians(deg) {
     return deg * (Math.PI / 180);
   }
 
-  // Helper: Calculate distance between two lat/lng pairs using the Haversine formula.
   function haversineDistance(lat1, lng1, lat2, lng2) {
-    const R = 3958.8; // Earth's radius in miles.
+    const R = 3958.8; // Earth's radius in miles
     const dLat = toRadians(lat2 - lat1);
     const dLng = toRadians(lng2 - lng1);
     const a = Math.sin(dLat / 2) ** 2 +
@@ -24,11 +22,11 @@ document.addEventListener("DOMContentLoaded", function() {
     return R * c;
   }
 
-  // Initialize Google Places Autocomplete on the address input.
+  // Initialize Google Places Autocomplete on the address input field
   var addressInput = document.getElementById("address");
   if (addressInput && window.google && google.maps && google.maps.places) {
     var autocomplete = new google.maps.places.Autocomplete(addressInput, {
-      // Optional: Restrict search to the United States.
+      // Optionally restrict to the United States:
       // componentRestrictions: { country: "us" },
     });
     autocomplete.addListener("place_changed", function() {
@@ -48,16 +46,14 @@ document.addEventListener("DOMContentLoaded", function() {
       console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
       if (distance > DELIVERY_RADIUS_MILES) {
         alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
-        // Clear the address field so the user must pick a different address.
-        addressInput.value = "";
+        addressInput.value = ""; // Clear address field if too far
       }
     });
   } else {
-    console.warn("Google Places API is not loaded. Make sure to include it in your HTML.");
+    console.warn("Google Places API is not loaded; check your script tag in HTML.");
   }
 
   // --- Existing Functions ---
-
   function displayCart() {
     const cartList = document.getElementById("cart-items");
     const totalElement = document.getElementById("cart-total");

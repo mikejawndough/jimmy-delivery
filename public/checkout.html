@@ -7,9 +7,12 @@
   
   <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Load Google Maps JavaScript API with Places library asynchronously -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbagmRumEATqUQ7co9ygTtEZDxAOHqzWk&libraries=places"></script>
   
-  <!-- Include Google Maps JavaScript API with Places library -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbagmRumEATqUQ7co9ygTtEZDxAOHqzWk&libraries=places"></script>
+  <!-- Load PayPal SDK asynchronously (replace YOUR_PAYPAL_CLIENT_ID with your client ID) -->
+  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
   
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -117,9 +120,7 @@
   <script>
     fetch('header.html')
       .then(response => response.text())
-      .then(data => {
-        document.getElementById('header-placeholder').innerHTML = data;
-      })
+      .then(data => { document.getElementById('header-placeholder').innerHTML = data; })
       .catch(error => console.error('Error loading header:', error));
   </script>
   
