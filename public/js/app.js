@@ -52,6 +52,11 @@ window.login = function(event) {
     .then(function(userCredential) {
       alert("Login successful!");
       loadDashboard(userCredential.user);
+      // Optionally hide the container immediately:
+      var loginFormContainer = document.getElementById("login-form-container");
+      if (loginFormContainer) {
+        loginFormContainer.style.display = "none";
+      }
     })
     .catch(function(error) {
       alert("Error: " + error.message);

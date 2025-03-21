@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
+    
     header {
       background-color: #F58426;
       display: flex;
@@ -33,14 +34,13 @@
     nav a:hover {
       text-decoration: underline;
     }
-    /* Right-side container for Login + Cart */
     .header-right {
       display: flex;
       align-items: center;
       gap: 20px;
     }
-    /* Login Button */
-    .login-btn {
+    .login-btn,
+    .logout-btn {
       background-color: #1D428A;
       color: #fff;
       border: none;
@@ -50,10 +50,13 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    .login-btn:hover {
+    .login-btn:hover,
+    .logout-btn:hover {
       background-color: #163769;
     }
-    /* Cart Icon Container */
+    .logout-btn {
+      display: none; /* hidden by default */
+    }
     .cart-icon {
       position: relative;
       cursor: pointer;
@@ -79,7 +82,6 @@
       font-size: 12px;
       color: white;
     }
-    /* Mini Cart Dropdown */
     .mini-cart {
       position: absolute;
       right: 20px;
@@ -139,26 +141,47 @@
       margin-top: 10px;
       text-align: right;
     }
+    /* The inline login form container */
+    #login-form-container {
+      display: none;
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+      width: 300px;
+      text-align: left;
+    }
+    #login-form-container form input,
+    #login-form-container form button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
   <header>
-    <!-- Left: Logo -->
     <div class="logo">
       <img src="logo.png" alt="Jimmy's Pizza" />
     </div>
-    <!-- Center: Navigation -->
     <nav>
       <a href="index.html">Home</a>
       <a href="order.html">Order</a>
       <a href="customer.html">Customer Dashboard</a>
       <a href="checkout.html">Checkout</a>
     </nav>
-    <!-- Right: Login Button + Cart Icon -->
     <div class="header-right">
-      <!-- Login button without inline onclick -->
+      <!-- Two buttons: login & logout -->
       <button class="login-btn" id="header-login">Log In</button>
-      <!-- Cart Icon -->
+      <button class="logout-btn" id="header-logout">Log Out</button>
+
+      <!-- Cart Icon + Mini Cart -->
       <div class="cart-icon" id="cartIcon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M7.58,16.57c0.47,0,0.85,0.39,0.85,0.85s-0.38,0.85-0.85,0.85S6.73,17.89,6.73,17.42S7.11,16.57,7.58,16.57z
@@ -170,7 +193,6 @@
         </svg>
         <span id="cart-count">0</span>
       </div>
-      <!-- Mini-cart dropdown -->
       <div class="mini-cart" id="miniCart">
         <h3>Your Cart</h3>
         <ul id="mini-cart-items"></ul>
@@ -179,19 +201,25 @@
     </div>
   </header>
   
+  <!-- Inline login form container -->
+  <div id="login-form-container">
+    <form onsubmit="login(event)">
+      <input type="email" id="login-email" placeholder="Email Address" required>
+      <input type="password" id="login-password" placeholder="Password" required>
+      <button type="submit">Log In</button>
+    </form>
+    <p>Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+  </div>
+  
   <!-- Firebase Libraries -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
-<!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
-<script src="/js/firebase-config.js"></script>
-
-<!-- Common Functions (app.js) -->
-<script src="/js/app.js"></script>
-
-<!-- Header Functionality (header.js) -->
-<script src="/js/header.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <!-- Firebase Config -->
+  <script src="/js/firebase-config.js"></script>
+  <!-- Common Functions -->
+  <script src="/js/app.js"></script>
+  <!-- Header Functionality -->
+  <script src="/js/header.js"></script>
 </body>
 </html>
