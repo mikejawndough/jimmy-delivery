@@ -1,6 +1,63 @@
 // public/js/checkout.js
 
 document.addEventListener("DOMContentLoaded", function() {
+  // --- New: Geocoding & Delivery Radius Check ---
+
+  // Define New Rochelle center coordinates and delivery radius in miles.
+  const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
+  const DELIVERY_RADIUS_MILES = 5;
+
+  // Helper: Convert degrees to radians.
+  function toRadians(deg) {
+    return deg * (Math.PI / 180);
+  }
+
+  // Helper: Calculate distance between two lat/lng pairs using the Haversine formula.
+  function haversineDistance(lat1, lng1, lat2, lng2) {
+    const R = 3958.8; // Earth's radius in miles.
+    const dLat = toRadians(lat2 - lat1);
+    const dLng = toRadians(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+              Math.sin(dLng / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  // Initialize Google Places Autocomplete on the address input.
+  var addressInput = document.getElementById("address");
+  if (addressInput && window.google && google.maps && google.maps.places) {
+    var autocomplete = new google.maps.places.Autocomplete(addressInput, {
+      // Optional: Restrict search to the United States.
+      // componentRestrictions: { country: "us" },
+    });
+    autocomplete.addListener("place_changed", function() {
+      var place = autocomplete.getPlace();
+      if (!place.geometry) {
+        alert("No details available for the selected address.");
+        return;
+      }
+      var location = place.geometry.location;
+      var locObj = { lat: location.lat(), lng: location.lng() };
+      var distance = haversineDistance(
+        NEW_ROCHELLE_COORDS.lat,
+        NEW_ROCHELLE_COORDS.lng,
+        locObj.lat,
+        locObj.lng
+      );
+      console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
+      if (distance > DELIVERY_RADIUS_MILES) {
+        alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
+        // Clear the address field so the user must pick a different address.
+        addressInput.value = "";
+      }
+    });
+  } else {
+    console.warn("Google Places API is not loaded. Make sure to include it in your HTML.");
+  }
+
+  // --- Existing Functions ---
+
   function displayCart() {
     const cartList = document.getElementById("cart-items");
     const totalElement = document.getElementById("cart-total");

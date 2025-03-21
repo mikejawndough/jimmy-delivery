@@ -10,6 +10,8 @@ const admin = require('firebase-admin');
 const sgMail = require('@sendgrid/mail');
 const fs = require('fs');
 const path = require('path');
+// Use node-fetch to make HTTP requests from Node.js
+const fetch = require('node-fetch');
 
 // 2. Define publicPath so it's available everywhere
 const publicPath = path.join(__dirname, 'public');
@@ -36,7 +38,6 @@ try {
   if (serviceAccount.private_key.includes("\\n")) {
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
   }
-  // Optionally log part of the key (avoid printing full key in production)
   console.log("Service Account parsed successfully for project:", serviceAccount.project_id);
 } catch (error) {
   console.error("❌ Error parsing FIREBASE_SERVICE_ACCOUNT:", error);
@@ -75,11 +76,49 @@ async function loadOrderingStatus() {
 }
 loadOrderingStatus();
 
-// 9. Middleware
+// 9. Define New Rochelle Center Coordinates (approximate)
+const NEW_ROCHELLE_LAT = 40.9115;
+const NEW_ROCHELLE_LNG = -73.7824;
+
+// 10. Helper Functions for Geocoding and Distance Calculation
+
+// Convert degrees to radians
+function toRadians(deg) {
+  return deg * (Math.PI / 180);
+}
+
+// Calculate distance between two lat/lng pairs using the Haversine formula (in miles)
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 3958.8; // Earth's radius in miles
+  const dLat = toRadians(lat2 - lat1);
+  const dLng = toRadians(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+            Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Geocode an address using Google Geocoding API
+async function geocodeAddress(address) {
+  const encodedAddress = encodeURIComponent(address);
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+  
+  const response = await fetch(url);
+  const data = await response.json();
+  
+  if (data.status !== "OK" || !data.results || data.results.length === 0) {
+    throw new Error("Could not find that address on the map.");
+  }
+  
+  return data.results[0].geometry.location; // returns { lat: number, lng: number }
+}
+
+// 11. Middleware
 app.use(express.json());
 app.use(cors());
 
-// 10. API Routes (Defined BEFORE static file serving)
+// 12. API Routes (Defined BEFORE static file serving)
 
 // GET endpoint: fetch current ordering status
 app.get('/admin/order-status', async (req, res) => {
@@ -115,40 +154,66 @@ app.post('/admin/toggle-ordering', async (req, res) => {
   }
 });
 
-// Order Placement Endpoint – only allow if ordering is enabled
+// Order Placement Endpoint – Check delivery radius
 app.post('/order', async (req, res) => {
   if (!isOrderingEnabled) {
     return res.status(403).json({ error: 'Ordering is currently disabled by admin.' });
   }
-  const { items, customerName, customerEmail, phoneNumber, address, deliveryDatetime, recurring, frequency, recurringStart, recurringEnd } = req.body;
-  if (!items || !customerName || !customerEmail || !phoneNumber || !address) {
-    console.error("❌ Error: Missing required fields.");
-    return res.status(400).json({ error: 'Missing required fields.' });
-  }
-  const newOrder = {
+  const {
+    items,
     customerName,
     customerEmail,
     phoneNumber,
     address,
-    items,
-    total: items.reduce((sum, item) => sum + item.price, 5.99),
-    status: 'Order Received',
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    deliveryDatetime: deliveryDatetime || null,
-    recurring: recurring || "no",
-    frequency: frequency || null,
-    recurringStart: recurringStart || null,
-    recurringEnd: recurringEnd || null
-  };
+    deliveryDatetime,
+    recurring,
+    frequency,
+    recurringStart,
+    recurringEnd
+  } = req.body;
+  if (!items || !customerName || !customerEmail || !phoneNumber || !address) {
+    console.error("❌ Error: Missing required fields.");
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+  
   try {
+    // Geocode the delivery address to get its coordinates
+    const location = await geocodeAddress(address);
+    // Calculate the distance from New Rochelle center to the delivery address
+    const distance = haversineDistance(NEW_ROCHELLE_LAT, NEW_ROCHELLE_LNG, location.lat, location.lng);
+    console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
+    
+    // If the address is more than 5 miles away, reject the order
+    if (distance > 5) {
+      return res.status(400).json({ error: "Delivery is only available within 5 miles of New Rochelle." });
+    }
+    
+    // Proceed to create the order
+    const newOrder = {
+      customerName,
+      customerEmail,
+      phoneNumber,
+      address,
+      items,
+      total: items.reduce((sum, item) => sum + item.price, 5.99), // adds delivery fee
+      status: 'Order Received',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      deliveryDatetime: deliveryDatetime || null,
+      recurring: recurring || "no",
+      frequency: frequency || null,
+      recurringStart: recurringStart || null,
+      recurringEnd: recurringEnd || null
+    };
+    
     const orderRef = await db.collection('orders').add(newOrder);
     const userOrdersRef = db.collection('customers').doc(customerEmail);
     await userOrdersRef.set({ email: customerEmail }, { merge: true });
     await userOrdersRef.collection('orderHistory').doc(orderRef.id).set(newOrder);
+    
     console.log(`✅ Order placed with ID: ${orderRef.id}`);
     res.json({ orderId: orderRef.id, status: newOrder.status });
   } catch (error) {
-    console.error("Error placing order:", error.response ? error.response.body : error);
+    console.error("Error placing order:", error);
     res.status(500).json({ error: "Failed to place order." });
   }
 });
@@ -213,7 +278,7 @@ app.patch('/order/:id/status', async (req, res) => {
       await sgMail.send(msg);
       console.log(`✅ Email sent to ${orderData.customerEmail} about status update.`);
     } catch (emailError) {
-      console.error("SendGrid Error:", emailError.response ? emailError.response.body : emailError);
+      console.error("Error sending email via SendGrid:", emailError.response ? emailError.response.body : emailError);
     }
     res.json({ orderId, status });
   } catch (error) {
@@ -228,7 +293,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => console.log(`❌ Client disconnected: ${socket.id}`));
 });
 
-// 11. Serve Static Files from the 'public' Directory (after API routes)
+// 13. Serve Static Files from the 'public' Directory (after API routes)
 console.log("✅ Serving static files from:", publicPath);
 app.use(express.static(publicPath, {
   setHeaders: function (res, filePath) {
@@ -238,7 +303,7 @@ app.use(express.static(publicPath, {
   }
 }));
 
-// 12. Start the Server
+// 14. Start the Server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🔥 Server running on port ${PORT}`);
