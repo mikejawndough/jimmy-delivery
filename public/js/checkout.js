@@ -21,32 +21,45 @@ document.addEventListener("DOMContentLoaded", function() {
     return R * c;
   }
   
+  // --- LocationIQ Autocomplete Implementation ---
+  // Replace with your actual LocationIQ API key
+  const LOCATIONIQ_API_KEY = "pk.3d4ab6e4e696de166191300baf9fbb19";
+  
   // Elements for autocomplete
   const addressInput = document.getElementById("address");
   const suggestionsList = document.getElementById("suggestions");
   
-  // Function to fetch suggestions from LocationIQ
+  // Function to fetch suggestions from LocationIQ with error handling
   async function fetchSuggestions(query) {
     try {
-      const response = await fetch(`https://us1.locationiq.com/v1/autocomplete.php?key=pk.3d4ab6e4e696de166191300baf9fbb19&q=${encodeURIComponent(query)}&limit=5&format=json`);
-      return await response.json();
+      const url = `https://us1.locationiq.com/v1/autocomplete.php?key=${LOCATIONIQ_API_KEY}&q=${encodeURIComponent(query)}&limit=5&format=json`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.error("LocationIQ API error:", response.status);
+        return []; // Return empty array on error (e.g., 429)
+      }
+      const results = await response.json();
+      if (!Array.isArray(results)) {
+        console.error("Unexpected response format from LocationIQ:", results);
+        return [];
+      }
+      return results;
     } catch (error) {
       console.error("Error fetching suggestions:", error);
       return [];
     }
   }
   
-  // Render suggestions in the dropdown
+  // Render suggestions in the suggestions list
   function renderSuggestions(suggestions) {
     suggestionsList.innerHTML = "";
     suggestions.forEach(suggestion => {
       const li = document.createElement("li");
       li.textContent = suggestion.display_name;
       li.addEventListener("click", function() {
-        // Set the address input value
         addressInput.value = suggestion.display_name;
         suggestionsList.innerHTML = "";
-        // Calculate distance from New Rochelle using suggestion coordinates
+        // Get the coordinates from the suggestion
         const locObj = { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) };
         const distance = haversineDistance(NEW_ROCHELLE_COORDS.lat, NEW_ROCHELLE_COORDS.lng, locObj.lat, locObj.lng);
         console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
@@ -59,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
   
-  // Listen for keyup on the address input to fetch suggestions
+  // Listen for keyup events on the address input to fetch suggestions
   if (addressInput) {
     addressInput.addEventListener("keyup", async function() {
       const query = addressInput.value;
