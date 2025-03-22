@@ -1,8 +1,11 @@
 // public/js/checkout.js
 
 document.addEventListener("DOMContentLoaded", function() {
-  // --- New: Delivery Radius Check via LocationIQ Autocomplete ---
-  // Define New Rochelle center and delivery radius (in miles)
+  // --- Delivery Radius Check using Google Places Autocomplete via Photon Alternative ---
+  // We now use Photon (an open-source geocoder) for autocomplete.
+  // Photon public endpoint: https://photon.komoot.io/api/
+  
+  // Define New Rochelle center and allowed delivery radius (in miles)
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
   
@@ -21,47 +24,48 @@ document.addEventListener("DOMContentLoaded", function() {
     return R * c;
   }
   
-  // --- LocationIQ Autocomplete Implementation ---
-  // Replace with your actual LocationIQ API key
-  const LOCATIONIQ_API_KEY = "pk.3d4ab6e4e696de166191300baf9fbb19";
-  
-  // Elements for autocomplete
+  // --- Photon Autocomplete Implementation ---
   const addressInput = document.getElementById("address");
   const suggestionsList = document.getElementById("suggestions");
   
-  // Function to fetch suggestions from LocationIQ with error handling
-  async function fetchSuggestions(query) {
+  // Function to fetch suggestions from Photon
+  async function fetchPhotonSuggestions(query) {
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`;
     try {
-      const url = `https://us1.locationiq.com/v1/autocomplete.php?key=${LOCATIONIQ_API_KEY}&q=${encodeURIComponent(query)}&limit=5&format=json`;
       const response = await fetch(url);
       if (!response.ok) {
-        console.error("LocationIQ API error:", response.status);
-        return []; // Return empty array on error (e.g., 429)
-      }
-      const results = await response.json();
-      if (!Array.isArray(results)) {
-        console.error("Unexpected response format from LocationIQ:", results);
+        console.error("Photon API error:", response.status);
         return [];
       }
-      return results;
+      const data = await response.json();
+      if (!data || !Array.isArray(data.features)) {
+        console.error("Unexpected Photon response:", data);
+        return [];
+      }
+      return data.features; // Each feature has properties.display_name and geometry.coordinates
     } catch (error) {
-      console.error("Error fetching suggestions:", error);
+      console.error("Error fetching Photon suggestions:", error);
       return [];
     }
   }
   
-  // Render suggestions in the suggestions list
+  // Render suggestions from Photon in the dropdown
   function renderSuggestions(suggestions) {
     suggestionsList.innerHTML = "";
-    suggestions.forEach(suggestion => {
+    suggestions.forEach(feature => {
       const li = document.createElement("li");
-      li.textContent = suggestion.display_name;
+      li.textContent = feature.properties.display_name;
       li.addEventListener("click", function() {
-        addressInput.value = suggestion.display_name;
+        addressInput.value = feature.properties.display_name;
         suggestionsList.innerHTML = "";
-        // Get the coordinates from the suggestion
-        const locObj = { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) };
-        const distance = haversineDistance(NEW_ROCHELLE_COORDS.lat, NEW_ROCHELLE_COORDS.lng, locObj.lat, locObj.lng);
+        // Photon returns coordinates as [lng, lat]
+        const locObj = { lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] };
+        const distance = haversineDistance(
+          NEW_ROCHELLE_COORDS.lat,
+          NEW_ROCHELLE_COORDS.lng,
+          locObj.lat,
+          locObj.lng
+        );
         console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
         if (distance > DELIVERY_RADIUS_MILES) {
           alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
@@ -72,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
   
-  // Listen for keyup events on the address input to fetch suggestions
+  // Listen for keyup events to fetch Photon suggestions
   if (addressInput) {
     addressInput.addEventListener("keyup", async function() {
       const query = addressInput.value;
@@ -80,12 +84,12 @@ document.addEventListener("DOMContentLoaded", function() {
         suggestionsList.innerHTML = "";
         return;
       }
-      const suggestions = await fetchSuggestions(query);
+      const suggestions = await fetchPhotonSuggestions(query);
       renderSuggestions(suggestions);
     });
   }
   
-  // --- Existing Functions (unchanged) ---
+  // --- Existing Functions ---
   function displayCart() {
     const cartList = document.getElementById("cart-items");
     const totalElement = document.getElementById("cart-total");
@@ -138,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
   
-  // Initialize PayPal buttons when the SDK is loaded
+  // Initialize PayPal buttons once the SDK is loaded
   function initializePaypalButtons() {
     if (typeof paypal === "undefined") {
       setTimeout(initializePaypalButtons, 100);
@@ -167,12 +171,19 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   initializePaypalButtons();
   
+  // Order form submission
   document.getElementById("order-form").addEventListener("submit", async function(e) {
     e.preventDefault();
     const customerName = document.getElementById("customer-name").value.trim();
     const phoneNumber = document.getElementById("phone-number").value.trim();
     const customerEmail = document.getElementById("customer-email").value.trim();
     const address = document.getElementById("address").value.trim();
+    
+    // Since the autocomplete already checks delivery radius, assume address is valid.
+    if (!customerName || !phoneNumber || !customerEmail || !address) {
+      alert("Please fill out all required fields.");
+      return;
+    }
     
     let deliveryDatetime = "";
     const deliveryOption = document.querySelector('input[name="delivery-option"]:checked').value;
@@ -195,11 +206,6 @@ document.addEventListener("DOMContentLoaded", function() {
       const hourStr = hour.toString().padStart(2, "0");
       const dateTimeString = `${year}-${month}-${day}T${hourStr}:${minute}:00`;
       deliveryDatetime = new Date(dateTimeString).toISOString();
-    }
-    
-    if (!customerName || !phoneNumber || !customerEmail || !address) {
-      alert("Please fill out all required fields.");
-      return;
     }
     
     const selectedPayment = document.querySelector('input[name="payment-method"]:checked').value;
