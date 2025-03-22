@@ -68,11 +68,12 @@
       position: absolute;
       width: calc(100% - 22px);
       background: #fff;
-      z-index: 100;
+      z-index: 9999; /*Ensure it's on top*/
     }
     #suggestions li {
       padding: 8px;
       cursor: pointer;
+      color: #1D428A; /* Set a dark text color*/
     }
     #suggestions li:hover {
       background-color: #f0f0f0;
