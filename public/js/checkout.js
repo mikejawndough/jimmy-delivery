@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const addressInput = document.getElementById("address");
   const suggestionsList = document.getElementById("suggestions");
   
+  console.log("Fetching Photon suggestions from URL:", url);
+
   async function fetchPhotonSuggestions(query) {
     const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`;
     try {
@@ -71,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function() {
   if (addressInput) {
     addressInput.addEventListener("keyup", async function() {
       const query = addressInput.value;
-      if (query.length < 3) {
+      if (query.length < 1) {
         suggestionsList.innerHTML = "";
         return;
       }
