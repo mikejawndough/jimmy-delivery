@@ -57,27 +57,26 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
-    /* Autocomplete suggestions styling */
     #suggestions {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      border: 1px solid #ccc;
-      max-height: 150px;
-      overflow-y: auto;
-      position: absolute;
-      width: calc(100% - 22px);
-      background: #fff;
-      z-index: 9999; /*Ensure it's on top*/
-    }
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 9999;
+}
+
     #suggestions li {
-      padding: 8px;
-      cursor: pointer;
-      color: #1D428A; /* Set a dark text color*/
-    }
+  padding: 8px;
+  cursor: pointer;
+  color: #000 !important; /* Force black text for clarity */
+  background-color: #fff;
+}
+
     #suggestions li:hover {
-      background-color: #f0f0f0;
-    }
+  background-color: #f0f0f0;
+}
     .datetime-dropdowns {
       display: flex;
       flex-wrap: wrap;
