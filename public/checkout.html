@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
 
   <!-- Load PayPal SDK asynchronously (replace YOUR_PAYPAL_CLIENT_ID with your actual client ID) -->
-  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
+  <script async defer src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons"></script>
   
   <style>
     /* Basic CSS styles */
@@ -35,7 +35,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       text-align: left;
-      position: relative; /* for suggestions dropdown */
+      position: relative; /* For suggestions dropdown */
     }
     .checkout-container h2 { color: #F58426; margin-bottom: 10px; }
     .form-section { margin-bottom: 20px; }
@@ -57,25 +57,29 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
+    /* Suggestions dropdown styling */
     #suggestions {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background: #fff;
-  border: 1px solid #ccc;
-  z-index: 9999;
-}
-
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: calc(100% - 22px);
+      background: #fff;
+      z-index: 9999;
+    }
     #suggestions li {
-  padding: 8px;
-  cursor: pointer;
-  color: #000 !important; /* Force black text for clarity */
-}
-
+      padding: 8px;
+      cursor: pointer;
+      color: #000; /* Clear black text */
+    }
     #suggestions li:hover {
-  background-color: #f0f0f0;
-}
+      background-color: #f0f0f0;
+    }
     .datetime-dropdowns {
       display: flex;
       flex-wrap: wrap;
@@ -133,7 +137,7 @@
   </style>
 </head>
 <body>
-  <!-- Header Placeholder (assume header.html is loaded) -->
+  <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
