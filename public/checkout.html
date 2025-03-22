@@ -12,8 +12,12 @@
   <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
   
   <style>
-    /* Basic CSS styles */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Basic CSS reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: 'DynaPuff', cursive;
       background-color: #ffffff;
@@ -35,11 +39,22 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       text-align: left;
-      position: relative; /* For suggestions dropdown */
+      position: relative; /* For suggestions dropdown positioning */
+      /* Make sure we don't clip the suggestions: */
+      overflow: visible; /* If there's any hidden or auto, remove it */
     }
-    .checkout-container h2 { color: #F58426; margin-bottom: 10px; }
-    .form-section { margin-bottom: 20px; }
-    .form-section h3 { color: #F58426; margin-bottom: 10px; font-size: 20px; }
+    .checkout-container h2 {
+      color: #F58426;
+      margin-bottom: 10px;
+    }
+    .form-section {
+      margin-bottom: 20px;
+    }
+    .form-section h3 {
+      color: #F58426;
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
     .form-section label {
       display: block;
       margin: 6px 0 4px;
@@ -57,37 +72,61 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
-    /* Suggestions dropdown styling */
+
+    /* Suggestions dropdown styling (PHOTON AUTOCOMPLETE) */
     #suggestions {
-  position: absolute;
-  top: 100%; /* Immediately below the address input */
-  left: 0;
-  width: calc(100% - 20px); /* Adjust according to your input padding/margins */
-  background-color: #fff;
-  border: 1px solid #ccc;
-  max-height: 150px;
-  overflow-y: auto;
-  z-index: 9999; /* Very high so it appears on top */
-  display: block; /* Ensure it's set to display */
-}
-#suggestions li {
-  padding: 8px;
-  cursor: pointer;
-  color: #000; /* Black text for clear visibility */
-  background-color: #fff;
-}
-#suggestions li:hover {
-  background-color: #f0f0f0;
-}
+      /* Force it to be absolutely positioned below the address input */
+      position: absolute !important;
+      top: 100% !important;
+      left: 0 !important;
+      width: 100% !important;
+
+      /* Bright border for debugging so you can see it for sure */
+      border: 2px solid red !important;
+
+      background: #fff !important;
+      color: #000 !important;
+      max-height: 200px !important;
+      overflow-y: auto !important;
+
+      /* Very high z-index so it’s on top of everything */
+      z-index: 999999 !important;
+
+      /* Force it to show up */
+      display: block !important;
+    }
+    #suggestions li {
+      padding: 8px !important;
+      cursor: pointer !important;
+      background-color: #fff !important;
+      color: #000 !important;
+      border-bottom: 1px solid #ccc !important;
+    }
+    #suggestions li:hover {
+      background-color: #f0f0f0 !important; /* Highlight on hover */
+    }
+
     .datetime-dropdowns {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
-    .datetime-dropdowns select { flex: 1; min-width: 70px; }
-    .radio-group { margin-top: 8px; }
-    .radio-group label { display: block; margin-bottom: 8px; cursor: pointer; }
-    #schedule-delivery { display: none; margin-top: 10px; }
+    .datetime-dropdowns select {
+      flex: 1;
+      min-width: 70px;
+    }
+    .radio-group {
+      margin-top: 8px;
+    }
+    .radio-group label {
+      display: block;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    #schedule-delivery {
+      display: none;
+      margin-top: 10px;
+    }
     #recurring-options {
       display: none;
       margin-top: 10px;
@@ -113,14 +152,21 @@
       transition: background-color 0.2s ease;
       margin-top: 20px;
     }
-    #place-order:hover { background-color: #163769; }
-    #place-order:disabled { background-color: #888; cursor: not-allowed; }
+    #place-order:hover {
+      background-color: #163769;
+    }
+    #place-order:disabled {
+      background-color: #888;
+      cursor: not-allowed;
+    }
     #cart-items {
       list-style: none;
       padding: 0;
       margin-bottom: 10px;
     }
-    #cart-items li { margin: 5px 0; }
+    #cart-items li {
+      margin: 5px 0;
+    }
     .total {
       font-weight: bold;
       text-align: right;
@@ -141,7 +187,9 @@
   <script>
     fetch('header.html')
       .then(response => response.text())
-      .then(data => { document.getElementById('header-placeholder').innerHTML = data; })
+      .then(data => {
+        document.getElementById('header-placeholder').innerHTML = data;
+      })
       .catch(error => console.error('Error loading header:', error));
   </script>
   
@@ -159,13 +207,17 @@
         <h3>Delivery Information</h3>
         <label for="customer-name">Name</label>
         <input type="text" id="customer-name" placeholder="Enter your name" required>
+
         <label for="phone-number">Phone Number</label>
         <input type="tel" id="phone-number" placeholder="Enter your phone number" required>
+
         <label for="customer-email">Email</label>
         <input type="email" id="customer-email" placeholder="Enter your email address" required>
+
         <label for="address">Delivery Address</label>
         <input type="text" id="address" name="address" placeholder="Enter your address" required>
-        <!-- Suggestions container -->
+
+        <!-- Suggestions container (Photon Autocomplete) -->
         <ul id="suggestions"></ul>
       </div>
       
@@ -297,7 +349,9 @@
   <script>
     fetch('footer.html')
       .then(response => response.text())
-      .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
+      .then(data => {
+        document.getElementById('footer-placeholder').innerHTML = data;
+      })
       .catch(error => console.error('Error loading footer:', error));
   </script>
   
