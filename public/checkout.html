@@ -59,25 +59,26 @@
     }
     /* Suggestions dropdown styling */
     #suggestions {
-      position: absolute;
-      top: 100%; /* Just below the address input */
-      left: 0;
-      width: calc(100% - 22px);
-      background-color: #fff;
-      border: 1px solid #ccc;
-      max-height: 150px;
-      overflow-y: auto;
-      z-index: 9999;
-    }
-    #suggestions li {
-      padding: 8px;
-      cursor: pointer;
-      color: #000; /* Black text */
-      background-color: #fff;
-    }
-    #suggestions li:hover {
-      background-color: #f0f0f0;
-    }
+  position: absolute;
+  top: 100%; /* Immediately below the address input */
+  left: 0;
+  width: calc(100% - 20px); /* Adjust according to your input padding/margins */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 9999; /* Very high so it appears on top */
+  display: block; /* Ensure it's set to display */
+}
+#suggestions li {
+  padding: 8px;
+  cursor: pointer;
+  color: #000; /* Black text for clear visibility */
+  background-color: #fff;
+}
+#suggestions li:hover {
+  background-color: #f0f0f0;
+}
     .datetime-dropdowns {
       display: flex;
       flex-wrap: wrap;
@@ -164,7 +165,7 @@
         <input type="email" id="customer-email" placeholder="Enter your email address" required>
         <label for="address">Delivery Address</label>
         <input type="text" id="address" name="address" placeholder="Enter your address" required>
-        <!-- Suggestions list for Photon autocomplete -->
+        <!-- Suggestions container -->
         <ul id="suggestions"></ul>
       </div>
       
