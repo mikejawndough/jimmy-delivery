@@ -2,11 +2,9 @@
 
 document.addEventListener("DOMContentLoaded", function() {
   // --- Delivery Radius Check using Photon Autocomplete ---
-  // Define New Rochelle center and allowed delivery radius (in miles)
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
   
-  // Haversine helper functions
   function toRadians(deg) {
     return deg * (Math.PI / 180);
   }
@@ -21,17 +19,16 @@ document.addEventListener("DOMContentLoaded", function() {
     return R * c;
   }
   
-  // --- Photon Autocomplete Implementation ---
   const addressInput = document.getElementById("address");
   const suggestionsList = document.getElementById("suggestions");
   
-  // Function to fetch suggestions from Photon
   async function fetchPhotonSuggestions(query) {
     const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`;
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        console.error("Photon API error:", response.status);
+        const errorText = await response.text();
+        console.error("Photon API error:", response.status, errorText);
         return [];
       }
       const data = await response.json();
@@ -46,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
   
-  // Render suggestions in the suggestions list
   function renderSuggestions(suggestions) {
     suggestionsList.innerHTML = "";
     suggestions.forEach(feature => {
@@ -55,7 +51,6 @@ document.addEventListener("DOMContentLoaded", function() {
       li.addEventListener("click", function() {
         addressInput.value = feature.properties.display_name;
         suggestionsList.innerHTML = "";
-        // Photon returns coordinates as [lng, lat]
         const locObj = { lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] };
         const distance = haversineDistance(
           NEW_ROCHELLE_COORDS.lat,
@@ -73,7 +68,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
   
-  // Listen for keyup events on the address input to fetch Photon suggestions
   if (addressInput) {
     addressInput.addEventListener("keyup", async function() {
       const query = addressInput.value;
@@ -86,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
   
-  // --- Existing Functions ---
+  // --- Existing Functions (unchanged) ---
   function displayCart() {
     const cartList = document.getElementById("cart-items");
     const totalElement = document.getElementById("cart-total");
@@ -100,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function() {
       li.textContent = `${item.name}${item.infused ? " (Infused)" : ""} x${qty} - $${(item.price * qty).toFixed(2)}`;
       cartList.appendChild(li);
     });
-    total += 5.99; // Delivery fee
+    total += 5.99;
     totalElement.textContent = total.toFixed(2);
   }
   displayCart();
@@ -139,7 +133,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
   
-  // Initialize PayPal buttons when the SDK is loaded
   function initializePaypalButtons() {
     if (typeof paypal === "undefined") {
       setTimeout(initializePaypalButtons, 100);
@@ -168,7 +161,6 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   initializePaypalButtons();
   
-  // Order form submission
   document.getElementById("order-form").addEventListener("submit", async function(e) {
     e.preventDefault();
     const customerName = document.getElementById("customer-name").value.trim();
