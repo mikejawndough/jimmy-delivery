@@ -8,7 +8,7 @@
   <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
 
-  <!-- Load PayPal SDK asynchronously (replace YOUR_PAYPAL_CLIENT_ID with your actual client ID) -->
+  <!-- Load PayPal SDK asynchronously (keep your client id here) -->
   <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
   
   <style>
@@ -59,23 +59,21 @@
     }
     /* Suggestions dropdown styling */
     #suggestions {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+      position: absolute;
+      top: 100%; /* Just below the address input */
+      left: 0;
+      width: calc(100% - 22px);
+      background-color: #fff;
       border: 1px solid #ccc;
       max-height: 150px;
       overflow-y: auto;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: calc(100% - 22px);
-      background: #fff;
       z-index: 9999;
     }
     #suggestions li {
       padding: 8px;
       cursor: pointer;
-      color: #000; /* Clear black text */
+      color: #000; /* Black text */
+      background-color: #fff;
     }
     #suggestions li:hover {
       background-color: #f0f0f0;
@@ -166,7 +164,7 @@
         <input type="email" id="customer-email" placeholder="Enter your email address" required>
         <label for="address">Delivery Address</label>
         <input type="text" id="address" name="address" placeholder="Enter your address" required>
-        <!-- Container for Photon autocomplete suggestions -->
+        <!-- Suggestions list for Photon autocomplete -->
         <ul id="suggestions"></ul>
       </div>
       
