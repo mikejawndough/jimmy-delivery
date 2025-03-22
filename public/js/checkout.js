@@ -76,11 +76,13 @@ document.addEventListener("DOMContentLoaded", function() {
   if (addressInput) {
     addressInput.addEventListener("keyup", async function() {
       const query = addressInput.value;
+      console.log("Address input changed:", query);
       if (query.length < 3) {
         suggestionsList.innerHTML = "";
         return;
       }
       const suggestions = await fetchPhotonSuggestions(query);
+      console.log("Suggestions received:", suggestions);
       renderSuggestions(suggestions);
     });
   }
