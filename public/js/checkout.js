@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function() {
   });
   
   function initializePaypalButtons() {
-    if (typeof paypal === "undefined") {
+    if (typeof paypal === "undefined" || !paypal.Buttons) {
       setTimeout(initializePaypalButtons, 100);
       return;
     }
