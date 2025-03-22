@@ -1,10 +1,7 @@
 // public/js/checkout.js
 
 document.addEventListener("DOMContentLoaded", function() {
-  // --- Delivery Radius Check using Google Places Autocomplete via Photon Alternative ---
-  // We now use Photon (an open-source geocoder) for autocomplete.
-  // Photon public endpoint: https://photon.komoot.io/api/
-  
+  // --- Delivery Radius Check using Photon Autocomplete ---
   // Define New Rochelle center and allowed delivery radius (in miles)
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
@@ -42,14 +39,14 @@ document.addEventListener("DOMContentLoaded", function() {
         console.error("Unexpected Photon response:", data);
         return [];
       }
-      return data.features; // Each feature has properties.display_name and geometry.coordinates
+      return data.features;
     } catch (error) {
       console.error("Error fetching Photon suggestions:", error);
       return [];
     }
   }
   
-  // Render suggestions from Photon in the dropdown
+  // Render suggestions in the suggestions list
   function renderSuggestions(suggestions) {
     suggestionsList.innerHTML = "";
     suggestions.forEach(feature => {
@@ -76,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
   
-  // Listen for keyup events to fetch Photon suggestions
+  // Listen for keyup events on the address input to fetch Photon suggestions
   if (addressInput) {
     addressInput.addEventListener("keyup", async function() {
       const query = addressInput.value;
@@ -142,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
   
-  // Initialize PayPal buttons once the SDK is loaded
+  // Initialize PayPal buttons when the SDK is loaded
   function initializePaypalButtons() {
     if (typeof paypal === "undefined") {
       setTimeout(initializePaypalButtons, 100);
@@ -179,7 +176,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const customerEmail = document.getElementById("customer-email").value.trim();
     const address = document.getElementById("address").value.trim();
     
-    // Since the autocomplete already checks delivery radius, assume address is valid.
     if (!customerName || !phoneNumber || !customerEmail || !address) {
       alert("Please fill out all required fields.");
       return;

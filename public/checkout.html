@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
 
   <!-- Load PayPal SDK asynchronously (replace YOUR_PAYPAL_CLIENT_ID with your actual client ID) -->
-  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
+  <script async defer src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons"></script>
   
   <style>
     /* Basic CSS styles */
@@ -35,7 +35,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       text-align: left;
-      position: relative; /* For suggestions dropdown */
+      position: relative; /* for suggestions dropdown */
     }
     .checkout-container h2 { color: #F58426; margin-bottom: 10px; }
     .form-section { margin-bottom: 20px; }
@@ -134,7 +134,7 @@
   </style>
 </head>
 <body>
-  <!-- Header Placeholder (assuming header.html is loaded here) -->
+  <!-- Header Placeholder (assume header.html is loaded) -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
@@ -163,7 +163,7 @@
         <input type="email" id="customer-email" placeholder="Enter your email address" required>
         <label for="address">Delivery Address</label>
         <input type="text" id="address" name="address" placeholder="Enter your address" required>
-        <!-- Container for autocomplete suggestions -->
+        <!-- Container for Photon autocomplete suggestions -->
         <ul id="suggestions"></ul>
       </div>
       
