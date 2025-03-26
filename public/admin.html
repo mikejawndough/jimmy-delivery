@@ -44,6 +44,15 @@
       font-size: 18px;
       font-weight: bold;
     }
+    input, button {
+      font-family: inherit;
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    #create-driver {
+      margin-top: 40px;
+    }
     @media (max-width: 768px) {
       body { padding: 10px; }
       table, thead, tbody, th, td, tr { display: block; }
@@ -52,28 +61,26 @@
   </style>
 </head>
 <body>
-  <!-- Header Placeholder -->
+
+  <!-- Header -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
       .then(response => response.text())
-      .then(data => {
-        document.getElementById('header-placeholder').innerHTML = data;
-        // Optionally load header.js if not already loaded in your static files
-      })
+      .then(data => { document.getElementById('header-placeholder').innerHTML = data; })
       .catch(error => console.error('Error loading header:', error));
   </script>
-  
+
   <h1>Admin Dashboard - Jimmy's Pizza</h1>
-  
-  <!-- Toggle Section for Ordering -->
+
+  <!-- Toggle for accepting orders -->
   <div class="toggle-container">
     <label>
       <input type="checkbox" id="order-toggle" checked>
       Accept New Orders
     </label>
   </div>
-  
+
   <!-- Orders Table -->
   <table id="orders-table">
     <thead>
@@ -88,11 +95,21 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Orders will be populated by admin.js -->
+      <!-- Orders populated by admin.js -->
     </tbody>
   </table>
-  
-  <!-- Footer Placeholder -->
+
+  <!-- Driver Creation Form -->
+  <h2>Create Driver Account</h2>
+  <div id="create-driver">
+    <input id="new-driver-email" type="email" placeholder="Driver Email" required />
+    <input id="new-driver-password" type="password" placeholder="Password" required />
+    <br />
+    <button onclick="createDriver()">Create Driver Account</button>
+    <p id="create-driver-status" style="color: green;"></p>
+  </div>
+
+  <!-- Footer -->
   <div id="footer-placeholder"></div>
   <script>
     fetch('footer.html')
@@ -100,53 +117,64 @@
       .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
       .catch(error => console.error('Error loading footer:', error));
   </script>
-  
-  <!-- Script Order: Load Firebase libraries, config, app.js, then admin.js -->
+
+  <!-- Firebase SDKs & Config -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
   <script src="/js/app.js"></script>
-  
-  <!-- Admin Toggle Script -->
+  <script src="/js/admin.js"></script>
+  <script src="/js/header.js"></script>
+
+  <!-- Admin Scripts -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      const toggle = document.getElementById('order-toggle');
+
       fetch('/admin/order-status')
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-          console.log("Fetched order status:", data);
-          var toggleCheckbox = document.getElementById('order-toggle');
-          if (toggleCheckbox) {
-            toggleCheckbox.checked = data.enabled;
-          }
-        })
-        .catch(error => console.error('Error fetching order status:', error));
-      
-      var toggleCheckbox = document.getElementById('order-toggle');
-      if (toggleCheckbox) {
-        toggleCheckbox.addEventListener('change', function() {
-          var enabled = toggleCheckbox.checked;
-          fetch('/admin/toggle-ordering', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ enabled: enabled })
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log("Toggle update response:", data);
-            alert(data.message);
-          })
-          .catch(err => { console.error('Error toggling ordering:', err); });
+          toggle.checked = data.enabled;
         });
-      }
+
+      toggle.addEventListener('change', function() {
+        fetch('/admin/toggle-ordering', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: toggle.checked })
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+        })
+        .catch(err => console.error('Error toggling ordering:', err));
+      });
     });
+
+    function createDriver() {
+      const email = document.getElementById("new-driver-email").value;
+      const password = document.getElementById("new-driver-password").value;
+      const statusEl = document.getElementById("create-driver-status");
+
+      if (!email || !password) {
+        statusEl.textContent = "Please enter email and password.";
+        statusEl.style.color = "red";
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          statusEl.textContent = `✅ Driver account created: ${email}`;
+          statusEl.style.color = "green";
+          document.getElementById("new-driver-email").value = "";
+          document.getElementById("new-driver-password").value = "";
+        })
+        .catch(error => {
+          statusEl.textContent = `❌ ${error.message}`;
+          statusEl.style.color = "red";
+        });
+    }
   </script>
-  
-  <!-- Include custom admin.js -->
-  <script src="/js/admin.js"></script>
-  
-  <!-- Include header.js (if needed) -->
-  <script src="/js/header.js"></script>
-  
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="="en">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -17,6 +17,7 @@
   <!-- Mapbox CSS -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
+</head>
 <body>
 
   <!-- Header -->
@@ -52,7 +53,7 @@
         <!-- Autocomplete Field -->
         <div class="autocomplete-container" style="position: relative;">
           <label for="address">Delivery Address</label>
-          <input type="text" id="address" name="address" placeholder="Enter your address" required>
+          <input type="text" id="address" name="address" placeholder="Enter your address" required autocomplete="off">
         </div>
 
         <label for="apt-number">Apartment / Unit (optional)</label>
@@ -69,8 +70,7 @@
         <div id="schedule-delivery">
           <label>Select Delivery Date & Time</label>
           <div class="datetime-dropdowns">
-            <select id="delivery-month">
-              <option value="">Month</option>
+            <select id="delivery-month"><option value="">Month</option>
               <option value="01">January</option><option value="02">February</option>
               <option value="03">March</option><option value="04">April</option>
               <option value="05">May</option><option value="06">June</option>
@@ -78,20 +78,16 @@
               <option value="09">September</option><option value="10">October</option>
               <option value="11">November</option><option value="12">December</option>
             </select>
-            <select id="delivery-day">
-              <option value="">Day</option>
+            <select id="delivery-day"><option value="">Day</option>
               <script>for (let i = 1; i <= 31; i++) document.write(`<option value="${String(i).padStart(2, '0')}">${i}</option>`);</script>
             </select>
-            <select id="delivery-year">
-              <option value="">Year</option>
+            <select id="delivery-year"><option value="">Year</option>
               <script>const y = new Date().getFullYear(); for (let i = 0; i < 2; i++) document.write(`<option value="${y+i}">${y+i}</option>`);</script>
             </select>
-            <select id="delivery-hour">
-              <option value="">Hour</option>
+            <select id="delivery-hour"><option value="">Hour</option>
               <script>for (let i = 1; i <= 12; i++) document.write(`<option value="${String(i).padStart(2, '0')}">${i}</option>`);</script>
             </select>
-            <select id="delivery-minute">
-              <option value="">Minute</option>
+            <select id="delivery-minute"><option value="">Minute</option>
               <script>for (let i = 0; i < 60; i += 5) document.write(`<option value="${String(i).padStart(2, '0')}">${String(i).padStart(2, '0')}</option>`);</script>
             </select>
             <select id="delivery-ampm">
@@ -158,8 +154,9 @@
 
   <!-- Mapbox Scripts -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>  <script>
-    const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYXNham91czEzOTQiLCJhIjoiY204cTgzc3k3MDYxZzJrcHlheTV1ZWx4aiJ9.z6X6Ss0D60yg2VRX3iPcdA'; // Replace this
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+  <script>
+    const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYXNham91czEzOTQiLCJhIjoiY204cTgzc3k3MDYxZzJrcHlheTV1ZWx4aiJ9.z6X6Ss0D60yg2VRX3iPcdA'; // Replace with your actual token
 
     const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
     const DELIVERY_RADIUS_MILES = 5;
@@ -180,34 +177,41 @@
     }
 
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
       types: 'address',
       placeholder: 'Enter your address',
-      marker: false
+      marker: false,
+      flyTo: false,
+      proximity: {
+        longitude: -73.7824,
+        latitude: 40.9115
+      }
     });
 
     const addressInput = document.getElementById("address");
-    const container = document.createElement('div');
-    addressInput.parentNode.replaceChild(container, addressInput);
-    container.appendChild(addressInput);
-    geocoder.addTo(container);
-
-    geocoder.on('result', function(e) {
+    geocoder.onAdd = () => document.createElement("div"); // prevent UI override
+    geocoder.on("result", function (e) {
       const coords = e.result.center;
       const distance = haversineDistance(
         NEW_ROCHELLE_COORDS.lat, NEW_ROCHELLE_COORDS.lng,
         coords[1], coords[0]
       );
 
-      console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
-
       if (distance > DELIVERY_RADIUS_MILES) {
         alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
         addressInput.value = "";
       } else {
         addressInput.value = e.result.place_name;
+        window.dispatchEvent(new CustomEvent("mapboxGeocoderResult", {
+          detail: { coords: { lat: coords[1], lng: coords[0] } }
+        }));
       }
+    });
+
+    addressInput.addEventListener("input", function (e) {
+      geocoder.query(e.target.value);
     });
   </script>
 </body>

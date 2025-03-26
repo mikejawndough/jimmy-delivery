@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Driver Dashboard - Jimmy’s Pizza</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'DynaPuff', cursive;
+      text-align: center;
+      padding: 2rem;
+    }
+    .hidden { display: none; }
+    input, button {
+      font-family: inherit;
+      font-size: 16px;
+      padding: 10px;
+      margin: 10px;
+      width: 300px;
+      max-width: 90%;
+    }
+    #map {
+      width: 100%;
+      height: 400px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Driver Dashboard</h1>
+
+  <!-- Login Form -->
+  <div id="login-section">
+    <input id="email" type="email" placeholder="Driver Email" required />
+    <input id="password" type="password" placeholder="Password" required />
+    <br />
+    <button onclick="loginDriver()">Login</button>
+    <p id="login-error" style="color: red;"></p>
+  </div>
+
+  <!-- Tracker UI -->
+  <div id="driver-ui" class="hidden">
+    <button onclick="logoutDriver()">Logout</button>
+    <br />
+    <input id="orderId" placeholder="Enter Order ID" />
+    <input id="manual-lat" type="number" placeholder="Latitude" step="0.000001" />
+    <input id="manual-lng" type="number" placeholder="Longitude" step="0.000001" />
+    <br />
+    <button onclick="sendManualLocation()">Send Manual Location</button>
+    <button onclick="startLiveTracking()">Start GPS Tracking</button>
+    <div id="status"></div>
+    <div id="map"></div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+
+  <!-- Mapbox SDK -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+
+  <script>
+    const MAPBOX_TOKEN = 'pk.your_mapbox_access_token_here'; // Replace with your token
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    let map, driverMarker;
+
+    auth.onAuthStateChanged(user => {
+      const loggedIn = !!user;
+      document.getElementById("login-section").classList.toggle("hidden", loggedIn);
+      document.getElementById("driver-ui").classList.toggle("hidden", !loggedIn);
+
+      if (loggedIn) {
+        console.log("Driver signed in:", user.email);
+        initMap();
+      }
+    });
+
+    function loginDriver() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          document.getElementById("login-error").textContent = "";
+        })
+        .catch(err => {
+          document.getElementById("login-error").textContent = err.message;
+        });
+    }
+
+    function logoutDriver() {
+      auth.signOut();
+    }
+
+    function initMap() {
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-73.7824, 40.9115],
+        zoom: 13
+      });
+    }
+
+    function sendManualLocation() {
+      const orderId = document.getElementById("orderId").value.trim();
+      const lat = parseFloat(document.getElementById("manual-lat").value);
+      const lng = parseFloat(document.getElementById("manual-lng").value);
+      if (!orderId || isNaN(lat) || isNaN(lng)) return alert("Enter order ID + valid coordinates.");
+
+      db.collection("drivers").doc(orderId).set({ lat, lng })
+        .then(() => {
+          document.getElementById("status").textContent = `✅ Sent driver location for ${orderId}`;
+          if (map && !driverMarker) {
+            driverMarker = new mapboxgl.Marker({ color: 'red' }).setLngLat([lng, lat]).addTo(map);
+          } else if (driverMarker) {
+            driverMarker.setLngLat([lng, lat]);
+          }
+        });
+    }
+
+    function startLiveTracking() {
+      const orderId = document.getElementById("orderId").value.trim();
+      if (!orderId) return alert("Enter order ID");
+
+      navigator.geolocation.watchPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        db.collection("drivers").doc(orderId).set({ lat, lng });
+        document.getElementById("status").textContent = `📍 Updated via GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+        if (map && !driverMarker) {
+          driverMarker = new mapboxgl.Marker({ color: 'red' }).setLngLat([lng, lat]).addTo(map);
+        } else if (driverMarker) {
+          driverMarker.setLngLat([lng, lat]);
+        }
+      }, err => {
+        console.error(err);
+        alert("GPS access denied.");
+      }, { enableHighAccuracy: true });
+    }
+  </script>
+</body>
+</html>
