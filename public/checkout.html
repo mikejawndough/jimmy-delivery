@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Checkout - Jimmy's Pizza</title>
-  
+
   <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
-  
-  <!-- External CSS for Checkout Page -->
+
+  <!-- External CSS -->
   <link rel="stylesheet" href="/css/checkout.css">
-  
-  <!-- Load PayPal SDK asynchronously -->
+
+  <!-- PayPal SDK -->
   <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
-</head>
+
+  <!-- Mapbox CSS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
 <body>
 
   <!-- Header -->
@@ -24,104 +27,72 @@
       .then(html => { document.getElementById('header-placeholder').innerHTML = html; })
       .catch(err => console.error('Error loading header:', err));
   </script>
-  
+
   <h1>Checkout</h1>
-  
+
   <!-- Checkout Form -->
   <form id="order-form">
     <div class="checkout-container">
       <h2>Your Order</h2>
       <ul id="cart-items"></ul>
       <p class="total">Total: $<span id="cart-total">0.00</span></p>
-      
-      <!-- Delivery Information Section -->
+
+      <!-- Delivery Info -->
       <div class="form-section">
         <h3>Delivery Information</h3>
         <label for="customer-name">Name</label>
         <input type="text" id="customer-name" placeholder="Enter your name" required>
-        
+
         <label for="phone-number">Phone Number</label>
         <input type="tel" id="phone-number" placeholder="Enter your phone number" required>
-        
+
         <label for="customer-email">Email</label>
         <input type="email" id="customer-email" placeholder="Enter your email address" required>
-        
-        <!-- Address input wrapped in a relative container for suggestions -->
+
+        <!-- Autocomplete Field -->
         <div class="autocomplete-container" style="position: relative;">
           <label for="address">Delivery Address</label>
           <input type="text" id="address" name="address" placeholder="Enter your address" required>
         </div>
-        
+
         <label for="apt-number">Apartment / Unit (optional)</label>
         <input type="text" id="apt-number" placeholder="Enter apartment or unit number (if any)">
       </div>
-      
-      <!-- Delivery Time Section -->
+
+      <!-- Delivery Time -->
       <div class="form-section">
         <h3>Delivery Time</h3>
         <div class="radio-group" id="delivery-options">
-          <label>
-            <input type="radio" name="delivery-option" value="asap" checked>
-            ASAP (Deliver now)
-          </label>
-          <label>
-            <input type="radio" name="delivery-option" value="scheduled">
-            Schedule for Later
-          </label>
+          <label><input type="radio" name="delivery-option" value="asap" checked> ASAP (Deliver now)</label>
+          <label><input type="radio" name="delivery-option" value="scheduled"> Schedule for Later</label>
         </div>
         <div id="schedule-delivery">
-          <label>Select Delivery Date &amp; Time</label>
+          <label>Select Delivery Date & Time</label>
           <div class="datetime-dropdowns">
             <select id="delivery-month">
               <option value="">Month</option>
-              <option value="01">January</option>
-              <option value="02">February</option>
-              <option value="03">March</option>
-              <option value="04">April</option>
-              <option value="05">May</option>
-              <option value="06">June</option>
-              <option value="07">July</option>
-              <option value="08">August</option>
-              <option value="09">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
+              <option value="01">January</option><option value="02">February</option>
+              <option value="03">March</option><option value="04">April</option>
+              <option value="05">May</option><option value="06">June</option>
+              <option value="07">July</option><option value="08">August</option>
+              <option value="09">September</option><option value="10">October</option>
+              <option value="11">November</option><option value="12">December</option>
             </select>
             <select id="delivery-day">
               <option value="">Day</option>
-              <script>
-                for (let i = 1; i <= 31; i++) {
-                  let day = i.toString().padStart(2, '0');
-                  document.write(`<option value="${day}">${day}</option>`);
-                }
-              </script>
+              <script>for (let i = 1; i <= 31; i++) document.write(`<option value="${String(i).padStart(2, '0')}">${i}</option>`);</script>
             </select>
             <select id="delivery-year">
               <option value="">Year</option>
-              <script>
-                const currentYear = new Date().getFullYear();
-                for (let i = 0; i < 2; i++) {
-                  let year = currentYear + i;
-                  document.write(`<option value="${year}">${year}</option>`);
-                }
-              </script>
+              <script>const y = new Date().getFullYear(); for (let i = 0; i < 2; i++) document.write(`<option value="${y+i}">${y+i}</option>`);</script>
             </select>
             <select id="delivery-hour">
               <option value="">Hour</option>
-              <script>
-                for (let i = 1; i <= 12; i++) {
-                  document.write(`<option value="${i.toString().padStart(2, '0')}">${i}</option>`);
-                }
-              </script>
+              <script>for (let i = 1; i <= 12; i++) document.write(`<option value="${String(i).padStart(2, '0')}">${i}</option>`);</script>
             </select>
             <select id="delivery-minute">
               <option value="">Minute</option>
-              <script>
-                for (let i = 0; i < 60; i += 5) {
-                  let minute = i.toString().padStart(2, '0');
-                  document.write(`<option value="${minute}">${minute}</option>`);
-                }
-              </script>
+              <script>for (let i = 0; i < 60; i += 5) document.write(`<option value="${String(i).padStart(2, '0')}">${String(i).padStart(2, '0')}</option>`);</script>
             </select>
             <select id="delivery-ampm">
               <option value="">AM/PM</option>
@@ -131,26 +102,18 @@
           </div>
         </div>
       </div>
-      
-      <!-- Recurring Order Section -->
+
+      <!-- Recurring Orders -->
       <div class="form-section">
         <h3>Recurring Order?</h3>
         <div class="radio-group">
-          <label>
-            <input type="radio" name="recurring" value="no" checked>
-            One-Time Order
-          </label>
-          <label>
-            <input type="radio" name="recurring" value="yes">
-            Recurring Order
-          </label>
+          <label><input type="radio" name="recurring" value="no" checked> One-Time Order</label>
+          <label><input type="radio" name="recurring" value="yes"> Recurring Order</label>
         </div>
         <div id="recurring-options">
           <label for="frequency">Frequency</label>
           <select id="frequency">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
+            <option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option>
           </select>
           <label for="recurring-start">Start Date</label>
           <input type="date" id="recurring-start">
@@ -158,27 +121,21 @@
           <input type="date" id="recurring-end">
         </div>
       </div>
-      
-      <!-- Payment Section -->
+
+      <!-- Payment -->
       <div class="form-section">
         <h3>Select Payment Method</h3>
         <div class="radio-group">
-          <label>
-            <input type="radio" name="payment-method" value="cash" required>
-            Cash
-          </label>
-          <label>
-            <input type="radio" name="payment-method" value="paypal" required>
-            PayPal
-          </label>
+          <label><input type="radio" name="payment-method" value="cash" required> Cash</label>
+          <label><input type="radio" name="payment-method" value="paypal" required> PayPal</label>
         </div>
         <div id="paypal-button-container"></div>
       </div>
-      
+
       <button type="submit" id="place-order" disabled>Place Order</button>
     </div>
   </form>
-  
+
   <!-- Footer -->
   <div id="footer-placeholder"></div>
   <script>
@@ -188,37 +145,70 @@
       .catch(err => console.error('Error loading footer:', err));
   </script>
 
-  <!-- Firebase Libraries -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
-  <!-- Firebase Config -->
   <script src="/js/firebase-config.js"></script>
 
-  <!-- Your JS Logic -->
+  <!-- App Scripts -->
   <script src="/js/app.js"></script>
   <script src="/js/checkout.js" defer></script>
   <script src="/js/header.js"></script>
 
-  <!-- Load Google Maps API Key Dynamically After Scripts Are Ready -->
-  <script>
-    fetch('/api/google-key')
-      .then(res => res.json())
-      .then(data => {
-        if (!data.googleApiKey || !/^AIza[0-9A-Za-z-_]{35}$/.test(data.googleApiKey)) {
-          throw new Error("Malformed Google API Key");
-        }
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.googleApiKey}&libraries=places&callback=initAutocomplete`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-      })
-      .catch(err => {
-        console.error("Failed to load Google API key:", err);
-      });
-  </script>
+  <!-- Mapbox Scripts -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>  <script>
+    const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYXNham91czEzOTQiLCJhIjoiY204cTgzc3k3MDYxZzJrcHlheTV1ZWx4aiJ9.z6X6Ss0D60yg2VRX3iPcdA'; // Replace this
 
+    const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
+    const DELIVERY_RADIUS_MILES = 5;
+
+    function toRadians(deg) {
+      return deg * (Math.PI / 180);
+    }
+
+    function haversineDistance(lat1, lng1, lat2, lng2) {
+      const R = 3958.8;
+      const dLat = toRadians(lat2 - lat1);
+      const dLng = toRadians(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      types: 'address',
+      placeholder: 'Enter your address',
+      marker: false
+    });
+
+    const addressInput = document.getElementById("address");
+    const container = document.createElement('div');
+    addressInput.parentNode.replaceChild(container, addressInput);
+    container.appendChild(addressInput);
+    geocoder.addTo(container);
+
+    geocoder.on('result', function(e) {
+      const coords = e.result.center;
+      const distance = haversineDistance(
+        NEW_ROCHELLE_COORDS.lat, NEW_ROCHELLE_COORDS.lng,
+        coords[1], coords[0]
+      );
+
+      console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
+
+      if (distance > DELIVERY_RADIUS_MILES) {
+        alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
+        addressInput.value = "";
+      } else {
+        addressInput.value = e.result.place_name;
+      }
+    });
+  </script>
 </body>
 </html>
