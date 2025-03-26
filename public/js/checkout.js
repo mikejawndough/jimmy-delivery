@@ -1,17 +1,14 @@
-// public/js/checkout.js
-
 document.addEventListener("DOMContentLoaded", function() {
-  // --- Delivery Radius Check using Photon Autocomplete ---
-  // Define New Rochelle center and allowed delivery radius (in miles)
+  // --- Delivery Radius Constants ---
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   const DELIVERY_RADIUS_MILES = 5;
-  
-  // Haversine helper functions
+
+  // --- Haversine Formula for Distance ---
   function toRadians(deg) {
     return deg * (Math.PI / 180);
   }
   function haversineDistance(lat1, lng1, lat2, lng2) {
-    const R = 3958.8; // Earth's radius in miles
+    const R = 3958.8;
     const dLat = toRadians(lat2 - lat1);
     const dLng = toRadians(lng2 - lng1);
     const a = Math.sin(dLat / 2) ** 2 +
@@ -20,80 +17,58 @@ document.addEventListener("DOMContentLoaded", function() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
-  
-  // --- Photon Autocomplete Implementation ---
-  const addressInput = document.getElementById("address");
-  const suggestionsList = document.getElementById("suggestions");
-  
-  // Function to fetch suggestions from Photon
-  async function fetchPhotonSuggestions(query) {
-    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`;
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        console.error("Photon API error:", response.status);
-        return [];
-      }
-      const data = await response.json();
-      if (!data || !Array.isArray(data.features)) {
-        console.error("Unexpected Photon response:", data);
-        return [];
-      }
-      return data.features;
-    } catch (error) {
-      console.error("Error fetching Photon suggestions:", error);
-      return [];
+
+  // --- Google Places Autocomplete Setup ---
+  window.initAutocomplete = function() {
+    const addressInput = document.getElementById("address");
+    if (!addressInput) {
+      console.error("Address input field not found.");
+      return;
     }
-  }
-  
-  // Render suggestions in the suggestions list
-  function renderSuggestions(suggestions) {
-    suggestionsList.innerHTML = "";
-    suggestions.forEach(feature => {
-      const li = document.createElement("li");
-      li.textContent = feature.properties.display_name;
-      li.addEventListener("click", function() {
-        addressInput.value = feature.properties.display_name;
-        suggestionsList.innerHTML = "";
-        // Photon returns coordinates as [lng, lat]
-        const locObj = { lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] };
-        const distance = haversineDistance(
-          NEW_ROCHELLE_COORDS.lat,
-          NEW_ROCHELLE_COORDS.lng,
-          locObj.lat,
-          locObj.lng
-        );
-        console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
-        if (distance > DELIVERY_RADIUS_MILES) {
-          alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
-          addressInput.value = "";
-        }
-      });
-      suggestionsList.appendChild(li);
+    if (!window.google || !google.maps || !google.maps.places) {
+      console.error("Google Places API not available.");
+      return;
+    }
+
+    const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+      // Optionally restrict to US
+      // componentRestrictions: { country: "us" }
     });
-  }
-  
-  if (addressInput) {
-    addressInput.addEventListener("keyup", async function() {
-      const query = addressInput.value;
-      console.log("Address input changed:", query);
-      if (query.length < 3) {
-        suggestionsList.innerHTML = "";
+
+    autocomplete.addListener("place_changed", function() {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) {
+        alert("No details available for input: '" + addressInput.value + "'");
         return;
       }
-      const suggestions = await fetchPhotonSuggestions(query);
-      console.log("Suggestions received:", suggestions);
-      renderSuggestions(suggestions);
+
+      addressInput.value = place.formatted_address || addressInput.value;
+
+      const loc = {
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng()
+      };
+      const distance = haversineDistance(
+        NEW_ROCHELLE_COORDS.lat, NEW_ROCHELLE_COORDS.lng,
+        loc.lat, loc.lng
+      );
+
+      console.log(`Distance from New Rochelle: ${distance.toFixed(2)} miles`);
+      if (distance > DELIVERY_RADIUS_MILES) {
+        alert(`Sorry, we only deliver within ${DELIVERY_RADIUS_MILES} miles of New Rochelle.`);
+        addressInput.value = "";
+      }
     });
-  }
-  
-  // --- Existing Functions ---
+  };
+
+  // --- Display Cart Items ---
   function displayCart() {
     const cartList = document.getElementById("cart-items");
     const totalElement = document.getElementById("cart-total");
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     cartList.innerHTML = "";
     let total = 0;
+
     cart.forEach(item => {
       const qty = item.quantity || 1;
       total += item.price * qty;
@@ -101,11 +76,13 @@ document.addEventListener("DOMContentLoaded", function() {
       li.textContent = `${item.name}${item.infused ? " (Infused)" : ""} x${qty} - $${(item.price * qty).toFixed(2)}`;
       cartList.appendChild(li);
     });
+
     total += 5.99; // Delivery fee
     totalElement.textContent = total.toFixed(2);
   }
   displayCart();
-  
+
+  // --- Delivery Option Toggle ---
   document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
     radio.addEventListener("change", function() {
       const scheduleDiv = document.getElementById("schedule-delivery");
@@ -114,7 +91,8 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   });
-  
+
+  // --- Recurring Order Toggle ---
   document.querySelectorAll('input[name="recurring"]').forEach(radio => {
     radio.addEventListener("change", function() {
       const recurringOptions = document.getElementById("recurring-options");
@@ -123,29 +101,27 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   });
-  
+
+  // --- Payment Method Handling ---
   let paypalPaymentCompleted = false;
-  
   document.querySelectorAll('input[name="payment-method"]').forEach(elem => {
     elem.addEventListener("change", function(event) {
       const paypalContainer = document.getElementById("paypal-button-container");
       const placeOrderBtn = document.getElementById("place-order");
-      if (event.target.value === "paypal") {
-        if (paypalContainer) paypalContainer.style.display = "block";
-        if (placeOrderBtn) placeOrderBtn.disabled = true;
-      } else {
-        if (paypalContainer) paypalContainer.style.display = "none";
-        if (placeOrderBtn) placeOrderBtn.disabled = false;
-      }
+      const isPaypal = event.target.value === "paypal";
+
+      if (paypalContainer) paypalContainer.style.display = isPaypal ? "block" : "none";
+      if (placeOrderBtn) placeOrderBtn.disabled = isPaypal && !paypalPaymentCompleted;
     });
   });
-  
-  // Initialize PayPal buttons when the SDK is loaded
+
+  // --- Initialize PayPal Buttons ---
   function initializePaypalButtons() {
     if (typeof paypal === "undefined") {
       setTimeout(initializePaypalButtons, 100);
       return;
     }
+
     paypal.Buttons({
       createOrder: function(data, actions) {
         return actions.order.create({
@@ -156,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function() {
       },
       onApprove: function(data, actions) {
         return actions.order.capture().then(function(details) {
-          alert("PayPal Transaction completed by " + details.payer.name.given_name);
+          alert("PayPal transaction completed by " + details.payer.name.given_name);
           paypalPaymentCompleted = true;
           const placeOrderBtn = document.getElementById("place-order");
           if (placeOrderBtn) placeOrderBtn.disabled = false;
@@ -168,20 +144,21 @@ document.addEventListener("DOMContentLoaded", function() {
     }).render("#paypal-button-container");
   }
   initializePaypalButtons();
-  
-  // Order form submission
+
+  // --- Order Form Submission ---
   document.getElementById("order-form").addEventListener("submit", async function(e) {
     e.preventDefault();
+
     const customerName = document.getElementById("customer-name").value.trim();
     const phoneNumber = document.getElementById("phone-number").value.trim();
     const customerEmail = document.getElementById("customer-email").value.trim();
     const address = document.getElementById("address").value.trim();
-    
+
     if (!customerName || !phoneNumber || !customerEmail || !address) {
       alert("Please fill out all required fields.");
       return;
     }
-    
+
     let deliveryDatetime = "";
     const deliveryOption = document.querySelector('input[name="delivery-option"]:checked').value;
     if (deliveryOption === "asap") {
@@ -193,24 +170,27 @@ document.addEventListener("DOMContentLoaded", function() {
       const hourRaw = document.getElementById("delivery-hour").value;
       const minute = document.getElementById("delivery-minute").value;
       const ampm = document.getElementById("delivery-ampm").value;
+
       if (!month || !day || !year || !hourRaw || !minute || !ampm) {
         alert("Please select a complete delivery date and time.");
         return;
       }
+
       let hour = parseInt(hourRaw);
-      if (ampm === "PM" && hour < 12) { hour += 12; }
-      if (ampm === "AM" && hour === 12) { hour = 0; }
+      if (ampm === "PM" && hour < 12) hour += 12;
+      if (ampm === "AM" && hour === 12) hour = 0;
+
       const hourStr = hour.toString().padStart(2, "0");
       const dateTimeString = `${year}-${month}-${day}T${hourStr}:${minute}:00`;
       deliveryDatetime = new Date(dateTimeString).toISOString();
     }
-    
+
     const selectedPayment = document.querySelector('input[name="payment-method"]:checked').value;
     if (selectedPayment === "paypal" && !paypalPaymentCompleted) {
       alert("Please complete the PayPal payment before placing your order.");
       return;
     }
-    
+
     const recurring = document.querySelector('input[name="recurring"]:checked').value;
     let frequency = null, recurringStart = null, recurringEnd = null;
     if (recurring === "yes") {
@@ -218,11 +198,11 @@ document.addEventListener("DOMContentLoaded", function() {
       recurringStart = document.getElementById("recurring-start").value;
       recurringEnd = document.getElementById("recurring-end").value;
     }
-    
+
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const DELIVERY_FEE = 5.99;
     const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) + DELIVERY_FEE;
-    
+
     const newOrder = {
       customerName,
       phoneNumber,
@@ -239,9 +219,9 @@ document.addEventListener("DOMContentLoaded", function() {
       recurringStart,
       recurringEnd
     };
-    
+
     try {
-      const response = await fetch("http://localhost:3000/order", {
+      const response = await fetch("/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newOrder)

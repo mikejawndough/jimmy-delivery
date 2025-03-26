@@ -7,190 +7,22 @@
   
   <!-- Google Fonts: DynaPuff -->
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
-
-  <!-- Load PayPal SDK asynchronously (keep your client id here) -->
-  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
   
-  <style>
-    /* Basic CSS reset */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'DynaPuff', cursive;
-      background-color: #ffffff;
-      color: #1D428A;
-      padding-bottom: 50px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 36px;
-      margin: 20px 0;
-      color: #F58426;
-    }
-    .checkout-container {
-      width: 90%;
-      max-width: 600px;
-      margin: 0 auto 30px;
-      padding: 20px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      text-align: left;
-      position: relative; /* For suggestions dropdown positioning */
-      /* Make sure we don't clip the suggestions: */
-      overflow: visible; /* If there's any hidden or auto, remove it */
-    }
-    .checkout-container h2 {
-      color: #F58426;
-      margin-bottom: 10px;
-    }
-    .form-section {
-      margin-bottom: 20px;
-    }
-    .form-section h3 {
-      color: #F58426;
-      margin-bottom: 10px;
-      font-size: 20px;
-    }
-    .form-section label {
-      display: block;
-      margin: 6px 0 4px;
-      font-weight: bold;
-      color: #1D428A;
-    }
-    .form-section input[type="text"],
-    .form-section input[type="email"],
-    .form-section input[type="tel"],
-    .form-section select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    /* Suggestions dropdown styling (PHOTON AUTOCOMPLETE) */
-    #suggestions {
-      /* Force it to be absolutely positioned below the address input */
-      position: absolute !important;
-      top: 100% !important;
-      left: 0 !important;
-      width: 100% !important;
-
-      /* Bright border for debugging so you can see it for sure */
-      border: 2px solid red !important;
-
-      background: #fff !important;
-      color: #000 !important;
-      max-height: 200px !important;
-      overflow-y: auto !important;
-
-      /* Very high z-index so it’s on top of everything */
-      z-index: 999999 !important;
-
-      /* Force it to show up */
-      display: block !important;
-    }
-    #suggestions li {
-      padding: 8px !important;
-      cursor: pointer !important;
-      background-color: #fff !important;
-      color: #000 !important;
-      border-bottom: 1px solid #ccc !important;
-    }
-    #suggestions li:hover {
-      background-color: #f0f0f0 !important; /* Highlight on hover */
-    }
-
-    .datetime-dropdowns {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .datetime-dropdowns select {
-      flex: 1;
-      min-width: 70px;
-    }
-    .radio-group {
-      margin-top: 8px;
-    }
-    .radio-group label {
-      display: block;
-      margin-bottom: 8px;
-      cursor: pointer;
-    }
-    #schedule-delivery {
-      display: none;
-      margin-top: 10px;
-    }
-    #recurring-options {
-      display: none;
-      margin-top: 10px;
-      padding: 10px;
-      background: #ffffff;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #paypal-button-container {
-      margin-top: 20px;
-      display: none;
-    }
-    #place-order {
-      width: 100%;
-      padding: 12px;
-      border-radius: 5px;
-      border: none;
-      background-color: #1D428A;
-      color: #fff;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      margin-top: 20px;
-    }
-    #place-order:hover {
-      background-color: #163769;
-    }
-    #place-order:disabled {
-      background-color: #888;
-      cursor: not-allowed;
-    }
-    #cart-items {
-      list-style: none;
-      padding: 0;
-      margin-bottom: 10px;
-    }
-    #cart-items li {
-      margin: 5px 0;
-    }
-    .total {
-      font-weight: bold;
-      text-align: right;
-      margin-bottom: 20px;
-    }
-    footer {
-      text-align: center;
-      margin-top: 30px;
-      padding: 20px;
-      background-color: #1D428A;
-      color: white;
-    }
-  </style>
+  <!-- External CSS for Checkout Page -->
+  <link rel="stylesheet" href="/css/checkout.css">
+  
+  <!-- Load PayPal SDK asynchronously -->
+  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
 </head>
 <body>
-  <!-- Header Placeholder -->
+
+  <!-- Header -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('header-placeholder').innerHTML = data;
-      })
-      .catch(error => console.error('Error loading header:', error));
+      .then(res => res.text())
+      .then(html => { document.getElementById('header-placeholder').innerHTML = html; })
+      .catch(err => console.error('Error loading header:', err));
   </script>
   
   <h1>Checkout</h1>
@@ -207,18 +39,21 @@
         <h3>Delivery Information</h3>
         <label for="customer-name">Name</label>
         <input type="text" id="customer-name" placeholder="Enter your name" required>
-
+        
         <label for="phone-number">Phone Number</label>
         <input type="tel" id="phone-number" placeholder="Enter your phone number" required>
-
+        
         <label for="customer-email">Email</label>
         <input type="email" id="customer-email" placeholder="Enter your email address" required>
-
-        <label for="address">Delivery Address</label>
-        <input type="text" id="address" name="address" placeholder="Enter your address" required>
-
-        <!-- Suggestions container (Photon Autocomplete) -->
-        <ul id="suggestions"></ul>
+        
+        <!-- Address input wrapped in a relative container for suggestions -->
+        <div class="autocomplete-container" style="position: relative;">
+          <label for="address">Delivery Address</label>
+          <input type="text" id="address" name="address" placeholder="Enter your address" required>
+        </div>
+        
+        <label for="apt-number">Apartment / Unit (optional)</label>
+        <input type="text" id="apt-number" placeholder="Enter apartment or unit number (if any)">
       </div>
       
       <!-- Delivery Time Section -->
@@ -344,32 +179,46 @@
     </div>
   </form>
   
-  <!-- Footer Placeholder -->
+  <!-- Footer -->
   <div id="footer-placeholder"></div>
   <script>
     fetch('footer.html')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('footer-placeholder').innerHTML = data;
-      })
-      .catch(error => console.error('Error loading footer:', error));
+      .then(res => res.text())
+      .then(html => { document.getElementById('footer-placeholder').innerHTML = html; })
+      .catch(err => console.error('Error loading footer:', err));
   </script>
-  
+
   <!-- Firebase Libraries -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  
-  <!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
+
+  <!-- Firebase Config -->
   <script src="/js/firebase-config.js"></script>
-  
-  <!-- Common Functions (app.js) -->
+
+  <!-- Your JS Logic -->
   <script src="/js/app.js"></script>
-  
-  <!-- Checkout Functionality (checkout.js) -->
-  <script src="/js/checkout.js"></script>
-  
-  <!-- Header Functionality (header.js) -->
+  <script src="/js/checkout.js" defer></script>
   <script src="/js/header.js"></script>
+
+  <!-- Load Google Maps API Key Dynamically After Scripts Are Ready -->
+  <script>
+    fetch('/api/google-key')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.googleApiKey || !/^AIza[0-9A-Za-z-_]{35}$/.test(data.googleApiKey)) {
+          throw new Error("Malformed Google API Key");
+        }
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.googleApiKey}&libraries=places&callback=initAutocomplete`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      })
+      .catch(err => {
+        console.error("Failed to load Google API key:", err);
+      });
+  </script>
+
 </body>
 </html>

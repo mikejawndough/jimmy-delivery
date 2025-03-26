@@ -1,0 +1,82 @@
+/* checkout.css */
+
+/* Base reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'DynaPuff', cursive;
+  background-color: #ffffff;
+  color: #1D428A;
+  padding-bottom: 50px;
+}
+
+/* Checkout container */
+.checkout-container {
+  width: 90%;
+  max-width: 600px;
+  margin: 0 auto 30px;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-align: left;
+  position: relative;  /* This is important for absolute positioning of suggestions */
+}
+
+/* Form elements */
+.form-section label {
+  display: block;
+  margin: 6px 0 4px;
+  font-weight: bold;
+  color: #1D428A;
+}
+.form-section input,
+.form-section select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+/* Autocomplete container */
+.autocomplete-container {
+  position: relative;
+}
+
+/* Suggestions dropdown styling */
+#suggestions {
+  position: absolute;
+  top: 100%;  /* directly below the input */
+  left: 0;
+  width: 100%;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 9999;
+  display: none;  /* Initially hidden; your JS can set it to block when needed */
+}
+#suggestions li {
+  padding: 8px;
+  cursor: pointer;
+  background-color: #fff;
+  color: #000;
+  border-bottom: 1px solid #ccc;
+}
+#suggestions li:hover {
+  background-color: #f0f0f0;
+}
+
+/* Other styles (cart, buttons, etc.) remain as needed */
+.total {
+  font-weight: bold;
+  text-align: right;
+  margin-bottom: 20px;
+}
