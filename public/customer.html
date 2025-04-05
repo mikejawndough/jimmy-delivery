@@ -4,108 +4,105 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Customer Dashboard - Jimmy's Pizza</title>
-  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
-    body { font-family: 'DynaPuff', cursive; margin: 0; padding: 0; background: #fff; color: #1D428A; text-align: center; }
-    .customer-dashboard { padding: 20px; }
-    .customer-dashboard h1 { font-size: 36px; margin-bottom: 20px; }
-    .container { max-width: 400px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-    .hidden { display: none; }
-    #favorites-section {
-      margin-top: 30px;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
+    body {
+      margin: 0;
+      font-family: 'DynaPuff', cursive;
+      background-color: #ffffff;
+      color: #1D428A;
     }
-    #favorites-section h2 { margin-bottom: 10px; }
-    #favorites-list { list-style: none; padding: 0; }
-    #favorites-list li { background: #f5f5f5; margin: 5px 0; padding: 8px; border-radius: 5px; }
-    footer { background: #1D428A; color: white; text-align: center; padding: 15px; width: 100%; margin-top: 30px; }
-    button { cursor: pointer; padding: 10px 15px; font-size: 16px; border-radius: 5px; border: none; background: #1D428A; color: white; margin-top: 10px; }
-    button:hover { background: #163769; }
+
+    main {
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #F58426;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .orders {
+      max-width: 800px;
+      margin: 0 auto;
+      border-top: 2px solid #eee;
+    }
+
+    .order {
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .order:last-child {
+      border-bottom: none;
+    }
+
+    .order h3 {
+      margin: 0;
+      font-size: 20px;
+      color: #1D428A;
+    }
+
+    .order p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    footer {
+      margin-top: 40px;
+      background-color: #1D428A;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      width: 100%;
+    }
   </style>
 </head>
+<script src="/js/age-check.js"></script>
 <body>
-  <!-- Header Placeholder -->
+
+  <!-- Header Include -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
-      .then(function(response) { return response.text(); })
-      .then(function(data) { document.getElementById('header-placeholder').innerHTML = data; })
-      .catch(function(error) { console.error('Error loading header:', error); });
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('header-placeholder').innerHTML = data;
+      })
+      .catch(error => {
+        console.error('Error loading header:', error);
+      });
   </script>
 
-  <section class="customer-dashboard">
-    <h1>Welcome to Jimmy's Pizza</h1>
-    <p>Sign up or log in to track your orders and manage your favorites.</p>
-    
-    <!-- Sign Up Section -->
-    <div class="container" id="signup-section">
-      <h2>Sign Up</h2>
-      <form onsubmit="signup(event)">
-        <input type="text" id="name" placeholder="Full Name" required><br>
-        <input type="email" id="signup-email" placeholder="Email Address" required><br>
-        <input type="tel" id="phone" placeholder="Phone Number" required><br>
-        <input type="password" id="signup-password" placeholder="Password" required><br>
-        <button type="submit">Create Account</button>
-      </form>
-      <p>Already have an account? <a href="#" onclick="showLogin()">Log in</a></p>
+  <main>
+    <h1>Your Orders</h1>
+    <div class="orders" id="customer-orders">
+      <!-- Order history will be injected here by customer.js -->
     </div>
-    
-    <!-- Log In Section -->
-    <div class="container hidden" id="login-section">
-      <h2>Log In</h2>
-      <form onsubmit="login(event)">
-        <input type="email" id="login-email" placeholder="Email Address" required><br>
-        <input type="password" id="login-password" placeholder="Password" required><br>
-        <button type="submit">Log In</button>
-      </form>
-      <p>Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
-    </div>
-    
-    <!-- Dashboard Section -->
-    <div class="container hidden" id="dashboard-section">
-      <h2>Your Dashboard</h2>
-      <p id="user-info"></p>
-      <h3>Order History</h3>
-      <ul id="order-list"></ul>
-      <div id="favorites-section">
-        <h2>Your Favorites</h2>
-        <ul id="favorites-list"></ul>
-      </div>
-      <button onclick="logout()">Log Out</button>
-    </div>
+  </main>
 
-    <!-- Extra button to force showing the login screen -->
-    <button onclick="showLogin()">Show Login</button>
-  </section>
-  
-  <!-- Footer Placeholder -->
+  <!-- Footer Include -->
   <div id="footer-placeholder"></div>
   <script>
     fetch('footer.html')
-      .then(function(response) { return response.text(); })
-      .then(function(data) { document.getElementById('footer-placeholder').innerHTML = data; })
-      .catch(function(error) { console.error('Error loading footer:', error); });
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('footer-placeholder').innerHTML = data;
+      })
+      .catch(error => {
+        console.error('Error loading footer:', error);
+      });
   </script>
-  
-<!-- Firebase Libraries -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
-<!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
-<script src="/js/firebase-config.js"></script>
-
-<!-- Common Functions (app.js) -->
-<script src="/js/app.js"></script>
-
-<!-- Header Functionality (header.js) -->
-<script src="/js/header.js"></script>
-  
+  <!-- Firebase + JS -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/customer.js"></script>
+  <script src="/js/header.js"></script>
 </body>
 </html>

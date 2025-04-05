@@ -1,22 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Footer - Jimmy's Pizza</title>
-  <style>
-    footer {
-      background-color: #1D428A;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      width: 100%;
-      position: bottom;
-    }
-  </style>
-</head>
-<body>
-  <footer>
-    <p>&copy; 2025 Jimmy's Pizza. All Rights Reserved.</p>
-  </footer>
-</body>
-</html>
+<footer style="background:#1D428A; color:white; padding:10px 15px; text-align:center; position:relative;">
+  <div class="admin-footer-nav">
+    <button id="admin-menu-toggle" style="background:none; border:none; color:white; font-size:28px; position:absolute; left:15px; top:5px; cursor:pointer;">
+      ☰
+    </button>
+    <span>&copy; 2025 Jimmy's Pizza. All rights reserved.</span>
+
+    <nav id="admin-menu" style="display:none; position:absolute; left:15px; bottom:40px; background:white; color:#1D428A; padding:10px; border-radius:5px; box-shadow:0 2px 10px rgba(0,0,0,0.3); z-index:999;">
+      <ul style="list-style:none; padding:0; margin:0;">
+        <li><a href="/admin.html" style="color:#1D428A; text-decoration:none;">Admin Dashboard</a></li>
+        <li><a href="/driver.html" style="color:#1D428A; text-decoration:none;">Driver Portal</a></li>
+        <li><a href="/tracker.html" style="color:#1D428A; text-decoration:none;">Live Tracker</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>

@@ -2,205 +2,178 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Jimmy’s Pizza - Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jimmy's Pizza - Home</title>
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
     body {
       font-family: 'DynaPuff', cursive;
       margin: 0;
       padding: 0;
-      background-color: #ffffff;
+      background-color: #fff;
       color: #1D428A;
       text-align: center;
     }
-    .hero {
-      background-color: #1D428A;
-      color: white;
-      padding: 80px 20px;
-      margin-top: 20px;
+
+    .homepage-content {
+      padding: 60px 20px;
     }
-    .hero h1 {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-    .hero p {
-      font-size: 22px;
-    }
-    #custom-text {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 10px;
-      font-size: 16px;
-      color: #1D428A;
-      text-align: center;
-      line-height: 1.5;
-      margin-bottom: 100px;
-    }
-    footer {
-      background-color: #1D428A;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      position: relative;
-      width: 100%;
-    }
-    /* Age Verification Modal Styles */
-    .age-modal-overlay {
+
+    #age-modal {
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 10000;
+      z-index: 9999;
     }
-    .age-modal {
+
+    .age-box {
       background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 90%;
+      padding: 30px;
+      border-radius: 10px;
       max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
       text-align: center;
     }
-    .age-modal h2 {
-      margin-top: 0;
-      color: #F58426;
+
+    .age-box h2 {
+      margin-bottom: 20px;
+      color: #1D428A;
     }
-    .age-modal input[type="date"] {
-      width: 100%;
+
+    .age-box input {
       padding: 10px;
-      margin: 10px 0;
       font-size: 16px;
+      width: 100%;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
-    .age-modal button {
-      background-color: #1D428A;
+
+    .age-box button {
+      background-color: #F58426;
       color: white;
       padding: 10px 20px;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      border-radius: 6px;
       font-size: 16px;
-    }
-    .age-modal button:hover {
-      background-color: #163769;
-    }
-    .age-modal p.error {
-      color: red;
-      display: none;
+      cursor: pointer;
       margin-top: 10px;
     }
+
+    .age-box button:hover {
+      background-color: #d46a1f;
+    }
+
+    .error-msg {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    header {
+      background-color: #1D428A;
+      color: white;
+      padding: 20px;
+    }
   </style>
-  
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      if (!localStorage.getItem("ageVerified")) {
-        document.body.style.overflow = "hidden";
-        var modalOverlay = document.createElement("div");
-        modalOverlay.className = "age-modal-overlay";
-        modalOverlay.innerHTML = `
-          <div class="age-modal">
-            <h2>Age Verification</h2>
-            <p>Please enter your date of birth. You must be 21 or older to access this site.</p>
-            <input type="date" id="dob" max="${new Date().toISOString().split("T")[0]}" />
-            <button id="verify-btn">Verify</button>
-            <p class="error" id="error-msg">Sorry, you must be 21 or older to access this site.</p>
-          </div>
-        `;
-        document.body.appendChild(modalOverlay);
-        document.getElementById("verify-btn").addEventListener("click", function() {
-          var dobValue = document.getElementById("dob").value;
-          if (!dobValue) {
-            alert("Please enter your date of birth.");
-            return;
-          }
-          var dob = new Date(dobValue);
-          var today = new Date();
-          var age = today.getFullYear() - dob.getFullYear();
-          var m = today.getMonth() - dob.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) { age--; }
-          if (age >= 21) {
-            localStorage.setItem("ageVerified", "true");
-            modalOverlay.remove();
-            document.body.style.overflow = "";
-          } else {
-            document.getElementById("error-msg").style.display = "block";
-          }
-        });
-      }
-    });
-  </script>
-  
 </head>
 <body>
+  <!-- Age Modal -->
+  <div id="age-modal">
+    <div class="age-box">
+      <h2>Enter Your Birthday</h2>
+      <input type="text" id="birthday-input" placeholder="MM/DD/YYYY" />
+      <div class="error-msg" id="age-error"></div>
+      <button id="submit-birthday">Enter</button>
+    </div>
+  </div>
 
   <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
   <script>
-    fetch('header.html')
-      .then(response => response.text())
-      .then(function(data) {
+    fetch('/header.html')
+      .then(res => res.text())
+      .then(data => {
         document.getElementById('header-placeholder').innerHTML = data;
-      })
-      .catch(function(error) {
-        console.error('Error loading header:', error);
+        const script = document.createElement('script');
+        script.src = '/js/header.js';
+        document.body.appendChild(script);
       });
   </script>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <h1>Welcome to Jimmy's Pizza!</h1>
-    <p>Detroit-Style Pizza with a NY Attitude. Fresh, Hot, and Always Delicious.</p>
-  </section>
-  
-  <!-- Custom Text Section -->
-  <div id="custom-text">
-    <p>
-      Welcome to Jimmy's Pizza -<br>
-      Where the spirit of Detroit-style pizza meets the charm of Westchester, NY! Founded by Jimmy, our pizzeria is a culinary haven that celebrates the art of crafting unforgettable pies.
-    </p>
-    <p>
-      Legend had it that Tony, the talking tomato whispered the secrets of the perfect crust as Jimmy was strolling by, and thus, Jimmy's destiny as a pizza maestro was sealed. Our commitment to quality ingredients, expert craftsmanship, and a dash of humor in every slice sets us apart.
-    </p>
-    <p>
-      Though Jimmy may be a fictional character, the legacy of Jimmy's Pizza lives on in the hearts and taste buds of Westchester locals. So, if you ever find yourself in the area and hear the faint sound of the crunch of a crust, follow your senses – for you may just stumble upon the legendary Jimmy's Pizza.
-    </p>
+  <!-- Main Content -->
+  <div class="homepage-content">
+    <h1>Welcome to Jimmy’s Detroit-Style Pizza</h1>
+    <p>Deep. Crispy. Cheesy. Delicious.</p>
+    <a href="order.html">
+      <button style="font-size: 18px; padding: 12px 24px;">Start Your Order</button>
+    </a>
   </div>
-  
-  <!-- Elfsight Instagram Feed Widget -->
-  <script src="https://static.elfsight.com/platform/platform.js" async></script>
-  <div class="elfsight-app-88a1e5fe-48f9-43b3-9e69-566bbfc43783" data-elfsight-app-lazy></div>
-  
-  <!-- Footer Placeholder -->
+
+  <!-- Footer -->
   <div id="footer-placeholder"></div>
   <script>
-    fetch('footer.html')
-      .then(response => response.text())
-      .then(function(data) {
+    fetch('/footer.html')
+      .then(res => res.text())
+      .then(data => {
         document.getElementById('footer-placeholder').innerHTML = data;
-      })
-      .catch(function(error) {
-        console.error('Error loading footer:', error);
       });
   </script>
-  
-<!-- Firebase Libraries -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
-<!-- Firebase Configuration (initializes Firebase and sets window.auth/window.db) -->
-<script src="/js/firebase-config.js"></script>
+  <!-- Age Logic -->
+  <script>
+    function is21OrOlder(birthday) {
+      const [month, day, year] = birthday.split('/').map(num => parseInt(num));
+      if (!month || !day || !year || birthday.length !== 10) return false;
 
-<!-- Common Functions (app.js) -->
-<script src="/js/app.js"></script>
+      const birthDate = new Date(year, month - 1, day);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      const d = today.getDate() - birthDate.getDate();
 
-<!-- Header Functionality (header.js) -->
-<script src="/js/header.js"></script>
-  
+      if (age > 21) return true;
+      if (age === 21 && (m > 0 || (m === 0 && d >= 0))) return true;
+      return false;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("verifiedAge") === "true") {
+        document.getElementById("age-modal").style.display = "none";
+      }
+
+      document.getElementById("submit-birthday").addEventListener("click", () => {
+        const input = document.getElementById("birthday-input").value.trim();
+        const error = document.getElementById("age-error");
+
+        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+          error.textContent = "Please use MM/DD/YYYY format.";
+          return;
+        }
+
+        if (!is21OrOlder(input)) {
+          error.textContent = "Sorry, you must be at least 21 years old.";
+          return;
+        }
+
+        localStorage.setItem("verifiedAge", "true");
+        document.getElementById("age-modal").style.display = "none";
+      });
+    });
+  </script>
+
+  <!-- Firebase & Core -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/footer.js"></script>
 </body>
 </html>

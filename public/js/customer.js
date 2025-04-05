@@ -1,88 +1,119 @@
-// public/js/customer.js
+// Initialize Firebase App
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.auth) {
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        loadDashboard(user);
-      } else {
-        showLogin();
-      }
+// Function to display orders
+function loadOrders() {
+  const user = auth.currentUser;
+  if (!user) {
+    console.log('No user logged in.');
+    return;
+  }
+
+  db.collection('orders')
+    .where('customerId', '==', user.uid)
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(snapshot => {
+      const orders = snapshot.docs.map(doc => doc.data());
+      renderOrders(orders);
     });
+}
+
+// Function to render orders to the dashboard
+function renderOrders(orders) {
+  const orderContainer = document.getElementById('orders-container');
+  orderContainer.innerHTML = ''; // Clear existing content
+
+  orders.forEach(order => {
+    const orderCard = document.createElement('div');
+    orderCard.className = 'order';
+    orderCard.innerHTML = `
+      <h3>Order #${order.id}</h3>
+      <p><strong>Items:</strong> ${order.items.join(', ')}</p>
+      <p><strong>Status:</strong> ${order.status}</p>
+      <p><strong>Driver:</strong> ${order.driverName || 'Not Assigned'}</p>
+      <button class="reorder-btn" onclick="reorderItems('${order.id}')">Reorder</button>
+      <button class="favorites-btn" onclick="addToFavorites('${order.id}')">Add to Favorites</button>
+    `;
+    orderContainer.appendChild(orderCard);
+  });
+}
+
+// Reorder functionality
+function reorderItems(orderId) {
+  // Simulate adding items to the cart for reordering
+  console.log('Reordering items for order:', orderId);
+  // Logic for reordering items can be added here
+}
+
+// Function to manage favorites (add an order to favorites)
+function addToFavorites(orderId) {
+  const user = auth.currentUser;
+  if (!user) {
+    console.log('No user logged in.');
+    return;
+  }
+
+  db.collection('favorites').add({
+    userId: user.uid,
+    orderId: orderId,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  }).then(() => {
+    console.log('Order added to favorites!');
+  }).catch(error => {
+    console.error('Error adding to favorites:', error);
+  });
+}
+
+// Handle user login state changes
+auth.onAuthStateChanged(user => {
+  if (user) {
+    console.log('User logged in:', user.email);
+    loadOrders();
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('order-container').style.display = 'block';
+  } else {
+    console.log('User not logged in');
+    document.getElementById('login-container').style.display = 'block';
+    document.getElementById('order-container').style.display = 'none';
   }
 });
 
-window.loadDashboard = function(user) {
-  document.getElementById("login-section")?.classList.add("hidden");
-  document.getElementById("signup-section")?.classList.add("hidden");
-  document.getElementById("dashboard-section")?.classList.remove("hidden");
+// Handle login form submission
+document.getElementById('login-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const errorMessage = document.getElementById('error-message');
 
-  const userInfo = document.getElementById("user-info");
-  if (userInfo) userInfo.textContent = `Logged in as ${user.email}`;
-
-  db.collection("customers").doc(user.email).collection("orderHistory")
-    .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
-      const orderList = document.getElementById("order-list");
-      if (orderList) {
-        orderList.innerHTML = "";
-        snapshot.forEach(doc => {
-          const order = doc.data();
-          const li = document.createElement("li");
-          li.textContent = `Order #${doc.id}: ${order.items.map(i => i.name).join(", ")} - ${order.status}`;
-          orderList.appendChild(li);
-        });
-      }
-    }, error => console.error("Error loading order history:", error));
-
-  loadFavorites();
-};
-
-function loadFavorites() {
-  const user = auth.currentUser;
-  if (!user) return;
-  const favoritesList = document.getElementById("favorites-list");
-  if (!favoritesList) return;
-  db.collection("customers").doc(user.email).collection("favorites")
-    .orderBy("addedAt", "desc")
-    .onSnapshot(snapshot => {
-      favoritesList.innerHTML = "";
-      snapshot.forEach(doc => {
-        const fav = doc.data();
-        const li = document.createElement("li");
-        li.textContent = `${fav.name} - $${fav.price.toFixed(2)}${fav.infused ? " (Infused)" : ""}`;
-        favoritesList.appendChild(li);
-      });
-    }, error => console.error("Error loading favorites:", error));
-}
-window.loadFavorites = loadFavorites;
-
-window.addFavorite = function(item) {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("You must be logged in to add favorites.");
-    return;
-  }
-  const customerDoc = db.collection("customers").doc(user.email);
-  const favoritesRef = customerDoc.collection("favorites");
-  favoritesRef.where("name", "==", item.name).get()
-    .then(snapshot => {
-      if (!snapshot.empty) {
-        alert(`${item.name} is already in your favorites.`);
-        return;
-      }
-      return favoritesRef.add({
-        name: item.name,
-        price: item.price,
-        infused: item.infused,
-        addedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    })
+  auth.signInWithEmailAndPassword(email, password)
     .then(() => {
-      alert(`${item.name} added to favorites!`);
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('order-container').style.display = 'block';
+      loadOrders();
     })
-    .catch(error => {
-      console.error("Error adding favorite:", error);
-      alert("Error adding favorite: " + error.message);
+    .catch(err => {
+      errorMessage.textContent = 'Login failed: ' + err.message;
     });
-};
+});
+
+// Handle logout
+document.getElementById('logout-btn').addEventListener('click', () => {
+  auth.signOut().then(() => {
+    document.getElementById('login-container').style.display = 'block';
+    document.getElementById('order-container').style.display = 'none';
+    console.log('Logged out');
+  }).catch(err => {
+    console.error('Error logging out:', err);
+  });
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const user = auth.currentUser;
+  if (user) {
+    loadOrders();
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('order-container').style.display = 'block';
+  }
+});

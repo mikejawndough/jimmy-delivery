@@ -5,39 +5,73 @@
   <title>Driver Dashboard - Jimmy’s Pizza</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css"> 
   <style>
     body {
       font-family: 'DynaPuff', cursive;
+      background-color: #fff;
+      color: #1D428A;
+      margin: 0;
+      padding: 0;
       text-align: center;
-      padding: 2rem;
     }
-    .hidden { display: none; }
-    input, button {
-      font-family: inherit;
-      font-size: 16px;
-      padding: 10px;
-      margin: 10px;
-      width: 300px;
-      max-width: 90%;
-    }
-    #map {
+
+    header {
       width: 100%;
-      height: 400px;
-      margin-top: 20px;
-      border-radius: 8px;
+      background-color: #1D428A;
+      color: white;
+      text-align: center;
+      padding: 20px;
     }
-    #status {
-      margin-top: 20px;
-      font-weight: bold;
+
+    .dashboard-container {
+      margin-top: 100px;
+      padding: 20px;
+    }
+
+    .dashboard-container h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .order-list {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    footer {
+      background-color: #1D428A;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      position: relative;
+      bottom: 0;
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
+  <!-- Header Placeholder -->
+  <div id="header-placeholder"></div>
+  <script>
+    fetch('header.html')
+      .then(response => response.text())
+      .then(function(data) {
+        document.getElementById('header-placeholder').innerHTML = data;
+      })
+      .catch(function(error) {
+        console.error('Error loading header:', error);
+      });
+  </script>
+  
   <h1>Driver Dashboard</h1>
 
-  <!-- Login Form -->
   <div id="login-section">
     <input id="email" type="email" placeholder="Driver Email" required />
     <input id="password" type="password" placeholder="Password" required />
@@ -46,33 +80,20 @@
     <p id="login-error" style="color: red;"></p>
   </div>
 
-  <!-- Tracker UI -->
   <div id="driver-ui" class="hidden">
+    <p>You are logged in as a delivery driver.</p>
     <button onclick="logoutDriver()">Logout</button>
-    <br />
-    <input id="orderId" placeholder="Enter Order ID" />
-    <input id="manual-lat" type="number" placeholder="Latitude" step="0.000001" />
-    <input id="manual-lng" type="number" placeholder="Longitude" step="0.000001" />
-    <br />
-    <button onclick="sendManualLocation()">Send Manual Location</button>
-    <button onclick="startLiveTracking()">Start GPS Tracking</button>
-    <div id="status"></div>
-    <div id="map"></div>
+    <div id="notification-banner" style="display:none; background:#F58426; color:white; padding:10px; font-weight:bold;"></div>
+    <div id="assigned-orders"></div>
   </div>
 
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
 
-  <!-- Mapbox SDK -->
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-
   <script>
-    const MAPBOX_TOKEN = 'pk.your_mapbox_access_token_here'; // Replace with your token
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    let map, driverMarker;
+    const assignedOrdersDiv = document.getElementById("assigned-orders");
 
     auth.onAuthStateChanged(user => {
       const loggedIn = !!user;
@@ -80,8 +101,7 @@
       document.getElementById("driver-ui").classList.toggle("hidden", !loggedIn);
 
       if (loggedIn) {
-        console.log("Driver signed in:", user.email);
-        initMap();
+        loadAssignedOrders(user.email);
       }
     });
 
@@ -101,53 +121,125 @@
       auth.signOut();
     }
 
-    function initMap() {
-      map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [-73.7824, 40.9115],
-        zoom: 13
-      });
-    }
+    function loadAssignedOrders(driverEmail) {
+      db.collection("orders").where("assignedTo", "==", driverEmail)
+        .orderBy("createdAt", "desc")
+        .onSnapshot(snapshot => {
+          const prevCount = window.lastOrderCount || 0;
+          const currentCount = snapshot.size;
+          assignedOrdersDiv.innerHTML = "<h2>Assigned Orders</h2>";
 
-    function sendManualLocation() {
-      const orderId = document.getElementById("orderId").value.trim();
-      const lat = parseFloat(document.getElementById("manual-lat").value);
-      const lng = parseFloat(document.getElementById("manual-lng").value);
-      if (!orderId || isNaN(lat) || isNaN(lng)) return alert("Enter order ID + valid coordinates.");
-
-      db.collection("drivers").doc(orderId).set({ lat, lng })
-        .then(() => {
-          document.getElementById("status").textContent = `✅ Sent driver location for ${orderId}`;
-          if (map && !driverMarker) {
-            driverMarker = new mapboxgl.Marker({ color: 'red' }).setLngLat([lng, lat]).addTo(map);
-          } else if (driverMarker) {
-            driverMarker.setLngLat([lng, lat]);
+          if (prevCount && currentCount > prevCount) {
+            const banner = document.getElementById("notification-banner");
+            if (banner) {
+              banner.textContent = "You’ve been assigned a new order!";
+              banner.style.display = "block";
+              setTimeout(() => { banner.style.display = "none"; }, 5000);
+            }
           }
+
+          window.lastOrderCount = currentCount;
+
+          if (snapshot.empty) {
+            assignedOrdersDiv.innerHTML += "<p>No orders assigned to you.</p>";
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            const order = doc.data();
+            const box = document.createElement("div");
+            box.className = "order-box";
+            box.innerHTML = `
+              <strong>Customer:</strong> ${order.customerName}<br>
+              <strong>Phone:</strong> ${order.phoneNumber}<br>
+              <strong>Address:</strong> ${order.address}<br>
+              <strong>Status:</strong> ${order.status}<br>
+              <div id="countdown-${doc.id}" style="font-weight:bold;color:#F58426;"></div>
+              <button onclick="startDelivery('${doc.id}')">Start Delivery</button>
+              <button onclick="markDelivered('${doc.id}')">Mark as Delivered</button>
+              <button onclick="addMoreTime('${doc.id}', ${parseInt(order.status?.match(/ETA: (\\d+)/)?.[1] || 0)})">Add 5 More Minutes</button>
+              <ul>
+                ${order.items.map(i => `<li>${i.name}${i.infused ? " (Infused)" : ""} x${i.quantity || 1}</li>`).join('')}
+              </ul>
+            `;
+            assignedOrdersDiv.appendChild(box);
+
+            const etaMatch = order.status.match(/ETA: (\\d+) mins/);
+            if (etaMatch) {
+              let minutes = parseInt(etaMatch[1]);
+              const countdownEl = document.getElementById("countdown-" + doc.id);
+              function updateCountdown() {
+                if (minutes >= 0) {
+                  countdownEl.textContent = `ETA Countdown: ${minutes} min${minutes !== 1 ? 's' : ''} remaining`;
+                  minutes--;
+                  setTimeout(updateCountdown, 60000);
+                } else {
+                  countdownEl.textContent = "ETA has passed.";
+                }
+              }
+              window["countdown_" + doc.id] = () => { minutes += 5; updateCountdown(); };
+              updateCountdown();
+            }
+          });
+        }, err => {
+          assignedOrdersDiv.innerHTML = "<p>Error loading orders.</p>";
+          console.error(err);
         });
     }
 
-    function startLiveTracking() {
-      const orderId = document.getElementById("orderId").value.trim();
-      if (!orderId) return alert("Enter order ID");
+    function startDelivery(orderId) {
+      fetch(`/mapbox-eta/${orderId}`)
+        .then(res => res.json())
+        .then(data => {
+          const etaText = data.eta || "soon";
+          return db.collection("orders").doc(orderId).update({
+            status: `Out for Delivery (ETA: ${etaText})`
+          });
+        })
+        .then(() => {
+          alert("Order marked as Out for Delivery.");
+        })
+        .catch(err => {
+          console.error("Failed to start delivery:", err);
+          alert("Failed to update delivery status.");
+        });
+    }
 
-      navigator.geolocation.watchPosition(pos => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-
-        db.collection("drivers").doc(orderId).set({ lat, lng });
-        document.getElementById("status").textContent = `📍 Updated via GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-
-        if (map && !driverMarker) {
-          driverMarker = new mapboxgl.Marker({ color: 'red' }).setLngLat([lng, lat]).addTo(map);
-        } else if (driverMarker) {
-          driverMarker.setLngLat([lng, lat]);
+    function addMoreTime(orderId, currentETA) {
+      const newETA = currentETA + 5;
+      db.collection("orders").doc(orderId).update({
+        status: `Out for Delivery (ETA: ${newETA} mins)`
+      }).then(() => {
+        if (typeof window["countdown_" + orderId] === "function") {
+          window["countdown_" + orderId]();
         }
-      }, err => {
+        alert("Added 5 more minutes to ETA.");
+      }).catch(err => {
+        alert("Failed to update ETA.");
         console.error(err);
-        alert("GPS access denied.");
-      }, { enableHighAccuracy: true });
+      });
+    }
+
+    function markDelivered(orderId) {
+      if (!confirm("Mark this order as completed?")) return;
+      db.collection("orders").doc(orderId).update({
+        status: "Completed"
+      }).then(() => {
+        alert("Order marked as delivered.");
+      }).catch(err => {
+        alert("Failed to update status.");
+        console.error(err);
+      });
     }
   </script>
+  <div id="footer-placeholder"></div>
+  <script>
+    fetch('footer.html')
+      .then(res => res.text())
+      .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
+      .catch(err => console.error('Footer load error:', err));
+  </script>
+
+<script src="/js/footer.js"></script>
 </body>
 </html>

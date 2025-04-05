@@ -1,115 +1,83 @@
-// public/js/header.js
-(function() {
-  function waitForHeaderElements(callback) {
-    var loginBtn = document.getElementById("header-login");
-    var logoutBtn = document.getElementById("header-logout");
-    var cartIcon = document.getElementById("cartIcon");
-    var miniCart = document.getElementById("miniCart");
-    if (loginBtn && logoutBtn && cartIcon && miniCart) {
-      callback();
-    } else {
-      setTimeout(function() {
-        waitForHeaderElements(callback);
-      }, 100);
-    }
-  }
+function updateHeaderCart() {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const cartCountSpan = document.getElementById("cart-count");
+  const miniCartList = document.getElementById("mini-cart-items");
+  const totalSpan = document.getElementById("mini-cart-total");
 
-  // Mini-Cart Functions
-  function updateMiniCart() {
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
-    var cartCountElem = document.getElementById("cart-count");
-    if (cartCountElem) {
-      cartCountElem.textContent = cart.length;
-    }
-    var miniCartItemsElem = document.getElementById("mini-cart-items");
-    var miniCartTotalElem = document.getElementById("mini-cart-total");
-    if (miniCartItemsElem && miniCartTotalElem) {
-      miniCartItemsElem.innerHTML = "";
-      var total = 0;
-      cart.forEach(function(item, index) {
-        total += item.price;
-        var li = document.createElement("li");
-        li.innerHTML = `
-          <span class="item-text">${item.name}${item.infused ? " (Infused)" : ""} - $${item.price.toFixed(2)}</span>
-          <button class="remove-btn" onclick="removeMiniCartItem(${index})">&times;</button>
-        `;
-        miniCartItemsElem.appendChild(li);
-      });
-      // Example: add a $5.99 delivery fee
-      total += 5.99;
-      miniCartTotalElem.textContent = total.toFixed(2);
-    }
-  }
+  if (!cartCountSpan || !miniCartList || !totalSpan) return;
 
-  function removeMiniCartItem(index) {
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart.splice(index, 1);
-    localStorage.setItem("cart", JSON.stringify(cart));
-    updateMiniCart();
-  }
+  let totalItems = 0;
+  let totalPrice = 0;
 
-  window.updateMiniCart = updateMiniCart;
-  window.removeMiniCartItem = removeMiniCartItem;
+  miniCartList.innerHTML = "";
 
-  function attachCartEvents() {
-    var cartIcon = document.getElementById("cartIcon");
-    var miniCart = document.getElementById("miniCart");
-    if (cartIcon && miniCart) {
-      cartIcon.addEventListener("click", function() {
-        miniCart.style.display = (miniCart.style.display === "block") ? "none" : "block";
-      });
-    }
-    updateMiniCart();
-  }
+  cart.forEach((item, index) => {
+    const qty = item.quantity || 1;
+    totalItems += qty;
+    totalPrice += item.price * qty;
 
-  // Toggle login form visibility
-  function toggleLoginForm() {
-    var loginFormContainer = document.getElementById("login-form-container");
-    if (loginFormContainer) {
-      loginFormContainer.style.display = (loginFormContainer.style.display === "block") ? "none" : "block";
-    } else {
-      console.error("Login form container not found.");
-    }
-  }
+    const li = document.createElement("li");
 
-  // Attach authentication state listener
-  function attachAuthListener() {
-    var loginBtn = document.getElementById("header-login");
-    var logoutBtn = document.getElementById("header-logout");
-    if (!loginBtn || !logoutBtn) return;
+    const span = document.createElement("span");
+    span.classList.add("item-text");
+    span.textContent = `${item.name} x${qty}`;
 
-    if (window.auth && typeof auth.onAuthStateChanged === "function") {
-      auth.onAuthStateChanged(function(user) {
-        if (user) {
-          // If logged in: hide login button, show logout button
-          loginBtn.style.display = "none";
-          logoutBtn.style.display = "inline-block";
-          logoutBtn.textContent = `Log Out (${user.email})`;
-          logoutBtn.onclick = function() {
-            logout(); // calls global logout() from app.js
-          };
-          // Also hide the login form container if it's open
-          var loginFormContainer = document.getElementById("login-form-container");
-          if (loginFormContainer) {
-            loginFormContainer.style.display = "none";
-          }
-        } else {
-          // If not logged in: show login button, hide logout button
-          loginBtn.style.display = "inline-block";
-          logoutBtn.style.display = "none";
-          loginBtn.textContent = "Log In";
-          loginBtn.onclick = function() {
-            toggleLoginForm();
-          };
-        }
-      });
-    }
-  }
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "×";
+    removeBtn.classList.add("remove-btn");
+    removeBtn.onclick = () => {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateHeaderCart();
+    };
 
-  document.addEventListener("DOMContentLoaded", function() {
-    waitForHeaderElements(function() {
-      attachCartEvents();
-      attachAuthListener();
-    });
+    li.appendChild(span);
+    li.appendChild(removeBtn);
+    miniCartList.appendChild(li);
   });
-})();
+
+  cartCountSpan.textContent = totalItems;
+  totalSpan.textContent = totalPrice.toFixed(2);
+}
+
+// Toggle mini cart
+document.addEventListener("click", (e) => {
+  const cartIcon = document.getElementById("cartIcon");
+  const miniCart = document.getElementById("miniCart");
+
+  if (!cartIcon || !miniCart) return;
+
+  if (cartIcon.contains(e.target)) {
+    miniCart.style.display = miniCart.style.display === "block" ? "none" : "block";
+  } else if (!miniCart.contains(e.target)) {
+    miniCart.style.display = "none";
+  }
+});
+
+// Firebase Auth Display
+firebase.auth().onAuthStateChanged((user) => {
+  const loginBtn = document.getElementById("header-login");
+  const logoutBtn = document.getElementById("header-logout");
+
+  if (user) {
+    if (loginBtn) loginBtn.style.display = "none";
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
+  } else {
+    if (loginBtn) loginBtn.style.display = "inline-block";
+    if (logoutBtn) logoutBtn.style.display = "none";
+  }
+});
+
+// Logout
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutBtn = document.getElementById("header-logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      firebase.auth().signOut().then(() => {
+        window.location.reload();
+      });
+    });
+  }
+
+  updateHeaderCart(); // Initial cart sync on load
+});

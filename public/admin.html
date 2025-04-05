@@ -1,180 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <title>Customer Dashboard - Jimmy’s Pizza</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard - Jimmy's Pizza</title>
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap');
     body {
       font-family: 'DynaPuff', cursive;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       background-color: #ffffff;
       color: #1D428A;
       text-align: center;
     }
-    table {
-      border-collapse: collapse;
+
+    header {
       width: 100%;
-      max-width: 1200px;
-      margin: 20px auto;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+      background-color: #1D428A;
+      color: white;
+      text-align: center;
+      padding: 20px;
     }
-    th, td {
+
+    h1 {
+      font-size: 2rem;
+      color: #F58426;
+    }
+
+    .admin-container {
+      margin-top: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .admin-container table {
+      width: 80%;
+      margin: 20px 0;
+      border-collapse: collapse;
+    }
+
+    .admin-container th, .admin-container td {
+      padding: 10px;
+      text-align: center;
       border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
     }
-    th {
+
+    .admin-container th {
       background-color: #F58426;
       color: white;
-      font-size: 18px;
     }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
+
+    .admin-container tr:nth-child(even) {
+      background-color: #f2f2f2;
     }
-    .toggle-container {
-      margin: 20px 0;
-    }
-    .toggle-container label {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    input, button {
-      font-family: inherit;
-      padding: 10px;
-      margin: 5px;
+
+    .admin-container button {
+      background-color: #F58426;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
       font-size: 16px;
+      cursor: pointer;
     }
-    #create-driver {
-      margin-top: 40px;
+
+    .admin-container button:hover {
+      background-color: #D46A1F;
     }
-    @media (max-width: 768px) {
-      body { padding: 10px; }
-      table, thead, tbody, th, td, tr { display: block; }
-      th { position: sticky; top: 0; }
+
+    #footer-placeholder {
+      width: 100%;
+      padding: 10px;
+      background-color: #1D428A;
+      color: white;
+      text-align: center;
+      position: absolute;
+      bottom: 0;
+      left: 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+
+  <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
   <script>
-    fetch('header.html')
-      .then(response => response.text())
+    fetch('/header.html')
+      .then(res => res.text())
       .then(data => { document.getElementById('header-placeholder').innerHTML = data; })
-      .catch(error => console.error('Error loading header:', error));
+      .catch(err => console.error('Header load error:', err));
   </script>
 
-  <h1>Admin Dashboard - Jimmy's Pizza</h1>
+  <h1>Your Orders</h1>
 
-  <!-- Toggle for accepting orders -->
-  <div class="toggle-container">
-    <label>
-      <input type="checkbox" id="order-toggle" checked>
-      Accept New Orders
-    </label>
+  <!-- Login Form -->
+  <div id="login-container" class="login-container">
+    <h2>Login to View Your Orders</h2>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="Email" required />
+      <input type="password" id="login-password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <p class="error-message" id="error-message"></p>
+    </form>
+    <p class="toggle-form-btn" onclick="toggleForm()">Don't have an account? Sign Up</p>
+    <p class="toggle-form-btn" onclick="forgotPassword()">Forgot Password?</p>
   </div>
 
-  <!-- Orders Table -->
-  <table id="orders-table">
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Address</th>
-        <th>Items</th>
-        <th>Created At</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Orders populated by admin.js -->
-    </tbody>
-  </table>
-
-  <!-- Driver Creation Form -->
-  <h2>Create Driver Account</h2>
-  <div id="create-driver">
-    <input id="new-driver-email" type="email" placeholder="Driver Email" required />
-    <input id="new-driver-password" type="password" placeholder="Password" required />
-    <br />
-    <button onclick="createDriver()">Create Driver Account</button>
-    <p id="create-driver-status" style="color: green;"></p>
+  <!-- Sign-up Form -->
+  <div id="signup-container" class="login-container" style="display: none;">
+    <h2>Create an Account</h2>
+    <form id="signup-form">
+      <input type="email" id="signup-email" placeholder="Email" required />
+      <input type="password" id="signup-password" placeholder="Password" required />
+      <input type="password" id="confirm-password" placeholder="Confirm Password" required />
+      <button type="submit">Sign Up</button>
+      <p class="error-message" id="signup-error-message"></p>
+    </form>
+    <p class="toggle-form-btn" onclick="toggleForm()">Already have an account? Log In</p>
   </div>
 
-  <!-- Footer -->
+  <!-- Orders Section (hidden until logged in) -->
+  <div id="order-container" class="order-container">
+    <div id="orders-container"></div>
+  </div>
+
+  <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
   <script>
-    fetch('footer.html')
-      .then(response => response.text())
+    fetch('/footer.html')
+      .then(res => res.text())
       .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
-      .catch(error => console.error('Error loading footer:', error));
+      .catch(err => console.error('Footer load error:', err));
   </script>
 
-  <!-- Firebase SDKs & Config -->
+  <script src="/js/footer.js"></script>
+  <script src="/js/header.js"></script>
+  <script src="/js/customer.js"></script>
+
+  <!-- Firebase & App Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
-  <script src="/js/app.js"></script>
-  <script src="/js/admin.js"></script>
-  <script src="/js/header.js"></script>
 
-  <!-- Admin Scripts -->
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const toggle = document.getElementById('order-toggle');
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-      fetch('/admin/order-status')
-        .then(res => res.json())
-        .then(data => {
-          toggle.checked = data.enabled;
+    const loginContainer = document.getElementById("login-container");
+    const signupContainer = document.getElementById("signup-container");
+    const orderContainer = document.getElementById("order-container");
+
+    // Toggle between Sign-Up and Login forms
+    function toggleForm() {
+      loginContainer.style.display = loginContainer.style.display === 'none' ? 'block' : 'none';
+      signupContainer.style.display = signupContainer.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Forgot Password Functionality
+    function forgotPassword() {
+      const email = prompt("Please enter your email to receive a password reset link:");
+      if (email) {
+        auth.sendPasswordResetEmail(email)
+          .then(() => {
+            alert("Password reset email sent! Please check your inbox.");
+          })
+          .catch((err) => {
+            alert("Error: " + err.message);
+          });
+      }
+    }
+
+    // Login Functionality
+    document.getElementById("login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+      const errorMessage = document.getElementById("error-message");
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          loginContainer.style.display = "none";
+          orderContainer.style.display = "block";
+          loadOrders();
+        })
+        .catch((err) => {
+          errorMessage.textContent = "Login failed: " + err.message;
         });
-
-      toggle.addEventListener('change', function() {
-        fetch('/admin/toggle-ordering', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ enabled: toggle.checked })
-        })
-        .then(res => res.json())
-        .then(data => {
-          alert(data.message);
-        })
-        .catch(err => console.error('Error toggling ordering:', err));
-      });
     });
 
-    function createDriver() {
-      const email = document.getElementById("new-driver-email").value;
-      const password = document.getElementById("new-driver-password").value;
-      const statusEl = document.getElementById("create-driver-status");
+    // Sign-Up Functionality
+    document.getElementById("signup-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("signup-email").value;
+      const password = document.getElementById("signup-password").value;
+      const confirmPassword = document.getElementById("confirm-password").value;
+      const errorMessage = document.getElementById("signup-error-message");
 
-      if (!email || !password) {
-        statusEl.textContent = "Please enter email and password.";
-        statusEl.style.color = "red";
+      if (password !== confirmPassword) {
+        errorMessage.textContent = "Passwords do not match!";
         return;
       }
 
       auth.createUserWithEmailAndPassword(email, password)
         .then(() => {
-          statusEl.textContent = `✅ Driver account created: ${email}`;
-          statusEl.style.color = "green";
-          document.getElementById("new-driver-email").value = "";
-          document.getElementById("new-driver-password").value = "";
+          signupContainer.style.display = "none";
+          orderContainer.style.display = "block";
+          loadOrders();
         })
-        .catch(error => {
-          statusEl.textContent = `❌ ${error.message}`;
-          statusEl.style.color = "red";
+        .catch((err) => {
+          errorMessage.textContent = "Sign-Up failed: " + err.message;
+        });
+    });
+
+    // Display orders if user is authenticated
+    function loadOrders() {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      db.collection("orders")
+        .where("customerId", "==", user.uid)
+        .orderBy("timestamp", "desc")
+        .onSnapshot(snapshot => {
+          const orders = snapshot.docs.map(doc => doc.data());
+          renderOrders(orders);
         });
     }
+
+    function renderOrders(orders) {
+      const container = document.getElementById('orders-container');
+      container.innerHTML = '';
+
+      orders.forEach(order => {
+        const orderCard = document.createElement('div');
+        orderCard.className = 'order-card';
+        orderCard.innerHTML = `
+          <h3>Order #${order.id}</h3>
+          <p><strong>Items:</strong> ${order.items.join(', ')}</p>
+          <p><strong>Status:</strong> ${order.status}</p>
+          <p><strong>Driver:</strong> ${order.driverName || 'Not Assigned'}</p>
+        `;
+        container.appendChild(orderCard);
+      });
+    }
   </script>
+  
 </body>
 </html>

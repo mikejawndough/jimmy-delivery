@@ -1,22 +1,18 @@
 // public/js/firebase-config.js
 
 // Your Firebase config
-var firebaseConfig = {
-  apiKey: "AIzaSyDcNH3J0i7TsXP6XgEG862EQA72Lmrzcro",
-  authDomain: "jimmysdelivery-9261d.firebaseapp.com",
-  projectId: "jimmysdelivery-9261d",
-  storageBucket: "jimmysdelivery-9261d.appspot.com", // fixed typo
-  messagingSenderId: "52478759963",
-  appId: "1:52478759963:web:11fd5ab98b7bfd841bd4be",
+// Initialize Firebase using the configuration from your .env or environment variables
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID
 };
 
-// Initialize Firebase (only once)
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-  console.log("✅ Firebase initialized");
-} else {
-  console.log("⚠️ Firebase already initialized");
-}
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 
 // Assign global references
 window.auth = firebase.auth();
