@@ -1,50 +1,57 @@
+// public/js/app.js
 
-// app.js
-import { auth, db } from './firebase-config.js';
+document.addEventListener("DOMContentLoaded", () => {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-// Use auth or db here
+  // Handle Firebase Authentication State
+  auth.onAuthStateChanged((user) => {
+    const loginBtn = document.getElementById("header-login");
+    const logoutBtn = document.getElementById("header-logout");
 
-// Firestore Database and Firebase Auth
-const db = firebase.firestore();
-const auth = firebase.auth();
+    if (user) {
+      console.log('User logged in:', user.email);
+      if (loginBtn) loginBtn.style.display = "none";
+      if (logoutBtn) logoutBtn.style.display = "block";
+      loadOrders(user);
+    } else {
+      console.log('No user logged in');
+      if (loginBtn) loginBtn.style.display = "block";
+      if (logoutBtn) logoutBtn.style.display = "none";
+    }
+  });
 
-// Handle Firebase Authentication State
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    console.log('User logged in:', user.email);
-    // You can perform actions like redirecting users to their dashboard
-    document.getElementById("header-login").style.display = "none";
-    document.getElementById("header-logout").style.display = "block";
-  } else {
-    console.log('No user logged in');
-    document.getElementById("header-login").style.display = "block";
-    document.getElementById("header-logout").style.display = "none";
+  // Load orders for authenticated user
+  function loadOrders(user) {
+    if (!user) return;
+    const orderContainer = document.getElementById("orders-container");
+    if (!orderContainer) return;
+
+    db.collection("orders")
+      .where("userId", "==", user.uid)
+      .onSnapshot(snapshot => {
+        const orders = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderOrders(orders);
+      });
+  }
+
+  // Render orders to page
+  function renderOrders(orders) {
+    const orderContainer = document.getElementById("orders-container");
+    if (!orderContainer) return;
+
+    orderContainer.innerHTML = '';
+    orders.forEach(order => {
+      const div = document.createElement("div");
+      div.classList.add("order");
+      div.innerHTML = `
+        <h3>Order ID: ${order.id}</h3>
+        <p>Status: ${order.status || "Unknown"}</p>
+      `;
+      orderContainer.appendChild(div);
+    });
   }
 });
-
-// Example function for loading user orders from Firestore
-function loadOrders() {
-  const user = auth.currentUser;
-  if (user) {
-    db.collection("orders").where("userId", "==", user.uid).onSnapshot(snapshot => {
-      const orders = snapshot.docs.map(doc => doc.data());
-      renderOrders(orders);
-    });
-  } else {
-    console.log("User not authenticated, unable to load orders.");
-  }
-}
-
-// Function to render orders
-function renderOrders(orders) {
-  const orderContainer = document.getElementById("orders-container");
-  orderContainer.innerHTML = ''; // Clear previous content
-  orders.forEach(order => {
-    const orderElement = document.createElement("div");
-    orderElement.classList.add("order");
-    orderElement.innerHTML = `<h3>Order ID: ${order.id}</h3><p>Status: ${order.status}</p>`;
-    orderContainer.appendChild(orderElement);
-  });
-}
-
-document.addEventListener("DOMContentLoaded", loadOrders);
