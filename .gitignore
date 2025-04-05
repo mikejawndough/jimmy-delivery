@@ -3,6 +3,7 @@
 .env.local
 firebase-service-account.json
 public/geocoding.json
+serviceAccountKey.json
 
 # Ignore log files
 *.log
