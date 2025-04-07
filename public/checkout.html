@@ -7,15 +7,13 @@
 
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/checkout.css" />
-
-  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
-
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
+
+  <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
 </head>
 <body>
 
-  <!-- Header -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
@@ -33,7 +31,7 @@
       <p class="total">Total: $<span id="cart-total">0.00</span></p>
       <div id="undo-container" style="display:none; margin-bottom:10px; color: green;"></div>
 
-      <!-- Delivery Information -->
+      <!-- Delivery Info -->
       <div class="form-section">
         <h3>Delivery Information</h3>
         <label>Name<input type="text" id="customer-name" required></label>
@@ -45,207 +43,210 @@
         </div>
         <label>Apt / Unit (optional)<input type="text" id="apt-number" /></label>
       </div>
-            <!-- Delivery Time -->
-            <div class="form-section">
-              <h3>Delivery Time</h3>
-              <label><input type="radio" name="delivery-option" value="asap" checked /> ASAP</label>
-              <label><input type="radio" name="delivery-option" value="scheduled" /> Schedule</label>
-              <div id="schedule-delivery">
-                <label>Select Delivery Date & Time</label>
-                <div class="datetime-dropdowns">
-                  <select id="delivery-month"><option value="">Month</option></select>
-                  <select id="delivery-day"><option value="">Day</option></select>
-                  <select id="delivery-year"><option value="">Year</option></select>
-                  <select id="delivery-hour"><option value="">Hour</option></select>
-                  <select id="delivery-minute"><option value="">Minute</option></select>
-                  <select id="delivery-ampm"><option value="">AM/PM</option><option>AM</option><option>PM</option></select>
-                </div>
-              </div>
-            </div>
-      
-            <!-- Recurring -->
-            <div class="form-section">
-              <h3>Recurring Order?</h3>
-              <label><input type="radio" name="recurring" value="no" checked /> One-Time</label>
-              <label><input type="radio" name="recurring" value="yes" /> Recurring</label>
-              <div id="recurring-options">
-                <label>Frequency
-                  <select id="frequency">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
-                </label>
-                <label>Start Date<input type="date" id="recurring-start" /></label>
-                <label>End Date<input type="date" id="recurring-end" /></label>
-              </div>
-            </div>
-      
-            <!-- Payment -->
-            <div class="form-section">
-              <h3>Payment Method</h3>
-              <label><input type="radio" name="payment-method" value="cash" required /> Cash</label>
-              <label><input type="radio" name="payment-method" value="paypal" required /> PayPal</label>
-              <div id="paypal-button-container"></div>
-            </div>
-      
-            <button type="submit" id="place-order" disabled>Place Order</button>
+
+      <!-- Delivery Time -->
+      <div class="form-section">
+        <h3>Delivery Time</h3>
+        <label><input type="radio" name="delivery-option" value="asap" checked /> ASAP</label>
+        <label><input type="radio" name="delivery-option" value="scheduled" /> Schedule</label>
+        <div id="schedule-delivery">
+          <label>Select Delivery Date & Time</label>
+          <div class="datetime-dropdowns">
+            <select id="delivery-month"><option value="">Month</option></select>
+            <select id="delivery-day"><option value="">Day</option></select>
+            <select id="delivery-year"><option value="">Year</option></select>
+            <select id="delivery-hour"><option value="">Hour</option></select>
+            <select id="delivery-minute"><option value="">Minute</option></select>
+            <select id="delivery-ampm"><option value="">AM/PM</option><option>AM</option><option>PM</option></select>
           </div>
-        </form>
-      
-        <!-- Footer -->
-        <div id="footer-placeholder"></div>
-        <script>
-          fetch('footer.html')
-            .then(res => res.text())
-            .then(html => { document.getElementById('footer-placeholder').innerHTML = html; })
-            .catch(err => console.error('Error loading footer:', err));
-        </script>
-      
-        <!-- Firebase -->
-        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-        <script src="/js/firebase-config.js"></script>
-      
-        <!-- Scripts -->
-        <script>
-          let lastDeletedItem = null;
-          let undoTimeout = null;
-      
-          function renderCart() {
-            const cart = JSON.parse(localStorage.getItem("cart")) || [];
-            const cartItems = document.getElementById("cart-items");
-            const cartTotal = document.getElementById("cart-total");
-            const placeOrderBtn = document.getElementById("place-order");
-            cartItems.innerHTML = "";
-            let total = 0;
-      
-            cart.forEach((item, index) => {
-              const li = document.createElement("li");
-              li.style.display = "flex";
-              li.style.justifyContent = "space-between";
-              li.style.alignItems = "center";
-              li.style.padding = "10px 0";
-              li.style.borderBottom = "1px solid #ccc";
-      
-              const itemTotal = item.price * item.quantity;
-              total += itemTotal;
-      
-              li.innerHTML = `
-                <div>
-                  <strong>${item.name}</strong><br>
-                  Quantity: ${item.quantity} | Price: $${item.price.toFixed(2)}
-                </div>
-                <button onclick="confirmDeleteCartItem(${index})" style="background-color:red; color:white; border:none; padding:5px 10px; cursor:pointer;">Delete</button>
-              `;
-              cartItems.appendChild(li);
-            });
-      
-            cartTotal.textContent = total.toFixed(2);
-            placeOrderBtn.disabled = cart.length === 0;
-          }
-      
-          function confirmDeleteCartItem(index) {
-            if (confirm("Are you sure you want to remove this item?")) {
-              deleteCartItem(index);
-            }
-          }
-      
-          function deleteCartItem(index) {
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            lastDeletedItem = { ...cart[index], index };
-            cart.splice(index, 1);
-            localStorage.setItem("cart", JSON.stringify(cart));
-            renderCart();
-            showUndoOption();
-          }
-      
-          function showUndoOption() {
-            clearTimeout(undoTimeout);
-            const undoContainer = document.getElementById("undo-container");
-            undoContainer.innerHTML = `Item removed. <button onclick="undoDelete()">Undo</button>`;
-            undoContainer.style.display = "block";
-      
-            undoTimeout = setTimeout(() => {
-              undoContainer.style.display = "none";
-              lastDeletedItem = null;
-            }, 5000);
-          }
-      
-          function undoDelete() {
-            if (!lastDeletedItem) return;
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.splice(lastDeletedItem.index, 0, lastDeletedItem);
-            localStorage.setItem("cart", JSON.stringify(cart));
-            lastDeletedItem = null;
-            renderCart();
-            document.getElementById("undo-container").style.display = "none";
-          }
-      
-          window.addEventListener("DOMContentLoaded", () => {
-            renderCart();
-      
-            const fill = (id, start, end, pad = false) => {
-              const el = document.getElementById(id);
-              for (let i = start; i <= end; i++) {
-                const val = pad ? String(i).padStart(2, '0') : i;
-                el.innerHTML += `<option value="${val}">${val}</option>`;
-              }
-            };
-      
-            fill("delivery-day", 1, 31, true);
-            fill("delivery-year", new Date().getFullYear(), new Date().getFullYear() + 1);
-            fill("delivery-hour", 1, 12, true);
-            fill("delivery-minute", 0, 55, true);
-          });
-      
-          function toRadians(deg) {
-            return deg * (Math.PI / 180);
-          }
-      
-          function haversineDistance(lat1, lng1, lat2, lng2) {
-            const R = 3958.8;
-            const dLat = toRadians(lat2 - lat1);
-            const dLng = toRadians(lng2 - lng1);
-            const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLng / 2) ** 2;
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-          }
-      
-          mapboxgl.accessToken = 'pk.eyJ1IjoiYXNham91czEzOTQiLCJhIjoiY204cTgzc3k3MDYxZzJrcHlheTV1ZWx4aiJ9.z6X6Ss0D60yg2VRX3iPcdA';
-          const geocoder = new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            types: 'address',
-            placeholder: 'Enter your address',
-            marker: false,
-            flyTo: false,
-            proximity: {
-              longitude: -73.7824,
-              latitude: 40.9115
-            }
-          });
-      
-          const addressInput = document.getElementById("address");
-          geocoder.onAdd = () => document.createElement("div");
-          geocoder.on("result", function (e) {
-            const coords = e.result.center;
-            const distance = haversineDistance(40.9115, -73.7824, coords[1], coords[0]);
-            if (distance > 5) {
-              alert("Sorry, we only deliver within 5 miles of New Rochelle.");
-              addressInput.value = "";
-            } else {
-              addressInput.value = e.result.place_name;
-              window.dispatchEvent(new CustomEvent("mapboxGeocoderResult", {
-                detail: { coords: { lat: coords[1], lng: coords[0] } }
-              }));
-            }
-          });
-      
-          addressInput.addEventListener("input", e => geocoder.query(e.target.value));
-        </script>
-      
-        <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-        <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
-      </body>
-      </html>
+        </div>
+      </div>
+
+      <!-- Recurring -->
+      <div class="form-section">
+        <h3>Recurring Order?</h3>
+        <label><input type="radio" name="recurring" value="no" checked /> One-Time</label>
+        <label><input type="radio" name="recurring" value="yes" /> Recurring</label>
+        <div id="recurring-options">
+          <label>Frequency
+            <select id="frequency">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+          <label>Start Date<input type="date" id="recurring-start" /></label>
+          <label>End Date<input type="date" id="recurring-end" /></label>
+        </div>
+      </div>
+
+      <!-- Payment -->
+      <div class="form-section">
+        <h3>Payment Method</h3>
+        <label><input type="radio" name="payment-method" value="cash" required /> Cash</label>
+        <label><input type="radio" name="payment-method" value="paypal" required /> PayPal</label>
+        <div id="paypal-button-container"></div>
+      </div>
+
+      <button type="submit" id="place-order" disabled>Place Order</button>
+    </div>
+  </form>
+
+  <div id="footer-placeholder"></div>
+  <script>
+    fetch('footer.html')
+      .then(res => res.text())
+      .then(html => { document.getElementById('footer-placeholder').innerHTML = html; })
+      .catch(err => console.error('Error loading footer:', err));
+  </script>
+
+  <!-- Mapbox Scripts FIRST -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+
+  <!-- Cart + Mapbox Logic -->
+  <script>
+    let lastDeletedItem = null;
+    let undoTimeout = null;
+
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartItems = document.getElementById("cart-items");
+      const cartTotal = document.getElementById("cart-total");
+      const placeOrderBtn = document.getElementById("place-order");
+      cartItems.innerHTML = "";
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.style.display = "flex";
+        li.style.justifyContent = "space-between";
+        li.style.alignItems = "center";
+        li.style.padding = "10px 0";
+        li.style.borderBottom = "1px solid #ccc";
+
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+
+        li.innerHTML = `
+          <div>
+            <strong>${item.name}</strong><br>
+            Quantity: ${item.quantity} | Price: $${item.price.toFixed(2)}
+          </div>
+          <button onclick="confirmDeleteCartItem(${index})" style="background-color:red; color:white; border:none; padding:5px 10px; cursor:pointer;">Delete</button>
+        `;
+        cartItems.appendChild(li);
+      });
+
+      cartTotal.textContent = total.toFixed(2);
+      placeOrderBtn.disabled = cart.length === 0;
+    }
+
+    function confirmDeleteCartItem(index) {
+      if (confirm("Are you sure you want to remove this item?")) {
+        deleteCartItem(index);
+      }
+    }
+
+    function deleteCartItem(index) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      lastDeletedItem = { ...cart[index], index };
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+      showUndoOption();
+    }
+
+    function showUndoOption() {
+      clearTimeout(undoTimeout);
+      const undoContainer = document.getElementById("undo-container");
+      undoContainer.innerHTML = `Item removed. <button onclick="undoDelete()">Undo</button>`;
+      undoContainer.style.display = "block";
+
+      undoTimeout = setTimeout(() => {
+        undoContainer.style.display = "none";
+        lastDeletedItem = null;
+      }, 5000);
+    }
+
+    function undoDelete() {
+      if (!lastDeletedItem) return;
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.splice(lastDeletedItem.index, 0, lastDeletedItem);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      lastDeletedItem = null;
+      renderCart();
+      document.getElementById("undo-container").style.display = "none";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      renderCart();
+
+      const fill = (id, start, end, pad = false) => {
+        const el = document.getElementById(id);
+        for (let i = start; i <= end; i++) {
+          const val = pad ? String(i).padStart(2, '0') : i;
+          el.innerHTML += `<option value="${val}">${val}</option>`;
+        }
+      };
+
+      fill("delivery-day", 1, 31, true);
+      fill("delivery-year", new Date().getFullYear(), new Date().getFullYear() + 1);
+      fill("delivery-hour", 1, 12, true);
+      fill("delivery-minute", 0, 55, true);
+
+      // Mapbox setup
+      mapboxgl.accessToken = 'pk.eyJ1IjoiYXNham91czEzOTQiLCJhIjoiY204cTgzc3k3MDYxZzJrcHlheTV1ZWx4aiJ9.z6X6Ss0D60yg2VRX3iPcdA';
+
+      const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        types: 'address',
+        placeholder: 'Enter your address',
+        marker: false,
+        flyTo: false,
+        proximity: {
+          longitude: -73.7824,
+          latitude: 40.9115
+        }
+      });
+
+      const addressInput = document.getElementById("address");
+      geocoder.onAdd = () => document.createElement("div");
+      geocoder.on("result", function (e) {
+        const coords = e.result.center;
+        const distance = haversineDistance(40.9115, -73.7824, coords[1], coords[0]);
+        if (distance > 5) {
+          alert("Sorry, we only deliver within 5 miles of New Rochelle.");
+          addressInput.value = "";
+        } else {
+          addressInput.value = e.result.place_name;
+          window.dispatchEvent(new CustomEvent("mapboxGeocoderResult", {
+            detail: { coords: { lat: coords[1], lng: coords[0] } }
+          }));
+        }
+      });
+
+      addressInput.addEventListener("input", e => geocoder.query(e.target.value));
+    });
+
+    function toRadians(deg) {
+      return deg * (Math.PI / 180);
+    }
+
+    function haversineDistance(lat1, lng1, lat2, lng2) {
+      const R = 3958.8;
+      const dLat = toRadians(lat2 - lat1);
+      const dLng = toRadians(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+  </script>
+</body>
+</html>
