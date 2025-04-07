@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Jimmy’s Pizza - Home</title>
+  <title>Jimmy’s Pizza - Welcome</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
   <style>
     body {
       font-family: 'DynaPuff', cursive;
@@ -15,165 +16,117 @@
       text-align: center;
     }
 
-    .homepage-content {
+    .hero {
+      background-color: #1D428A;
+      color: white;
       padding: 60px 20px;
     }
 
-    #age-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .age-box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 400px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      text-align: center;
-    }
-
-    .age-box h2 {
-      margin-bottom: 20px;
-      color: #1D428A;
-    }
-
-    .age-box input {
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
+    .hero h1 {
+      font-size: 48px;
       margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
     }
 
-    .age-box button {
+    .hero p {
+      font-size: 18px;
+      max-width: 700px;
+      margin: 0 auto 20px auto;
+    }
+
+    #custom-text {
+      padding: 40px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    #custom-text p {
+      margin-bottom: 20px;
+    }
+
+    .hero button {
       background-color: #F58426;
       color: white;
-      padding: 10px 20px;
+      font-size: 18px;
+      padding: 14px 28px;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 20px;
     }
 
-    .age-box button:hover {
-      background-color: #d46a1f;
+    .hero button:hover {
+      background-color: #163369;
     }
 
-    .error-msg {
-      color: red;
-      font-size: 14px;
-      margin-top: 5px;
-    }
-
-    header {
-      background-color: #1D428A;
-      color: white;
-      padding: 20px;
+    .elfsight-app-88a1e5fe-48f9-43b3-9e69-566bbfc43783 {
+      margin-top: 40px;
     }
   </style>
 </head>
 <body>
-  <!-- Age Modal -->
-  <div id="age-modal">
-    <div class="age-box">
-      <h2>Enter Your Birthday</h2>
-      <input type="text" id="birthday-input" placeholder="MM/DD/YYYY" />
-      <div class="error-msg" id="age-error"></div>
-      <button id="submit-birthday">Enter</button>
-    </div>
-  </div>
-
   <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
+
   <script>
-    fetch('/header.html')
+    fetch('header.html')
       .then(res => res.text())
-      .then(data => {
-        document.getElementById('header-placeholder').innerHTML = data;
-        const script = document.createElement('script');
-        script.src = '/js/header.js';
-        document.body.appendChild(script);
-      });
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading header:', err));
   </script>
 
-  <!-- Main Content -->
-  <div class="homepage-content">
-    <h1>Welcome to Jimmy’s Detroit-Style Pizza</h1>
-    <p>Deep. Crispy. Cheesy. Delicious.</p>
-    <a href="order.html">
-      <button style="font-size: 18px; padding: 12px 24px;">Start Your Order</button>
-    </a>
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Welcome to Jimmy's Pizza!</h1>
+    <p>Detroit-Style Pizza with a NY Attitude. Fresh, Hot, and Always Delicious.</p>
+    <button onclick="confirmRedirect()">Place Order</button>
+
+    <script>
+      function confirmRedirect() {
+        if (confirm('Are you sure you want to place an order?')) {
+          window.location.href = 'order.html';
+        }
+      }
+    </script>
+    </section>
+
+  <!-- Story -->
+  <div id="custom-text">
+    <p>
+      Welcome to Jimmy's Pizza –<br>
+      Where the spirit of Detroit-style pizza meets the charm of Westchester, NY! Founded by Jimmy, our pizzeria is a culinary haven that celebrates the art of crafting unforgettable pies.
+    </p>
+    <p>
+      Legend had it that Tony, the talking tomato whispered the secrets of the perfect crust as Jimmy was strolling by, and thus, Jimmy's destiny as a pizza maestro was sealed.
+    </p>
+    <p>
+      Though Jimmy may be a fictional character, the legacy of Jimmy's Pizza lives on in the hearts and taste buds of Westchester locals. So, if you ever find yourself in the area and hear the faint sound of the crunch of a crust, follow your senses – for you may just stumble upon the legendary Jimmy's Pizza.
+    </p>
   </div>
 
-  <!-- Footer -->
+  <!-- Elfsight Widget -->
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
+  <div class="elfsight-app-88a1e5fe-48f9-43b3-9e69-566bbfc43783" data-elfsight-app-lazy></div>
+
+  <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
   <script>
-    fetch('/footer.html')
+    fetch('header.html')
       .then(res => res.text())
-      .then(data => {
-        document.getElementById('footer-placeholder').innerHTML = data;
-      });
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading header:', err));
   </script>
 
-  <!-- Age Logic -->
-  <script>
-    function is21OrOlder(birthday) {
-      const [month, day, year] = birthday.split('/').map(num => parseInt(num));
-      if (!month || !day || !year || birthday.length !== 10) return false;
-
-      const birthDate = new Date(year, month - 1, day);
-      const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      const d = today.getDate() - birthDate.getDate();
-
-      if (age > 21) return true;
-      if (age === 21 && (m > 0 || (m === 0 && d >= 0))) return true;
-      return false;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      if (localStorage.getItem("verifiedAge") === "true") {
-        document.getElementById("age-modal").style.display = "none";
-      }
-
-      document.getElementById("submit-birthday").addEventListener("click", () => {
-        const input = document.getElementById("birthday-input").value.trim();
-        const error = document.getElementById("age-error");
-
-        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
-          error.textContent = "Please use MM/DD/YYYY format.";
-          return;
-        }
-
-        if (!is21OrOlder(input)) {
-          error.textContent = "Sorry, you must be at least 21 years old.";
-          return;
-        }
-
-        localStorage.setItem("verifiedAge", "true");
-        document.getElementById("age-modal").style.display = "none";
-      });
-    });
-  </script>
-
-  <!-- Firebase & Core -->
+  <!-- Firebase & Site Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
-  <script src="/js/app.js"></script>
+  <script src="/js/header.js"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>
