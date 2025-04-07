@@ -17,7 +17,7 @@
       min-height: 100vh;
     }
 
-    .login-container {
+    .auth-container {
       margin-top: 120px;
       background: #f9f9f9;
       padding: 30px;
@@ -28,12 +28,12 @@
       text-align: center;
     }
 
-    .login-container h2 {
+    .auth-container h2 {
       margin-bottom: 20px;
       color: #F58426;
     }
 
-    .login-container input {
+    .auth-container input {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
@@ -43,7 +43,7 @@
       font-family: 'DynaPuff', cursive;
     }
 
-    .login-container button {
+    .auth-container button {
       background-color: #F58426;
       color: white;
       font-size: 16px;
@@ -55,18 +55,19 @@
       margin-top: 10px;
     }
 
-    .login-container button:hover {
+    .auth-container button:hover {
       background-color: #d66a10;
     }
 
-    .login-container p {
+    .auth-container p {
       margin-top: 15px;
       font-size: 14px;
     }
 
-    .login-container a {
+    .auth-container a {
       color: #1D428A;
       text-decoration: underline;
+      cursor: pointer;
     }
 
     footer {
@@ -81,7 +82,6 @@
 </head>
 <body>
 
-  <!-- Header Include -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
@@ -94,17 +94,28 @@
       });
   </script>
 
-  <div class="login-container">
-    <h2>Login to Your Account</h2>
-    <form onsubmit="login(event)">
+  <!-- Auth Container -->
+  <div class="auth-container" id="auth-box">
+    <h2 id="form-title">Login to Your Account</h2>
+
+    <!-- Login Form -->
+    <form id="login-form" onsubmit="login(event)">
       <input type="email" id="login-email" placeholder="Email Address" required />
       <input type="password" id="login-password" placeholder="Password" required />
       <button type="submit">Log In</button>
+      <p>Don't have an account? <a onclick="toggleForm('signup')">Sign Up</a></p>
     </form>
-    <p>Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+
+    <!-- Signup Form -->
+    <form id="signup-form" onsubmit="signup(event)" style="display: none;">
+      <input type="text" id="signup-name" placeholder="Full Name" required />
+      <input type="email" id="signup-email" placeholder="Email Address" required />
+      <input type="password" id="signup-password" placeholder="Password" required />
+      <button type="submit">Sign Up</button>
+      <p>Already have an account? <a onclick="toggleForm('login')">Log In</a></p>
+    </form>
   </div>
 
-  <!-- Footer Include -->
   <div id="footer-placeholder"></div>
   <script>
     fetch('footer.html')
@@ -117,11 +128,60 @@
       });
   </script>
 
-  <!-- Firebase + Auth -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
-  <script src="/js/app.js"></script>
-  <script src="/js/header.js"></script>
+
+  <!-- Auth Logic -->
+  <script>
+    function login(event) {
+      event.preventDefault();
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = "order.html";
+        })
+        .catch(error => {
+          alert("Login failed: " + error.message);
+        });
+    }
+
+    function signup(event) {
+      event.preventDefault();
+      const name = document.getElementById("signup-name").value.trim();
+      const email = document.getElementById("signup-email").value.trim();
+      const password = document.getElementById("signup-password").value;
+
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          return userCredential.user.updateProfile({ displayName: name });
+        })
+        .then(() => {
+          window.location.href = "order.html";
+        })
+        .catch(error => {
+          alert("Signup failed: " + error.message);
+        });
+    }
+
+    function toggleForm(mode) {
+      const loginForm = document.getElementById("login-form");
+      const signupForm = document.getElementById("signup-form");
+      const title = document.getElementById("form-title");
+
+      if (mode === "signup") {
+        loginForm.style.display = "none";
+        signupForm.style.display = "block";
+        title.textContent = "Create an Account";
+      } else {
+        loginForm.style.display = "block";
+        signupForm.style.display = "none";
+        title.textContent = "Login to Your Account";
+      }
+    }
+  </script>
 </body>
 </html>
