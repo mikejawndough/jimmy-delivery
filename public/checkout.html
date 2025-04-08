@@ -248,5 +248,100 @@
       return R * c;
     }
   </script>
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="/js/firebase-config.js"></script>
+
+<!-- Load Header + Auth Logic -->
+<script>
+  fetch('header.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('header-placeholder').innerHTML = html;
+
+      const userMenu = document.getElementById('user-menu');
+      const dropdown = document.getElementById('auth-dropdown');
+      const loginForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
+      const title = document.getElementById('auth-title');
+
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          userMenu.textContent = user.displayName || user.email;
+          userMenu.onclick = () => auth.signOut().then(() => window.location.reload());
+          dropdown.style.display = 'none';
+        } else {
+          userMenu.textContent = "Sign In";
+          userMenu.onclick = () => {
+            toggleAuthMode('login');
+            dropdown.style.display = 'block';
+          };
+        }
+      });
+
+      window.handleLogin = function (event) {
+        event.preventDefault();
+        const email = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value;
+
+        auth.signInWithEmailAndPassword(email, password)
+          .then(() => {
+            dropdown.style.display = 'none';
+            window.location.reload();
+          })
+          .catch(error => alert("Login failed: " + error.message));
+      };
+
+      window.handleSignup = function (event) {
+        event.preventDefault();
+        const name = document.getElementById("signup-name").value.trim();
+        const email = document.getElementById("signup-email").value.trim();
+        const password = document.getElementById("signup-password").value;
+
+        auth.createUserWithEmailAndPassword(email, password)
+          .then(userCred => {
+            return userCred.user.updateProfile({ displayName: name })
+              .then(() => userCred.user.sendEmailVerification());
+          })
+          .then(() => {
+            alert("Signup successful. Please verify your email.");
+            dropdown.style.display = 'none';
+            window.location.reload();
+          })
+          .catch(error => alert("Signup failed: " + error.message));
+      };
+
+      window.handlePasswordReset = function () {
+        const email = document.getElementById("login-email").value.trim();
+        if (!email) {
+          alert("Please enter your email above first.");
+          return;
+        }
+
+        auth.sendPasswordResetEmail(email)
+          .then(() => alert("Password reset email sent."))
+          .catch(error => alert("Error: " + error.message));
+      };
+
+      window.toggleAuthMode = function (mode) {
+        if (mode === 'signup') {
+          loginForm.style.display = 'none';
+          signupForm.style.display = 'block';
+          title.textContent = 'Create Account';
+        } else {
+          loginForm.style.display = 'block';
+          signupForm.style.display = 'none';
+          title.textContent = 'Login';
+        }
+      };
+
+      document.addEventListener("click", function (e) {
+        if (!dropdown.contains(e.target) && !userMenu.contains(e.target)) {
+          dropdown.style.display = "none";
+        }
+      });
+    });
+</script>
 </body>
 </html>

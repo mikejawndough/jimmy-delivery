@@ -7,7 +7,7 @@
   </div>
 
   <!-- Login/Signup Dropdown -->
-  <div id="auth-dropdown" style="display: none; position: absolute; top: 60px; right: 20px; background: #fff; color: #000; border: 1px solid #ccc; padding: 20px; width: 250px; z-index: 999;">
+  <div id="auth-dropdown" style="display: none; position: absolute; top: 60px; right: 20px; background: #fff; color: #000; border: 1px solid #ccc; padding: 20px; width: 90vw; max-width: 280px; z-index: 999;">
     <div id="auth-toggle">
       <h4 id="auth-title">Login</h4>
     </div>
@@ -15,7 +15,8 @@
       <input type="email" id="login-email" placeholder="Email" required style="width:100%; margin-bottom:10px;" />
       <input type="password" id="login-password" placeholder="Password" required style="width:100%; margin-bottom:10px;" />
       <button type="submit" style="width:100%; background:#F58426; color:white; border:none; padding:10px;">Login</button>
-      <p style="font-size: 14px; margin-top:10px;">Don't have an account? <a href="#" onclick="toggleAuthMode('signup')">Sign Up</a></p>
+      <p style="font-size: 14px; margin: 10px 0;"><a href="#" onclick="handlePasswordReset()">Forgot password?</a></p>
+      <p style="font-size: 14px;">Don't have an account? <a href="#" onclick="toggleAuthMode('signup')">Sign Up</a></p>
     </form>
 
     <form id="signup-form" onsubmit="handleSignup(event)" style="display:none;">
@@ -31,23 +32,11 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="/js/firebase-config.js"></script>
 
-<!-- Firebase Config -->
 <script>
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    appId: "YOUR_APP_ID"
-  };
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
   const auth = firebase.auth();
-</script>
 
-<!-- Auth Logic + Dropdown -->
-<script>
   function toggleDropdown(show = true) {
     const dropdown = document.getElementById('auth-dropdown');
     dropdown.style.display = show ? 'block' : 'none';
@@ -82,7 +71,10 @@
       dropdown.style.display = 'none';
     } else {
       userMenu.textContent = "Sign In";
-      userMenu.onclick = () => toggleDropdown(true);
+      userMenu.onclick = () => {
+        toggleAuthMode('login');
+        toggleDropdown(true);
+      };
     }
   });
 
@@ -104,16 +96,30 @@
     const email = document.getElementById("signup-email").value.trim();
     const password = document.getElementById("signup-password").value;
     auth.createUserWithEmailAndPassword(email, password)
-      .then(cred => cred.user.updateProfile({ displayName: name }))
+      .then(cred => {
+        return cred.user.updateProfile({ displayName: name })
+          .then(() => cred.user.sendEmailVerification());
+      })
       .then(() => {
+        alert("Account created! A verification email has been sent.");
         toggleDropdown(false);
         window.location.reload();
       })
       .catch(err => alert("Signup failed: " + err.message));
   }
 
-  // Hide dropdown if clicked outside
-  document.addEventListener("click", function(e) {
+  function handlePasswordReset() {
+    const email = document.getElementById("login-email").value.trim();
+    if (!email) {
+      alert("Please enter your email address first.");
+      return;
+    }
+    auth.sendPasswordResetEmail(email)
+      .then(() => alert("Password reset email sent."))
+      .catch(err => alert("Error: " + err.message));
+  }
+
+  document.addEventListener("click", function (e) {
     const dropdown = document.getElementById("auth-dropdown");
     const menu = document.getElementById("user-menu");
     if (!dropdown.contains(e.target) && !menu.contains(e.target)) {
