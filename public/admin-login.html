@@ -28,6 +28,7 @@
   </style>
 </head>
 <body>
+  <!-- Header -->
   <div id="header-placeholder"></div>
   <script>
     fetch('header.html')
@@ -36,6 +37,7 @@
       .catch(err => console.error('Header load error:', err));
   </script>
 
+  <!-- Admin Form -->
   <h1>Admin Login</h1>
   <form id="login-form">
     <input type="password" id="admin-password" placeholder="Enter Admin Password" required />
@@ -44,6 +46,7 @@
   </form>
   <div id="status"></div>
 
+  <!-- Footer -->
   <div id="footer-placeholder"></div>
   <script>
     fetch('footer.html')
@@ -52,6 +55,7 @@
       .catch(err => console.error('Footer load error:', err));
   </script>
 
+  <!-- Admin Login Handler -->
   <script>
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();

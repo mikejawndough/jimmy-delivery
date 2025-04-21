@@ -84,7 +84,6 @@
 </head>
 <body>
 
-
   <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
   <script>
@@ -136,45 +135,37 @@
       .catch(err => console.error('Footer load error:', err));
   </script>
 
+  <!-- External Scripts -->
   <script src="/js/footer.js"></script>
   <script src="/js/header.js"></script>
   <script src="/js/customer.js"></script>
 
-  <!-- Firebase & App Scripts -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
 
+  <!-- Customer Logic -->
   <script>
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
     const loginContainer = document.getElementById("login-container");
     const signupContainer = document.getElementById("signup-container");
     const orderContainer = document.getElementById("order-container");
 
-    // Toggle between Sign-Up and Login forms
     function toggleForm() {
       loginContainer.style.display = loginContainer.style.display === 'none' ? 'block' : 'none';
       signupContainer.style.display = signupContainer.style.display === 'none' ? 'block' : 'none';
     }
 
-    // Forgot Password Functionality
     function forgotPassword() {
       const email = prompt("Please enter your email to receive a password reset link:");
       if (email) {
         auth.sendPasswordResetEmail(email)
-          .then(() => {
-            alert("Password reset email sent! Please check your inbox.");
-          })
-          .catch((err) => {
-            alert("Error: " + err.message);
-          });
+          .then(() => alert("Password reset email sent! Please check your inbox."))
+          .catch((err) => alert("Error: " + err.message));
       }
     }
 
-    // Login Functionality
     document.getElementById("login-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const email = document.getElementById("login-email").value;
@@ -192,7 +183,6 @@
         });
     });
 
-    // Sign-Up Functionality
     document.getElementById("signup-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const email = document.getElementById("signup-email").value;
@@ -216,7 +206,6 @@
         });
     });
 
-    // Display orders if user is authenticated
     function loadOrders() {
       const user = auth.currentUser;
       if (!user) return;
@@ -247,6 +236,5 @@
       });
     }
   </script>
-  
 </body>
 </html>
