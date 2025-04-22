@@ -77,51 +77,47 @@
       .then(res => res.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
+        console.log("✅ Header loaded");
   
-        // 1. Update Header Cart if function is defined
-        if (typeof updateHeaderCart === "function") updateHeaderCart();
+        const waitForFirebase = setInterval(() => {
+          if (window.firebase && firebase.auth) {
+            clearInterval(waitForFirebase);
+            console.log("✅ Firebase Auth available");
   
-        // 2. Handle Firebase Auth display in header
-        const interval = setInterval(() => {
-          if (firebase.auth && typeof firebase.auth().onAuthStateChanged === "function") {
-            clearInterval(interval);
             const auth = firebase.auth();
-            auth.onAuthStateChanged((user) => {
-              const userMenu = document.getElementById("user-menu");
-              const dropdown = document.getElementById("auth-dropdown");
-              if (!userMenu || !dropdown) return;
+            const userMenu = document.getElementById("user-menu");
+            const dropdown = document.getElementById("auth-dropdown");
+  
+            if (!userMenu || !dropdown) {
+              console.log("❌ user-menu or auth-dropdown not found");
+              return;
+            }
+  
+            console.log("✅ Found header elements. Setting auth listener...");
+  
+            auth.onAuthStateChanged(user => {
+              console.log("✅ onAuthStateChanged triggered. User:", user);
   
               if (user) {
                 userMenu.textContent = user.displayName || user.email;
                 userMenu.onclick = () => auth.signOut().then(() => location.reload());
                 dropdown.style.display = "none";
+                console.log("✅ Updated header with user info");
               } else {
                 userMenu.textContent = "Sign In";
                 userMenu.onclick = () => {
-                  toggleAuthMode("login");
+                  toggleAuthMode('login');
                   dropdown.style.display = "block";
                 };
+                console.log("✅ No user signed in. Showing Sign In");
               }
             });
+  
+            if (typeof updateHeaderCart === "function") updateHeaderCart();
           }
         }, 100);
-  
-        // 3. Enable mini cart toggle behavior
-        document.addEventListener("click", function (e) {
-          const cartIcon = document.getElementById("cartIcon");
-          const miniCart = document.getElementById("miniCart");
-  
-          if (!cartIcon || !miniCart) return;
-  
-          if (cartIcon.contains(e.target)) {
-            miniCart.style.display = miniCart.style.display === "block" ? "none" : "block";
-          } else if (!miniCart.contains(e.target)) {
-            miniCart.style.display = "none";
-          }
-        });
-  
       })
-      .catch(err => console.error("Error loading header:", err));
+      .catch(err => console.error("❌ Error loading header:", err));
   </script>
 
   <h1>Customer Dashboard</h1>
