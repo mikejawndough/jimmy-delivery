@@ -10,24 +10,32 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
   <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
 </head>
 <body>
+  <!-- Header Placeholder -->
+  <div id="header-placeholder"></div>
   <script>
     fetch("header.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
-  
+
         const interval = setInterval(() => {
           if (typeof firebase !== "undefined" && firebase.auth) {
             clearInterval(interval);
             const auth = firebase.auth();
             const userMenu = document.getElementById("user-menu");
             const dropdown = document.getElementById("auth-dropdown");
-  
+
             auth.onAuthStateChanged((user) => {
               if (!userMenu || !dropdown) return;
-  
+
               if (user) {
                 userMenu.textContent = user.displayName || user.email;
                 userMenu.onclick = () => auth.signOut().then(() => location.reload());
@@ -40,13 +48,11 @@
                 };
               }
             });
-  
-            // Handle login
+
             window.handleLogin = function (event) {
               event.preventDefault();
               const email = document.getElementById("login-email").value.trim();
               const password = document.getElementById("login-password").value;
-  
               auth.signInWithEmailAndPassword(email, password)
                 .then(() => {
                   dropdown.style.display = "none";
@@ -54,14 +60,12 @@
                 })
                 .catch(err => alert("Login failed: " + err.message));
             };
-  
-            // Handle signup
+
             window.handleSignup = function (event) {
               event.preventDefault();
               const name = document.getElementById("signup-name").value.trim();
               const email = document.getElementById("signup-email").value.trim();
               const password = document.getElementById("signup-password").value;
-  
               auth.createUserWithEmailAndPassword(email, password)
                 .then(userCred => {
                   return userCred.user.updateProfile({ displayName: name })
@@ -74,8 +78,7 @@
                 })
                 .catch(err => alert("Signup failed: " + err.message));
             };
-  
-            // Handle password reset
+
             window.handlePasswordReset = function () {
               const email = document.getElementById("login-email").value.trim();
               if (!email) return alert("Please enter your email first.");
@@ -83,19 +86,17 @@
                 .then(() => alert("Password reset email sent."))
                 .catch(err => alert("Error: " + err.message));
             };
-  
-            // Toggle form
+
             window.toggleAuthMode = function (mode) {
               const loginForm = document.getElementById("login-form");
               const signupForm = document.getElementById("signup-form");
               const title = document.getElementById("auth-title");
-  
+
               loginForm.style.display = mode === 'signup' ? 'none' : 'block';
               signupForm.style.display = mode === 'signup' ? 'block' : 'none';
               title.textContent = mode === 'signup' ? 'Create Account' : 'Login';
             };
-  
-            // Close dropdown if clicked outside
+
             document.addEventListener("click", function (e) {
               if (!dropdown.contains(e.target) && !userMenu.contains(e.target)) {
                 dropdown.style.display = "none";
@@ -122,6 +123,7 @@
 
       <label for="geocoder">Address</label>
       <div id="geocoder"></div>
+      <input type="hidden" id="address" name="address" />
 
       <label for="apt-number">Apt/Unit (Optional)</label>
       <input type="text" id="apt-number" />
@@ -173,27 +175,25 @@
     </div>
   </form>
 
-  <!-- Footer Placeholder -->
-<div id="footer-placeholder"></div>
-<script>
-  fetch('footer.html')
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById('footer-placeholder').innerHTML = html;
-      const script = document.createElement("script");
-      script.src = "/js/footer.js";
-      document.body.appendChild(script);
-    })
-    .catch(err => console.error("Error loading footer:", err));
-</script>
+  <!-- Footer -->
+  <div id="footer-placeholder"></div>
+  <script>
+    fetch('footer.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+        const script = document.createElement("script");
+        script.src = "/js/footer.js";
+        document.body.appendChild(script);
+      })
+      .catch(err => console.error("Error loading footer:", err));
+  </script>
 
+  <!-- Mapbox -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <script src="/js/firebase-config.js"></script>
+  <!-- Checkout Logic -->
   <script src="/js/checkout.js"></script>
 </body>
 </html>
