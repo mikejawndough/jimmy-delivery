@@ -86,7 +86,10 @@ document.addEventListener("DOMContentLoaded", function () {
     accessToken: mapboxgl.accessToken,
     placeholder: "Start typing your address...",
     mapboxgl: mapboxgl,
-    marker: false
+    marker: false,
+    types: 'address',
+    countries: 'us',
+    bbox: [-79.7624, 40.4774, -71.7517, 45.0153] // Bounding box for New York State
   });
 
   geocoder.addTo("#geocoder");
