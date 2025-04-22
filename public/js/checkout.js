@@ -21,13 +21,12 @@ document.addEventListener("DOMContentLoaded", function () {
       cartList.appendChild(li);
     });
 
-    total += 5.99; // Delivery fee
+    total += 5.99;
     totalElement.textContent = total.toFixed(2);
   }
 
   displayCart();
 
-  // Delivery Option Toggle
   document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
     radio.addEventListener("change", () => {
       const scheduleDiv = document.getElementById("schedule-delivery");
@@ -35,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Recurring Option Toggle
   document.querySelectorAll('input[name="recurring"]').forEach(radio => {
     radio.addEventListener("change", () => {
       const recurringOptions = document.getElementById("recurring-options");
@@ -43,7 +41,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Payment Method Toggle
   document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
     radio.addEventListener("change", (e) => {
       const paypalContainer = document.getElementById("paypal-button-container");
@@ -83,6 +80,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   initializePaypalButtons();
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    placeholder: "Start typing your address...",
+    mapboxgl: mapboxgl,
+    marker: false
+  });
+
+  geocoder.addTo("#geocoder");
+
+  geocoder.on("result", function (e) {
+    const { center, place_name } = e.result;
+    addressCoords = { lat: center[1], lng: center[0] };
+    document.getElementById("address").value = place_name;
+  });
 
   document.getElementById("order-form").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -171,10 +183,5 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Order error:", err);
       alert("Error submitting order. Please try again.");
     }
-  });
-
-  // Set addressCoords from Mapbox event
-  window.addEventListener("mapboxGeocoderResult", function (event) {
-    addressCoords = event.detail.coords;
   });
 });

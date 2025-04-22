@@ -13,12 +13,13 @@
 </head>
 <body>
 
+  <!-- Header -->
   <div id="header-placeholder"></div>
   <script>
-    fetch('header.html')
+    fetch("header.html")
       .then(res => res.text())
-      .then(html => { document.getElementById('header-placeholder').innerHTML = html; })
-      .catch(err => console.error('Error loading header:', err));
+      .then(html => { document.getElementById("header-placeholder").innerHTML = html; })
+      .catch(err => console.error("Error loading header:", err));
   </script>
 
   <h1>Checkout</h1>
@@ -26,139 +27,88 @@
   <form id="order-form">
     <div class="checkout-container">
       <div class="cart-summary">
-        <h2>Order Summary</h2>
+        <h2>Your Cart</h2>
         <ul id="cart-items"></ul>
-        <p><strong>Total:</strong> $<span id="order-total">0.00</span></p>
+        <p>Delivery Fee: $5.99</p>
+        <p><strong>Total: $<span id="cart-total">0.00</span></strong></p>
       </div>
 
-      <div class="delivery-details">
-        <h2>Delivery Details</h2>
-        <label for="name">Name</label>
-        <input type="text" id="name" required>
+      <div class="delivery-form">
+        <h2>Customer Info</h2>
+        <input type="text" id="customer-name" placeholder="Full Name" required />
+        <input type="email" id="customer-email" placeholder="Email" required />
+        <input type="tel" id="phone-number" placeholder="Phone Number" required />
+        
+        <div id="geocoder"></div>
+        <input type="text" id="address" placeholder="Full Address" required readonly />
+        <input type="text" id="apt-number" placeholder="Apt, Suite, etc. (optional)" />
 
-        <label for="phone">Phone</label>
-        <input type="tel" id="phone" required>
+        <h3>Delivery Option</h3>
+        <label><input type="radio" name="delivery-option" value="now" checked /> Deliver Now</label>
+        <label><input type="radio" name="delivery-option" value="scheduled" /> Schedule for Later</label>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" required>
+        <div id="schedule-delivery" style="display:none;">
+          <input type="text" id="delivery-month" placeholder="MM" maxlength="2" size="2" />
+          <input type="text" id="delivery-day" placeholder="DD" maxlength="2" size="2" />
+          <input type="text" id="delivery-year" placeholder="YYYY" maxlength="4" size="4" />
+          <input type="text" id="delivery-hour" placeholder="HH" maxlength="2" size="2" />
+          <input type="text" id="delivery-minute" placeholder="MM" maxlength="2" size="2" />
+          <select id="delivery-ampm">
+            <option>AM</option>
+            <option>PM</option>
+          </select>
+        </div>
 
-        <label for="address">Address</label>
-        <input type="text" id="address" required>
+        <h3>Recurring Order?</h3>
+        <label><input type="radio" name="recurring" value="no" checked /> No</label>
+        <label><input type="radio" name="recurring" value="yes" /> Yes</label>
 
-        <label for="note">Delivery Note (Optional)</label>
-        <textarea id="note"></textarea>
+        <div id="recurring-options" style="display:none;">
+          <label>Frequency:
+            <select id="frequency">
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Biweekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+          <input type="date" id="recurring-start" placeholder="Start Date" />
+          <input type="date" id="recurring-end" placeholder="End Date" />
+        </div>
 
-        <label for="time">Preferred Delivery Time</label>
-        <input type="datetime-local" id="time" required>
+        <h3>Payment Method</h3>
+        <label><input type="radio" name="payment-method" value="paypal" checked /> PayPal</label>
+        <label><input type="radio" name="payment-method" value="cod" /> Cash on Delivery</label>
 
-        <div id="geocoder" class="geocoder"></div>
-        <div id="map" class="map-container"></div>
+        <div id="paypal-button-container"></div>
+
+        <button type="submit" id="place-order" disabled>Place Order</button>
       </div>
     </div>
-
-    <div id="paypal-button-container"></div>
   </form>
 
+  <!-- Footer -->
   <div id="footer-placeholder"></div>
   <script>
-    fetch('footer.html')
+    fetch("footer.html")
       .then(res => res.text())
-      .then(html => { document.getElementById('footer-placeholder').innerHTML = html; })
-      .catch(err => console.error('Error loading footer:', err));
+      .then(html => { document.getElementById("footer-placeholder").innerHTML = html; })
+      .catch(err => console.error("Error loading footer:", err));
   </script>
 
-  <!-- Mapbox Scripts -->
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
-
-  <!-- Firebase SDK (Compat) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
 
-  <!-- Checkout Logic -->
-  <script src="/js/checkout.js"></script>
-
-  <!-- Auth UI for Header -->
+  <!-- Mapbox -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const interval = setInterval(() => {
-        if (window.auth && document.getElementById('user-menu')) {
-          clearInterval(interval);
-          const userMenu = document.getElementById('user-menu');
-          const dropdown = document.getElementById('auth-dropdown');
-          const loginForm = document.getElementById('login-form');
-          const signupForm = document.getElementById('signup-form');
-          const title = document.getElementById('auth-title');
-
-          auth.onAuthStateChanged(user => {
-            if (user) {
-              userMenu.textContent = user.displayName || user.email;
-              userMenu.onclick = () => auth.signOut().then(() => window.location.reload());
-              if (dropdown) dropdown.style.display = 'none';
-            } else {
-              userMenu.textContent = "Sign In";
-              userMenu.onclick = () => {
-                toggleAuthMode('login');
-                if (dropdown) dropdown.style.display = 'block';
-              };
-            }
-          });
-
-          window.handleLogin = function (event) {
-            event.preventDefault();
-            const email = document.getElementById("login-email").value.trim();
-            const password = document.getElementById("login-password").value;
-            auth.signInWithEmailAndPassword(email, password)
-              .then(() => {
-                if (dropdown) dropdown.style.display = 'none';
-                window.location.reload();
-              })
-              .catch(error => alert("Login failed: " + error.message));
-          };
-
-          window.handleSignup = function (event) {
-            event.preventDefault();
-            const name = document.getElementById("signup-name").value.trim();
-            const email = document.getElementById("signup-email").value.trim();
-            const password = document.getElementById("signup-password").value;
-            auth.createUserWithEmailAndPassword(email, password)
-              .then(userCred => {
-                return userCred.user.updateProfile({ displayName: name })
-                  .then(() => userCred.user.sendEmailVerification());
-              })
-              .then(() => {
-                alert("Signup successful. Please verify your email.");
-                if (dropdown) dropdown.style.display = 'none';
-                window.location.reload();
-              })
-              .catch(error => alert("Signup failed: " + error.message));
-          };
-
-          window.handlePasswordReset = function () {
-            const email = document.getElementById("login-email").value.trim();
-            if (!email) return alert("Please enter your email first.");
-            auth.sendPasswordResetEmail(email)
-              .then(() => alert("Password reset email sent."))
-              .catch(error => alert("Error: " + error.message));
-          };
-
-          window.toggleAuthMode = function (mode) {
-            if (!loginForm || !signupForm || !title) return;
-            loginForm.style.display = mode === 'signup' ? 'none' : 'block';
-            signupForm.style.display = mode === 'signup' ? 'block' : 'none';
-            title.textContent = mode === 'signup' ? 'Create Account' : 'Login';
-          };
-
-          document.addEventListener("click", function (e) {
-            if (!dropdown.contains(e.target) && !userMenu.contains(e.target)) {
-              dropdown.style.display = "none";
-            }
-          });
-        }
-      }, 300);
-    });
+    mapboxgl.accessToken = "pk.eyJ1IjoiamltbXlzcGl6emFueSIsImEiOiJjbGpiN3ZydWswMnYzM3ZucmZncXdtZGRuIn0.oyz0MgiRUOoyNi4MSbAlSw";
   </script>
+
+  <!-- App Logic -->
+  <script src="/js/checkout.js"></script>
 </body>
 </html>
