@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  mapboxgl.accessToken = 'pk.pk.eyJ1IjoiYXNham91czEzOTQiLCJhIjoiY204cTgzc3k3MDYxZzJrcHlheTV1ZWx4aiJ9.z6X6Ss0D60yg2VRX3iPcdA';
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYXNham91czEzOTQiLCJhIjoiY204cTgzc3k3MDYxZzJrcHlheTV1ZWx4aiJ9.z6X6Ss0D60yg2VRX3iPcdA';
   const DELIVERY_RADIUS_MILES = 5;
   const NEW_ROCHELLE_COORDS = { lat: 40.9115, lng: -73.7824 };
   let addressCoords = null;
