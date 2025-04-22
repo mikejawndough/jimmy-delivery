@@ -127,13 +127,18 @@
   </div>
 
   <!-- Footer Placeholder -->
-  <div id="footer-placeholder"></div>
-  <script>
-    fetch('/footer.html')
-      .then(res => res.text())
-      .then(data => { document.getElementById('footer-placeholder').innerHTML = data; })
-      .catch(err => console.error('Footer load error:', err));
-  </script>
+<div id="footer-placeholder"></div>
+<script>
+  fetch('footer.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+      const script = document.createElement("script");
+      script.src = "/js/footer.js";
+      document.body.appendChild(script);
+    })
+    .catch(err => console.error("Error loading footer:", err));
+</script>
 
   <!-- External Scripts -->
   <script src="/js/footer.js"></script>

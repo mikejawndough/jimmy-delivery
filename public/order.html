@@ -271,14 +271,19 @@
           </div>
         </section>
       
-        <div id="footer-placeholder"></div>
-        <script>
-          fetch('/footer.html')
-            .then(res => res.text())
-            .then(data => {
-              document.getElementById('footer-placeholder').innerHTML = data;
-            });
-        </script>
+        <!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+<script>
+  fetch('footer.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+      const script = document.createElement("script");
+      script.src = "/js/footer.js";
+      document.body.appendChild(script);
+    })
+    .catch(err => console.error("Error loading footer:", err));
+</script>
       
         <!-- Firebase & Core -->
         <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>

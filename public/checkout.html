@@ -86,13 +86,19 @@
     </div>
   </form>
 
-  <div id="footer-placeholder"></div>
-  <script>
-    fetch('footer.html')
-      .then(res => res.text())
-      .then(html => { document.getElementById('footer-placeholder').innerHTML = html; })
-      .catch(err => console.error('Error loading footer:', err));
-  </script>
+  <!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+<script>
+  fetch('footer.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+      const script = document.createElement("script");
+      script.src = "/js/footer.js";
+      document.body.appendChild(script);
+    })
+    .catch(err => console.error("Error loading footer:", err));
+</script>
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
