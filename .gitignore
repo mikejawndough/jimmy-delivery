@@ -9,3 +9,4 @@ serviceAccountKey.json
 *.log
 logs/
 
+node_modules/
