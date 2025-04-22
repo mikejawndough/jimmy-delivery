@@ -12,103 +12,95 @@
   <script async defer src="https://www.paypal.com/sdk/js?client-id=ARNzfgBBfN-XoHaWegDPFM3hm9LBSGo0zSPR4njgMlEzbH0e430yBxjqPwXGZ3p5agIBFBv-LJM-wqPy&currency=USD&components=buttons"></script>
 </head>
 <body>
-
-  <!-- Header -->
   <div id="header-placeholder"></div>
   <script>
-    fetch("header.html")
+    fetch('header.html')
       .then(res => res.text())
-      .then(html => { document.getElementById("header-placeholder").innerHTML = html; })
-      .catch(err => console.error("Error loading header:", err));
+      .then(html => { document.getElementById('header-placeholder').innerHTML = html; })
+      .catch(err => console.error('Error loading header:', err));
   </script>
 
   <h1>Checkout</h1>
 
   <form id="order-form">
     <div class="checkout-container">
-      <div class="cart-summary">
-        <h2>Your Cart</h2>
-        <ul id="cart-items"></ul>
-        <p>Delivery Fee: $5.99</p>
-        <p><strong>Total: $<span id="cart-total">0.00</span></strong></p>
-      </div>
+      <label for="customer-name">Name</label>
+      <input type="text" id="customer-name" required />
 
-      <div class="delivery-form">
-        <h2>Customer Info</h2>
-        <input type="text" id="customer-name" placeholder="Full Name" required />
-        <input type="email" id="customer-email" placeholder="Email" required />
-        <input type="tel" id="phone-number" placeholder="Phone Number" required />
-        
-        <div id="geocoder"></div>
-        <input type="text" id="address" placeholder="Full Address" required readonly />
-        <input type="text" id="apt-number" placeholder="Apt, Suite, etc. (optional)" />
+      <label for="phone-number">Phone Number</label>
+      <input type="tel" id="phone-number" required />
 
-        <h3>Delivery Option</h3>
+      <label for="customer-email">Email</label>
+      <input type="email" id="customer-email" required />
+
+      <label for="geocoder">Address</label>
+      <div id="geocoder"></div>
+
+      <label for="apt-number">Apt/Unit (Optional)</label>
+      <input type="text" id="apt-number" />
+
+      <fieldset>
+        <legend>Delivery Time</legend>
         <label><input type="radio" name="delivery-option" value="now" checked /> Deliver Now</label>
-        <label><input type="radio" name="delivery-option" value="scheduled" /> Schedule for Later</label>
-
+        <label><input type="radio" name="delivery-option" value="scheduled" /> Schedule Delivery</label>
         <div id="schedule-delivery" style="display:none;">
-          <input type="text" id="delivery-month" placeholder="MM" maxlength="2" size="2" />
-          <input type="text" id="delivery-day" placeholder="DD" maxlength="2" size="2" />
-          <input type="text" id="delivery-year" placeholder="YYYY" maxlength="4" size="4" />
-          <input type="text" id="delivery-hour" placeholder="HH" maxlength="2" size="2" />
-          <input type="text" id="delivery-minute" placeholder="MM" maxlength="2" size="2" />
+          <input type="text" id="delivery-month" placeholder="MM" />
+          <input type="text" id="delivery-day" placeholder="DD" />
+          <input type="text" id="delivery-year" placeholder="YYYY" />
+          <input type="text" id="delivery-hour" placeholder="HH" />
+          <input type="text" id="delivery-minute" placeholder="MM" />
           <select id="delivery-ampm">
-            <option>AM</option>
-            <option>PM</option>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
           </select>
         </div>
+      </fieldset>
 
-        <h3>Recurring Order?</h3>
+      <fieldset>
+        <legend>Recurring Order</legend>
         <label><input type="radio" name="recurring" value="no" checked /> No</label>
         <label><input type="radio" name="recurring" value="yes" /> Yes</label>
-
         <div id="recurring-options" style="display:none;">
-          <label>Frequency:
-            <select id="frequency">
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Biweekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </label>
-          <input type="date" id="recurring-start" placeholder="Start Date" />
-          <input type="date" id="recurring-end" placeholder="End Date" />
+          <select id="frequency">
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Biweekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <input type="date" id="recurring-start" />
+          <input type="date" id="recurring-end" />
         </div>
+      </fieldset>
 
-        <h3>Payment Method</h3>
-        <label><input type="radio" name="payment-method" value="paypal" checked /> PayPal</label>
-        <label><input type="radio" name="payment-method" value="cod" /> Cash on Delivery</label>
+      <fieldset>
+        <legend>Payment Method</legend>
+        <label><input type="radio" name="payment-method" value="paypal" /> PayPal</label>
+        <label><input type="radio" name="payment-method" value="cash" checked /> Cash</label>
+        <div id="paypal-button-container" style="display:none;"></div>
+      </fieldset>
 
-        <div id="paypal-button-container"></div>
+      <h3>Cart</h3>
+      <ul id="cart-items"></ul>
+      <p><strong>Total (with $5.99 delivery): $<span id="cart-total">0.00</span></strong></p>
 
-        <button type="submit" id="place-order" disabled>Place Order</button>
-      </div>
+      <button type="submit" id="place-order">Place Order</button>
     </div>
   </form>
 
-  <!-- Footer -->
   <div id="footer-placeholder"></div>
   <script>
-    fetch("footer.html")
+    fetch('footer.html')
       .then(res => res.text())
-      .then(html => { document.getElementById("footer-placeholder").innerHTML = html; })
-      .catch(err => console.error("Error loading footer:", err));
+      .then(html => { document.getElementById('footer-placeholder').innerHTML = html; })
+      .catch(err => console.error('Error loading footer:', err));
   </script>
 
-  <!-- Firebase SDKs -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
-
-  <!-- Mapbox -->
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
-  <script>
-    mapboxgl.accessToken = "pk.eyJ1IjoiamltbXlzcGl6emFueSIsImEiOiJjbGpiN3ZydWswMnYzM3ZucmZncXdtZGRuIn0.oyz0MgiRUOoyNi4MSbAlSw";
-  </script>
-
-  <!-- App Logic -->
   <script src="/js/checkout.js"></script>
 </body>
 </html>
