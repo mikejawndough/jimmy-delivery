@@ -42,7 +42,7 @@ async function trackOrderStatus() {
     const order = doc.data();
     const driverName = driverMap[order.assignedTo] || order.assignedTo || "Unassigned";
 
-    // Alert banner
+    // Alert banner on status change
     if (alertBanner && window.lastStatus && order.status !== window.lastStatus) {
       alertBanner.textContent = "Your order status has changed: " + order.status;
       alertBanner.style.display = "block";
@@ -50,13 +50,10 @@ async function trackOrderStatus() {
     }
     window.lastStatus = order.status;
 
-    // Update order status text
     if (statusEl) statusEl.textContent = order.status || "Pending";
-
-    // Update driver name
     if (driverEl) driverEl.textContent = driverName;
 
-    // Update progress bar
+    // Progress bar logic
     let progress = 0;
     if (order.status.includes("Order Received")) progress = 25;
     else if (order.status.includes("Preparing")) progress = 50;
