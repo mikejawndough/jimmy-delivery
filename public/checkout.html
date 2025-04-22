@@ -25,9 +25,38 @@
 
   <form id="order-form">
     <div class="checkout-container">
-      <!-- Order and form sections (unchanged) -->
-      <!-- [same as before, trimmed for space but retained in your file] -->
+      <div class="cart-summary">
+        <h2>Order Summary</h2>
+        <ul id="cart-items"></ul>
+        <p><strong>Total:</strong> $<span id="order-total">0.00</span></p>
+      </div>
+
+      <div class="delivery-details">
+        <h2>Delivery Details</h2>
+        <label for="name">Name</label>
+        <input type="text" id="name" required>
+
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+
+        <label for="address">Address</label>
+        <input type="text" id="address" required>
+
+        <label for="note">Delivery Note (Optional)</label>
+        <textarea id="note"></textarea>
+
+        <label for="time">Preferred Delivery Time</label>
+        <input type="datetime-local" id="time" required>
+
+        <div id="geocoder" class="geocoder"></div>
+        <div id="map" class="map-container"></div>
+      </div>
     </div>
+
+    <div id="paypal-button-container"></div>
   </form>
 
   <div id="footer-placeholder"></div>
@@ -42,92 +71,94 @@
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
 
-  <!-- Firebase SDK (only once) -->
+  <!-- Firebase SDK (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="/js/firebase-config.js"></script>
 
-  <!-- Cart Logic + Mapbox Validation -->
+  <!-- Checkout Logic -->
   <script src="/js/checkout.js"></script>
 
-  <!-- Load Header Auth Logic -->
+  <!-- Auth UI for Header -->
   <script>
-    fetch('header.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
+    document.addEventListener("DOMContentLoaded", () => {
+      const interval = setInterval(() => {
+        if (window.auth && document.getElementById('user-menu')) {
+          clearInterval(interval);
+          const userMenu = document.getElementById('user-menu');
+          const dropdown = document.getElementById('auth-dropdown');
+          const loginForm = document.getElementById('login-form');
+          const signupForm = document.getElementById('signup-form');
+          const title = document.getElementById('auth-title');
 
-        const userMenu = document.getElementById('user-menu');
-        const dropdown = document.getElementById('auth-dropdown');
-        const loginForm = document.getElementById('login-form');
-        const signupForm = document.getElementById('signup-form');
-        const title = document.getElementById('auth-title');
+          auth.onAuthStateChanged(user => {
+            if (user) {
+              userMenu.textContent = user.displayName || user.email;
+              userMenu.onclick = () => auth.signOut().then(() => window.location.reload());
+              if (dropdown) dropdown.style.display = 'none';
+            } else {
+              userMenu.textContent = "Sign In";
+              userMenu.onclick = () => {
+                toggleAuthMode('login');
+                if (dropdown) dropdown.style.display = 'block';
+              };
+            }
+          });
 
-        auth.onAuthStateChanged(user => {
-          if (user) {
-            userMenu.textContent = user.displayName || user.email;
-            userMenu.onclick = () => auth.signOut().then(() => window.location.reload());
-            dropdown.style.display = 'none';
-          } else {
-            userMenu.textContent = "Sign In";
-            userMenu.onclick = () => {
-              toggleAuthMode('login');
-              dropdown.style.display = 'block';
-            };
-          }
-        });
+          window.handleLogin = function (event) {
+            event.preventDefault();
+            const email = document.getElementById("login-email").value.trim();
+            const password = document.getElementById("login-password").value;
+            auth.signInWithEmailAndPassword(email, password)
+              .then(() => {
+                if (dropdown) dropdown.style.display = 'none';
+                window.location.reload();
+              })
+              .catch(error => alert("Login failed: " + error.message));
+          };
 
-        window.handleLogin = function (event) {
-          event.preventDefault();
-          const email = document.getElementById("login-email").value.trim();
-          const password = document.getElementById("login-password").value;
-          auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-              dropdown.style.display = 'none';
-              window.location.reload();
-            })
-            .catch(error => alert("Login failed: " + error.message));
-        };
+          window.handleSignup = function (event) {
+            event.preventDefault();
+            const name = document.getElementById("signup-name").value.trim();
+            const email = document.getElementById("signup-email").value.trim();
+            const password = document.getElementById("signup-password").value;
+            auth.createUserWithEmailAndPassword(email, password)
+              .then(userCred => {
+                return userCred.user.updateProfile({ displayName: name })
+                  .then(() => userCred.user.sendEmailVerification());
+              })
+              .then(() => {
+                alert("Signup successful. Please verify your email.");
+                if (dropdown) dropdown.style.display = 'none';
+                window.location.reload();
+              })
+              .catch(error => alert("Signup failed: " + error.message));
+          };
 
-        window.handleSignup = function (event) {
-          event.preventDefault();
-          const name = document.getElementById("signup-name").value.trim();
-          const email = document.getElementById("signup-email").value.trim();
-          const password = document.getElementById("signup-password").value;
-          auth.createUserWithEmailAndPassword(email, password)
-            .then(userCred => {
-              return userCred.user.updateProfile({ displayName: name })
-                .then(() => userCred.user.sendEmailVerification());
-            })
-            .then(() => {
-              alert("Signup successful. Please verify your email.");
-              dropdown.style.display = 'none';
-              window.location.reload();
-            })
-            .catch(error => alert("Signup failed: " + error.message));
-        };
+          window.handlePasswordReset = function () {
+            const email = document.getElementById("login-email").value.trim();
+            if (!email) return alert("Please enter your email first.");
+            auth.sendPasswordResetEmail(email)
+              .then(() => alert("Password reset email sent."))
+              .catch(error => alert("Error: " + error.message));
+          };
 
-        window.handlePasswordReset = function () {
-          const email = document.getElementById("login-email").value.trim();
-          if (!email) return alert("Please enter your email first.");
-          auth.sendPasswordResetEmail(email)
-            .then(() => alert("Password reset email sent."))
-            .catch(error => alert("Error: " + error.message));
-        };
+          window.toggleAuthMode = function (mode) {
+            if (!loginForm || !signupForm || !title) return;
+            loginForm.style.display = mode === 'signup' ? 'none' : 'block';
+            signupForm.style.display = mode === 'signup' ? 'block' : 'none';
+            title.textContent = mode === 'signup' ? 'Create Account' : 'Login';
+          };
 
-        window.toggleAuthMode = function (mode) {
-          loginForm.style.display = mode === 'signup' ? 'none' : 'block';
-          signupForm.style.display = mode === 'signup' ? 'block' : 'none';
-          title.textContent = mode === 'signup' ? 'Create Account' : 'Login';
-        };
-
-        document.addEventListener("click", function (e) {
-          if (!dropdown.contains(e.target) && !userMenu.contains(e.target)) {
-            dropdown.style.display = "none";
-          }
-        });
-      });
+          document.addEventListener("click", function (e) {
+            if (!dropdown.contains(e.target) && !userMenu.contains(e.target)) {
+              dropdown.style.display = "none";
+            }
+          });
+        }
+      }, 300);
+    });
   </script>
 </body>
 </html>
