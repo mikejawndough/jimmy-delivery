@@ -1,119 +1,93 @@
-// Initialize Firebase App
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-// Function to display orders
-function loadOrders() {
-  const user = auth.currentUser;
-  if (!user) {
-    console.log('No user logged in.');
-    return;
-  }
-
-  db.collection('orders')
-    .where('customerId', '==', user.uid)
-    .orderBy('timestamp', 'desc')
-    .onSnapshot(snapshot => {
-      const orders = snapshot.docs.map(doc => doc.data());
-      renderOrders(orders);
-    });
-}
-
-// Function to render orders to the dashboard
-function renderOrders(orders) {
-  const orderContainer = document.getElementById('orders-container');
-  orderContainer.innerHTML = ''; // Clear existing content
-
-  orders.forEach(order => {
-    const orderCard = document.createElement('div');
-    orderCard.className = 'order';
-    orderCard.innerHTML = `
-      <h3>Order #${order.id}</h3>
-      <p><strong>Items:</strong> ${order.items.join(', ')}</p>
-      <p><strong>Status:</strong> ${order.status}</p>
-      <p><strong>Driver:</strong> ${order.driverName || 'Not Assigned'}</p>
-      <button class="reorder-btn" onclick="reorderItems('${order.id}')">Reorder</button>
-      <button class="favorites-btn" onclick="addToFavorites('${order.id}')">Add to Favorites</button>
-    `;
-    orderContainer.appendChild(orderCard);
-  });
-}
-
-// Reorder functionality
-function reorderItems(orderId) {
-  // Simulate adding items to the cart for reordering
-  console.log('Reordering items for order:', orderId);
-  // Logic for reordering items can be added here
-}
-
-// Function to manage favorites (add an order to favorites)
-function addToFavorites(orderId) {
-  const user = auth.currentUser;
-  if (!user) {
-    console.log('No user logged in.');
-    return;
-  }
-
-  db.collection('favorites').add({
-    userId: user.uid,
-    orderId: orderId,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-  }).then(() => {
-    console.log('Order added to favorites!');
-  }).catch(error => {
-    console.error('Error adding to favorites:', error);
-  });
-}
-
-// Handle user login state changes
-auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log('User logged in:', user.email);
-    loadOrders();
-    document.getElementById('login-container').style.display = 'none';
-    document.getElementById('order-container').style.display = 'block';
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof auth === 'undefined' || typeof db === 'undefined') {
+    console.warn("Firebase not ready. Retrying...");
+    setTimeout(loadOrderHistory, 300);
   } else {
-    console.log('User not logged in');
-    document.getElementById('login-container').style.display = 'block';
-    document.getElementById('order-container').style.display = 'none';
+    loadOrderHistory();
   }
+
+  if (typeof updateHeaderCart === "function") updateHeaderCart(); // Mini cart sync
 });
 
-// Handle login form submission
-document.getElementById('login-form').addEventListener('submit', event => {
-  event.preventDefault();
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  const errorMessage = document.getElementById('error-message');
-
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      document.getElementById('login-container').style.display = 'none';
-      document.getElementById('order-container').style.display = 'block';
-      loadOrders();
-    })
-    .catch(err => {
-      errorMessage.textContent = 'Login failed: ' + err.message;
-    });
-});
-
-// Handle logout
-document.getElementById('logout-btn').addEventListener('click', () => {
-  auth.signOut().then(() => {
-    document.getElementById('login-container').style.display = 'block';
-    document.getElementById('order-container').style.display = 'none';
-    console.log('Logged out');
-  }).catch(err => {
-    console.error('Error logging out:', err);
+// Load driver map for name lookup
+async function getDriverMap() {
+  const res = await fetch("/drivers-full");
+  const data = await res.json();
+  const map = {};
+  data.drivers.forEach(driver => {
+    map[driver.email] = driver.name;
   });
-});
+  return map;
+}
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-  const user = auth.currentUser;
-  if (user) {
-    loadOrders();
-    document.getElementById('login-container').style.display = 'none';
-    document.getElementById('order-container').style.display = 'block';
+function loadOrderHistory() {
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const driverMap = await getDriverMap();
+      const orderList = document.getElementById("order-list");
+      if (!orderList) return;
+
+      db.collection("customers")
+        .doc(user.email)
+        .collection("orderHistory")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(
+          (snapshot) => {
+            orderList.innerHTML = "";
+            snapshot.forEach((doc) => {
+              const order = doc.data();
+              const driverName = driverMap[order.assignedTo] || order.assignedTo || "Unassigned";
+              const li = document.createElement("li");
+              li.textContent = `Order #${doc.id}: ${order.items.map(i => i.name).join(", ")} - ${order.status || "Pending"} - Driver: ${driverName}`;
+              orderList.appendChild(li);
+            });
+          },
+          (error) => {
+            console.error("Error loading order history:", error);
+          }
+        );
+    }
+  });
+}
+
+// Add to Cart function with infused dropdown support
+function addToCart(button) {
+  const itemName = button.getAttribute("data-name");
+  const basePrice = parseFloat(button.getAttribute("data-price"));
+
+  const menuItem = button.closest(".menu-item");
+  const select = menuItem.querySelector(".infused-select");
+  const qtySelect = menuItem.querySelector(".quantity-select");
+
+  const infusedOption = select ? select.value : "regular";
+  const quantity = qtySelect ? parseInt(qtySelect.value) : 1;
+
+  let finalPrice = basePrice;
+  let itemLabel = itemName;
+
+  if (infusedOption === "infused") {
+    finalPrice += 20;
+    itemLabel += " (Infused)";
   }
-});
+
+  const cartItem = {
+    name: itemLabel,
+    price: finalPrice,
+    quantity: quantity,
+    infused: infusedOption === "infused"
+  };
+
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  const existing = cart.find(i => i.name === cartItem.name && i.infused === cartItem.infused);
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    cart.push(cartItem);
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  if (typeof updateHeaderCart === "function") updateHeaderCart();
+
+  console.log("Added to cart:", cartItem);
+}
