@@ -1,5 +1,11 @@
 // /js/firebase-config.js
 
+// Ensure compat versions are loaded first
+if (typeof firebase === "undefined") {
+  console.error("Firebase SDK not loaded.");
+}
+
+// Initialize Firebase app if not already done
 if (!firebase.apps.length) {
   firebase.initializeApp({
     apiKey: "AIzaSyDcNH3J0i7TsXP6XgEG862EQA72Lmrzcro",
@@ -12,8 +18,9 @@ if (!firebase.apps.length) {
   });
 }
 
-// Prevent global overwrite if already defined
-if (!window.auth) window.auth = firebase.auth();
-if (!window.db) window.db = firebase.firestore();
+// Make sure these are globally available
+window.firebase = firebase;
+window.auth = firebase.auth();
+window.db = firebase.firestore();
 
 console.log("✅ Firebase initialized.");

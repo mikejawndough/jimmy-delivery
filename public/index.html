@@ -65,25 +65,16 @@
     }
   </style>
 </head>
-
 <body>
+
   <!-- Header Placeholder -->
   <div id="header-placeholder"></div>
-  <script>
-    fetch('header.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('header-placeholder').innerHTML = html;
-      })
-      .catch(err => console.error('Error loading header:', err));
-  </script>
 
   <!-- Hero Section -->
   <section class="hero">
     <h1>Welcome to Jimmy's Pizza!</h1>
     <p>Detroit-Style Pizza with a NY Attitude. Fresh, Hot, and Always Delicious.</p>
     <button onclick="confirmRedirect()">Place Order</button>
-
     <script>
       function confirmRedirect() {
         if (confirm('Are you sure you want to place an order?')) {
@@ -94,44 +85,34 @@
   </section>
 
   <!-- Story -->
-<div id="custom-text">
-  <p><strong>Psst… You Found Jimmy’s.</strong></p>
-  <p>
-    Not everyone knows about us — and that’s exactly how we like it.
-    Hidden in plain sight, Jimmy’s is the underground legend of Detroit-style pizza, where thick, cheesy corners and crispy crusts are served with a wink and a whole lotta flavor.
-  </p>
-  <p>
-    They say Jimmy learned the trade from a mysterious old baker who only cooked by moonlight and spoke in sauce recipes. True? Who knows. But what is real is the magic in every bite.
-  </p>
-  <p>
-    If you made it here, welcome to the inner circle. Slide in your order, keep it hush, and let your taste buds do the talking.
-  </p>
-</div>
+  <div id="custom-text">
+    <p><strong>Psst… You Found Jimmy’s.</strong></p>
+    <p>
+      Not everyone knows about us — and that’s exactly how we like it.
+      Hidden in plain sight, Jimmy’s is the underground legend of Detroit-style pizza, where thick, cheesy corners and crispy crusts are served with a wink and a whole lotta flavor.
+    </p>
+    <p>
+      They say Jimmy learned the trade from a mysterious old baker who only cooked by moonlight and spoke in sauce recipes. True? Who knows. But what is real is the magic in every bite.
+    </p>
+    <p>
+      If you made it here, welcome to the inner circle. Slide in your order, keep it hush, and let your taste buds do the talking.
+    </p>
+  </div>
 
-  <!-- Elfsight Instagram Feed -->
+  <!-- Instagram Embed -->
   <script src="https://static.elfsight.com/platform/platform.js" async></script>
   <div class="elfsight-app-cb431f66-4cce-4ec4-89d6-dbb839257c59" data-elfsight-app-lazy></div>
 
   <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
-  <script>
-    fetch('footer.html')
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      })
-      .catch(err => console.error('Error loading footer:', err));
-  </script>
 
-  <!-- Firebase & Site Scripts -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script src="/js/firebase-config.js"></script>
-  <script src="/js/header.js"></script>
-  <script src="/js/footer.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
 
-  <!-- Load Header + Auth Logic -->
+  <!-- Load Header AFTER Firebase -->
   <script>
     fetch('header.html')
       .then(res => res.text())
@@ -147,7 +128,7 @@
         auth.onAuthStateChanged(user => {
           if (user) {
             userMenu.textContent = user.displayName || user.email;
-            userMenu.onclick = () => auth.signOut().then(() => window.location.reload());
+            userMenu.onclick = () => auth.signOut().then(() => location.reload());
             dropdown.style.display = 'none';
           } else {
             userMenu.textContent = "Sign In";
@@ -213,7 +194,18 @@
             dropdown.style.display = "none";
           }
         });
-      });
+      })
+      .catch(err => console.error('Error loading header logic:', err));
   </script>
+
+  <script>
+    fetch('footer.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading footer:', err));
+  </script>
+
 </body>
 </html>
